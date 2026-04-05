@@ -1,4 +1,4 @@
-# Pushes to `main` trigger a production deployment on Vercel (remote build).
+# Pushes to `main` trigger a production deployment on Vercel (build in CI, upload prebuilt output).
 # Repository secrets (Settings → Secrets and variables → Actions):
 #   VERCEL_TOKEN       — https://vercel.com/account/tokens
 #   VERCEL_ORG_ID      — Vercel dashboard → Project → Settings → General
@@ -6,7 +6,13 @@
 #
 # If the project is also connected to GitHub in Vercel, disable automatic
 # Git deployments there to avoid duplicate production builds, or remove this workflow.
+#
+# Flow follows https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
 name: Deploy to Vercel
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
   push:
@@ -17,13 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Deploy production
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
