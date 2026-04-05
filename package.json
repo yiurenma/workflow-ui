@@ -1,5 +1,9 @@
 {
   "name": "workflow-ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yiurenma/workflow-ui.git"
+  },
   "private": true,
   "version": "0.0.0",
   "type": "module",

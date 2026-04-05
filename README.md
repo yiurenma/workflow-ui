@@ -1,6 +1,10 @@
-# React + TypeScript + Vite
+# workflow-ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Workflow editor UI (React + TypeScript + Vite). Canonical repository: [yiurenma/workflow-ui](https://github.com/yiurenma/workflow-ui).
+
+---
+
+This project started from the Vite React TS template. Original template notes:
 
 Currently, two official plugins are available:
 
