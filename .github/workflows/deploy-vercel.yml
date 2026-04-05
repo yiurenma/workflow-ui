@@ -1,15 +1,18 @@
-# Pushes to `main` trigger a production deployment on Vercel (build in CI, upload prebuilt output).
+# Push to `main` → POST Vercel Deploy Hook（在 Vercel 里为项目创建的「Deploy Hooks」URL）。
 #
-# Repository secrets (Settings → Secrets and variables → Actions → New repository secret):
-#   VERCEL_TOKEN       — Create at https://vercel.com/account/tokens (paste the token only;
-#                        not a URL, not "Bearer …", no extra punctuation — or the CLI rejects it.)
-#   VERCEL_ORG_ID      — Vercel → Project → Settings → General → "Project ID" section / team id
-#   VERCEL_PROJECT_ID  — same page
+# GitHub：Settings → Secrets and variables → Actions → New repository secret
+#   名称：VERCEL_DEPLOY_HOOK_URL
+#   值：  整段 URL，例如
+#         https://api.vercel.com/v1/integrations/deploy/prj_xxx/xxxxxxxx
 #
-# If the project is also connected to GitHub in Vercel, disable automatic Git deployments
-# there to avoid duplicate production builds, or remove this workflow.
+# 从你已有的链接里可以读出：
+#   - prj_dYkFSwmxyxStWt2amb2TC0MvIc9s  → 即 Vercel 的 Project ID（一般叫 VERCEL_PROJECT_ID）
+#   - 最后一段（如 g2GnQpt2Di）是 Hook 密钥，必须和整段 URL 一起保密，不要单独当 TOKEN 用。
 #
-# Flow: https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
+# Deploy Hook 与「Account Token + vercel CLI」是两套方式：有 Hook 时用这个工作流即可，不必再配 VERCEL_TOKEN。
+#
+# 若仍要用 CLI（vercel pull / build / deploy），才需要去 https://vercel.com/account/tokens 创建 TOKEN，
+# 并在项目 Settings → General 查看 Org / Project ID。
 name: Deploy to Vercel
 
 on:
@@ -19,23 +22,13 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      # Vercel CLI reads these automatically; avoid --token=… on the command line.
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production
-
-      - name: Build
-        run: vercel build --prod
-
-      - name: Deploy production
-        run: vercel deploy --prebuilt --prod
+      - name: Trigger Vercel deployment (deploy hook)
+        env:
+          HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK_URL" ]; then
+            echo "Missing secret VERCEL_DEPLOY_HOOK_URL. Add it under repo Settings → Secrets → Actions."
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK_URL"
