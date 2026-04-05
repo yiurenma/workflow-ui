@@ -1,18 +1,16 @@
 # Pushes to `main` trigger a production deployment on Vercel (build in CI, upload prebuilt output).
-# Repository secrets (Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN       — https://vercel.com/account/tokens
-#   VERCEL_ORG_ID      — Vercel dashboard → Project → Settings → General
-#   VERCEL_PROJECT_ID  — same section
 #
-# If the project is also connected to GitHub in Vercel, disable automatic
-# Git deployments there to avoid duplicate production builds, or remove this workflow.
+# Repository secrets (Settings → Secrets and variables → Actions → New repository secret):
+#   VERCEL_TOKEN       — Create at https://vercel.com/account/tokens (paste the token only;
+#                        not a URL, not "Bearer …", no extra punctuation — or the CLI rejects it.)
+#   VERCEL_ORG_ID      — Vercel → Project → Settings → General → "Project ID" section / team id
+#   VERCEL_PROJECT_ID  — same page
 #
-# Flow follows https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
+# If the project is also connected to GitHub in Vercel, disable automatic Git deployments
+# there to avoid duplicate production builds, or remove this workflow.
+#
+# Flow: https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
 name: Deploy to Vercel
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
   push:
@@ -21,6 +19,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # Vercel CLI reads these automatically; avoid --token=… on the command line.
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -29,10 +32,10 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production
 
       - name: Build
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod
 
       - name: Deploy production
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod
