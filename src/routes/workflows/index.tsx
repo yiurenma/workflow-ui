@@ -3,6 +3,8 @@ import {
   useWorkflowDialog,
   WorkflowDialogProvider,
 } from "@/routes/workflows/-components/workflow-dialog/WorkflowDialogProvider";
+import SettingsModal from "@/routes/workflows/-components/settings-modal";
+import HistoryDrawer from "@/routes/workflows/-components/history-drawer";
 import { PlusOutlined } from "@ant-design/icons";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -32,6 +34,8 @@ const ApplicationList = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
+  const [settingsTarget, setSettingsTarget] = useState<WorkflowEntitySettingRow | null>(null);
+  const [historyTarget, setHistoryTarget] = useState<string | null>(null);
   const { openCreateDialog } = useWorkflowDialog();
   const deleteApplication = useDeleteApplication();
 
@@ -63,6 +67,13 @@ const ApplicationList = () => {
       ),
     },
     {
+      title: "Description",
+      key: "description",
+      ellipsis: true,
+      render: (_: unknown, r: WorkflowEntitySettingRow) =>
+        r.eimId ?? r.defaultServiceAccount ?? r.region ?? "—",
+    },
+    {
       title: "Enabled",
       dataIndex: "enabled",
       key: "enabled",
@@ -80,7 +91,7 @@ const ApplicationList = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 160,
+      width: 260,
       render: (_: unknown, record: WorkflowEntitySettingRow) => (
         <Space>
           <Button
@@ -96,6 +107,20 @@ const ApplicationList = () => {
             }
           >
             Open
+          </Button>
+          <Button
+            type="link"
+            className="px-0"
+            onClick={() => setSettingsTarget(record)}
+          >
+            Settings
+          </Button>
+          <Button
+            type="link"
+            className="px-0"
+            onClick={() => setHistoryTarget(record.applicationName)}
+          >
+            History
           </Button>
           <Button
             type="link"
@@ -169,6 +194,18 @@ const ApplicationList = () => {
           className="bg-white rounded-lg shadow-sm"
         />
       </Spin>
+
+      <SettingsModal
+        open={settingsTarget !== null}
+        record={settingsTarget}
+        onClose={() => setSettingsTarget(null)}
+      />
+
+      <HistoryDrawer
+        open={historyTarget !== null}
+        applicationName={historyTarget}
+        onClose={() => setHistoryTarget(null)}
+      />
     </Flex>
   );
 };

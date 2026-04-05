@@ -1,5 +1,6 @@
 import { Node } from "@xyflow/react";
 import {
+  ApiOutlined,
   CaretRightOutlined,
   FolderOutlined,
   MessageOutlined,
@@ -11,15 +12,18 @@ import {
 export enum Plugin {
   START = "Start",
   CONSUMER = "Consumer",
+  CONSUMER_WITHOUT_ERROR = "Consumer_Without_Error",
   MESSAGE = "Message",
   IF_ELSE = "If-Else",
   FUNCTION = "Function_V2",
+  FUNCTION_V3 = "Function_V3",
 }
 
 export type BaseNodeData = {
   label: string;
   color?: string;
   icon: React.ReactNode;
+  backendPlugin?: unknown;
 };
 
 export type BaseNode = Node<BaseNodeData>;
@@ -28,6 +32,8 @@ export type IfElsePluginProps = BaseNode;
 export type MessagePluginProps = BaseNode;
 export type FunctionPluginProps = BaseNode;
 export type ConsumerPluginProps = BaseNode;
+export type ConsumerWithoutErrorPluginProps = BaseNode;
+export type FunctionV3PluginProps = BaseNode;
 
 export const PluginMetadataMap: Record<
   Plugin,
@@ -50,6 +56,12 @@ export const PluginMetadataMap: Record<
     icon: <SwapOutlined />,
   },
   [Plugin.FUNCTION]: {
+    icon: <ToolOutlined />,
+  },
+  [Plugin.CONSUMER_WITHOUT_ERROR]: {
+    icon: <ApiOutlined />,
+  },
+  [Plugin.FUNCTION_V3]: {
     icon: <ToolOutlined />,
   },
 };

@@ -14,7 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as WorkflowsIndexImport } from './routes/workflows/index'
+import { Route as RecordsIndexImport } from './routes/records/index'
 import { Route as WorkflowsApplicationNameImport } from './routes/workflows/$applicationName'
+import { Route as RecordsIdImport } from './routes/records/$id'
 
 // Create/Update Routes
 
@@ -36,9 +38,21 @@ const WorkflowsIndexRoute = WorkflowsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const RecordsIndexRoute = RecordsIndexImport.update({
+  id: '/records/',
+  path: '/records/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const WorkflowsApplicationNameRoute = WorkflowsApplicationNameImport.update({
   id: '/workflows/$applicationName',
   path: '/workflows/$applicationName',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RecordsIdRoute = RecordsIdImport.update({
+  id: '/records/$id',
+  path: '/records/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,11 +74,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/records/$id': {
+      id: '/records/$id'
+      path: '/records/$id'
+      fullPath: '/records/$id'
+      preLoaderRoute: typeof RecordsIdImport
+      parentRoute: typeof rootRoute
+    }
     '/workflows/$applicationName': {
       id: '/workflows/$applicationName'
       path: '/workflows/$applicationName'
       fullPath: '/workflows/$applicationName'
       preLoaderRoute: typeof WorkflowsApplicationNameImport
+      parentRoute: typeof rootRoute
+    }
+    '/records/': {
+      id: '/records/'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsIndexImport
       parentRoute: typeof rootRoute
     }
     '/workflows/': {
@@ -82,14 +110,18 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/records/$id': typeof RecordsIdRoute
   '/workflows/$applicationName': typeof WorkflowsApplicationNameRoute
+  '/records': typeof RecordsIndexRoute
   '/workflows': typeof WorkflowsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/records/$id': typeof RecordsIdRoute
   '/workflows/$applicationName': typeof WorkflowsApplicationNameRoute
+  '/records': typeof RecordsIndexRoute
   '/workflows': typeof WorkflowsIndexRoute
 }
 
@@ -97,30 +129,55 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/records/$id': typeof RecordsIdRoute
   '/workflows/$applicationName': typeof WorkflowsApplicationNameRoute
+  '/records/': typeof RecordsIndexRoute
   '/workflows/': typeof WorkflowsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/workflows/$applicationName' | '/workflows'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/records/$id'
+    | '/workflows/$applicationName'
+    | '/records'
+    | '/workflows'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/workflows/$applicationName' | '/workflows'
-  id: '__root__' | '/' | '/about' | '/workflows/$applicationName' | '/workflows/'
+  to:
+    | '/'
+    | '/about'
+    | '/records/$id'
+    | '/workflows/$applicationName'
+    | '/records'
+    | '/workflows'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/records/$id'
+    | '/workflows/$applicationName'
+    | '/records/'
+    | '/workflows/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  RecordsIdRoute: typeof RecordsIdRoute
   WorkflowsApplicationNameRoute: typeof WorkflowsApplicationNameRoute
+  RecordsIndexRoute: typeof RecordsIndexRoute
   WorkflowsIndexRoute: typeof WorkflowsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  RecordsIdRoute: RecordsIdRoute,
   WorkflowsApplicationNameRoute: WorkflowsApplicationNameRoute,
+  RecordsIndexRoute: RecordsIndexRoute,
   WorkflowsIndexRoute: WorkflowsIndexRoute,
 }
 
@@ -136,7 +193,9 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
+        "/records/$id",
         "/workflows/$applicationName",
+        "/records/",
         "/workflows/"
       ]
     },
@@ -146,8 +205,14 @@ export const routeTree = rootRoute
     "/about": {
       "filePath": "about.tsx"
     },
+    "/records/$id": {
+      "filePath": "records/$id.tsx"
+    },
     "/workflows/$applicationName": {
       "filePath": "workflows/$applicationName.tsx"
+    },
+    "/records/": {
+      "filePath": "records/index.tsx"
     },
     "/workflows/": {
       "filePath": "workflows/index.tsx"

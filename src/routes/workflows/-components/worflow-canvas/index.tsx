@@ -25,6 +25,8 @@ import { useWorkflowDragDrop } from "./hooks/useWorkflowDragDrop";
 import { useWorkflowForm } from "./hooks/useWorkflowForm";
 import { ConsumerPlugin } from "./convas/plugins/consumer-plugin";
 import { MessagePlugin } from "./convas/plugins/message-plugin";
+import { ConsumerWithoutErrorPlugin } from "./convas/plugins/consumer-without-error-plugin";
+import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
 
 // Node type mapping
 const nodeTypes: NodeTypes = {
@@ -33,6 +35,8 @@ const nodeTypes: NodeTypes = {
   [Plugin.IF_ELSE]: IfElsePlugin,
   [Plugin.MESSAGE]: MessagePlugin,
   [Plugin.CONSUMER]: ConsumerPlugin,
+  [Plugin.CONSUMER_WITHOUT_ERROR]: ConsumerWithoutErrorPlugin,
+  [Plugin.FUNCTION_V3]: FunctionV3Plugin,
 } as const;
 
 // Edge type mapping

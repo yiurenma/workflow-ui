@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ConfigProvider, Layout, Menu, MenuProps } from "antd";
 import {
   AppstoreOutlined,
+  FileTextOutlined,
   HomeOutlined,
   InfoCircleOutlined,
   UnorderedListOutlined,
@@ -22,6 +23,11 @@ const menuItems: MenuItem[] = [
     key: "Applications",
     label: <Link to="/workflows">Applications</Link>,
     icon: <UnorderedListOutlined />,
+  },
+  {
+    key: "Records",
+    label: <Link to="/records">Records</Link>,
+    icon: <FileTextOutlined />,
   },
   {
     key: "About",

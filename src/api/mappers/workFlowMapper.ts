@@ -12,9 +12,11 @@ const START = 'start-node';
 export function backendTypeToPlugin(t: string): Plugin {
   const u = (t || '').toUpperCase().replace(/-/g, '');
   if (u === 'CONSUMER') return Plugin.CONSUMER;
+  if (u === 'CONSUMERWITHOUTERROR') return Plugin.CONSUMER_WITHOUT_ERROR;
   if (u === 'IFELSE') return Plugin.IF_ELSE;
   if (u === 'MESSAGE') return Plugin.MESSAGE;
   if (u === 'FUNCTION_V2' || u === 'FUNCTION') return Plugin.FUNCTION;
+  if (u === 'FUNCTION_V3') return Plugin.FUNCTION_V3;
   return Plugin.FUNCTION;
 }
 
@@ -22,12 +24,16 @@ export function pluginToBackendType(p: Plugin): string {
   switch (p) {
     case Plugin.CONSUMER:
       return 'CONSUMER';
+    case Plugin.CONSUMER_WITHOUT_ERROR:
+      return 'CONSUMERWITHOUTERROR';
     case Plugin.IF_ELSE:
       return 'IFELSE';
     case Plugin.MESSAGE:
       return 'MESSAGE';
     case Plugin.FUNCTION:
       return 'FUNCTION_V2';
+    case Plugin.FUNCTION_V3:
+      return 'FUNCTION_V3';
     case Plugin.START:
       return 'CONSUMER';
     default:
@@ -151,11 +157,16 @@ export function mergeCanvasIntoWorkFlow(
       (p) => (p.uiMap as { id?: string } | undefined)?.id === node.id
     );
 
-    if (existing) {
+    // Prefer node.data.backendPlugin (reflects drawer edits) over prevPlugins (server snapshot)
+    const fromNodeData = node.data?.backendPlugin as BackendPlugin | undefined;
+    const base = fromNodeData ?? existing;
+
+    if (base) {
+      const uiSource = fromNodeData
+        ? ((typeof fromNodeData.uiMap === 'object' && fromNodeData.uiMap !== null ? fromNodeData.uiMap : {}) as object)
+        : ((typeof existing!.uiMap === 'object' && existing!.uiMap !== null ? existing!.uiMap : {}) as object);
       const ui = {
-        ...((typeof existing.uiMap === 'object' && existing.uiMap !== null
-          ? existing.uiMap
-          : {}) as object),
+        ...uiSource,
         id: node.id,
         position: node.position,
         measured: {
@@ -170,8 +181,9 @@ export function mergeCanvasIntoWorkFlow(
         },
       };
       resultPlugins.push({
-        ...existing,
-        description: String(node.data?.label ?? existing.description),
+        ...base,
+        id: base.id ?? (maxId + 1),
+        description: String(node.data?.label ?? base.description),
         uiMap: ui,
       });
     } else {

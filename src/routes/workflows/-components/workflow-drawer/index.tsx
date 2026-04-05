@@ -2,8 +2,9 @@ import React from "react";
 import { Drawer, Typography, Empty } from "antd";
 import { Node } from "@xyflow/react";
 import { Plugin } from "@/types/plugins";
-import FunctionForm from "./forms/FunctionForm";
-import { PluginFormData } from "@/types/plugin-form";
+import HttpCallForm from "./forms/HttpCallForm";
+import LogicForm from "./forms/LogicForm";
+import { type PluginFormData } from "@/routes/workflows/-components/worflow-canvas/hooks/useWorkflowForm";
 const { Title } = Typography;
 
 export type WorkflowDrawerProps = {
@@ -25,23 +26,25 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       return <Empty description="Please select a node" />;
     }
 
-    // Get node type
     const nodeType = selectedNode.type as Plugin;
+    const onValuesChange = (formData: PluginFormData) => onFormChange?.(selectedNode.id, formData);
 
-    // Render form based on node type
     switch (nodeType) {
+      // Group 1 — HTTP-call nodes
+      case Plugin.CONSUMER:
+      case Plugin.CONSUMER_WITHOUT_ERROR:
+      case Plugin.MESSAGE:
+        return <HttpCallForm selectedNode={selectedNode} onValuesChange={onValuesChange} />;
+
+      // Group 2 — Logic nodes
+      case Plugin.IF_ELSE:
       case Plugin.FUNCTION:
-        return (
-          <FunctionForm
-            selectedNode={selectedNode}
-            onValuesChange={(formData) => {
-              if (onFormChange) {
-                onFormChange(selectedNode.id, formData);
-              }
-            }}
-          />
-        );
-      // Add more node types here
+      case Plugin.FUNCTION_V3:
+        return <LogicForm selectedNode={selectedNode} onValuesChange={onValuesChange} />;
+
+      case Plugin.START:
+        return <Empty description="START node has no configuration" />;
+
       default:
         return (
           <Empty
