@@ -11,20 +11,8 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import { useEffect, useCallback } from 'react';
-import { Plugin, PluginMetadataMap } from '@/types/plugins';
 import type { WorkFlow } from '@/api/types';
 import { workFlowToNodesAndEdges } from '@/api/mappers/workFlowMapper';
-import { message } from 'antd';
-
-const createDefaultStartNode = (): Node => ({
-  id: 'start-node',
-  type: Plugin.START,
-  position: { x: 250, y: 100 },
-  data: {
-    label: 'Start',
-    icon: PluginMetadataMap[Plugin.START].icon,
-  },
-});
 
 type UseWorkflowStateProps = {
   workFlow?: WorkFlow | null;
@@ -51,22 +39,9 @@ export const useWorkflowState = ({
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      const filteredChanges = changes.filter((change) => {
-        if (
-          change.type === 'remove' &&
-          nodes.some(
-            (node) => node.id === change.id && node.type === Plugin.START
-          )
-        ) {
-          message.warning('Start node cannot be deleted');
-          return false;
-        }
-        return true;
-      });
-
-      setNodes((nds: Node[]) => applyNodeChanges(filteredChanges, nds) as Node[]);
+      setNodes((nds: Node[]) => applyNodeChanges(changes, nds) as Node[]);
     },
-    [nodes, setNodes]
+    [setNodes]
   );
 
   const onEdgesChange = useCallback(
@@ -82,10 +57,10 @@ export const useWorkflowState = ({
       setNodes(mapped.nodes);
       setEdges(mapped.edges);
     } else if (applicationName) {
-      setNodes([createDefaultStartNode()]);
+      setNodes([]);
       setEdges([]);
     } else {
-      setNodes([createDefaultStartNode()]);
+      setNodes([]);
       setEdges([]);
     }
   }, [applicationName, workFlow, setNodes, setEdges]);

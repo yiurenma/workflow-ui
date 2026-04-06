@@ -42,21 +42,38 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
 
   return (
     <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
-      <Form.Item name="description" label="Description">
+      {/* Section 1 — Node Identity */}
+      <Form.Item
+        name="description"
+        label="Step Name"
+        tooltip="The name displayed on the canvas node. Keep it short and descriptive."
+      >
         <Input placeholder="Step description (shown as node label)" />
       </Form.Item>
 
-      <Form.Item label="Rules">
+      <div className="mb-2">
+        <Typography.Title level={5} className="!mb-1">Trigger Rules</Typography.Title>
+        <Typography.Text type="secondary" className="text-xs block mb-2">
+          All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
+        </Typography.Text>
         <Form.List name="ruleList">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...rest }) => (
                 <Space key={key} align="baseline" className="flex mb-2">
-                  <Form.Item {...rest} name={[name, "key"]} className="!mb-0" style={{ flex: 1 }}>
-                    <Input placeholder="JSONPath rule expression" style={{ width: 180 }} />
+                  <Form.Item
+                    {...rest}
+                    name={[name, "key"]}
+                    className="!mb-0"
+                    tooltip='e.g. $.messageInformation[?(@.customerId =~ /.+?/)] — evaluates to true when the path returns a result'
+                  >
+                    <Input
+                      placeholder='$.messageInformation[?(@.field == "value")]'
+                      style={{ width: 200 }}
+                    />
                   </Form.Item>
                   <Form.Item {...rest} name={[name, "remark"]} className="!mb-0">
-                    <Input placeholder="Remark" style={{ width: 100 }} />
+                    <Input placeholder="Human-readable explanation" style={{ width: 120 }} />
                   </Form.Item>
                   <MinusCircleOutlined onClick={() => remove(name)} />
                 </Space>
@@ -67,21 +84,36 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
             </>
           )}
         </Form.List>
-      </Form.Item>
+      </div>
 
-      <Typography.Text type="secondary" className="text-xs">Logic Configuration</Typography.Text>
-      <Form.Item name="provider" label="Provider">
-        <Input placeholder="e.g. SYSTEM" />
-      </Form.Item>
-      <Form.Item name="type" label="Type">
-        <Input disabled />
-      </Form.Item>
-      <Form.Item name="remark" label="Remark">
-        <Input.TextArea rows={2} placeholder="Step remark" />
-      </Form.Item>
-      <Form.Item name="elseLogic" label="Logic / Else Logic (JSON)">
-        <Input.TextArea rows={9} placeholder='{"key": "value"}' />
-      </Form.Item>
+      {/* Section 2 — Logic Configuration */}
+      <div className="border border-gray-100 rounded-lg p-3 bg-gray-50 mt-2">
+        <Typography.Title level={5} className="!mb-3">Logic Configuration</Typography.Title>
+        <Form.Item
+          name="provider"
+          label="Provider"
+          tooltip="Use 'SYSTEM' for built-in logic steps, or a class name for Java reflection steps."
+        >
+          <Input placeholder="SYSTEM" />
+        </Form.Item>
+        <Form.Item
+          name="type"
+          label="Plugin Type"
+          tooltip="Auto-populated. Read-only."
+        >
+          <Input disabled />
+        </Form.Item>
+        <Form.Item name="remark" label="Step Note">
+          <Input.TextArea rows={2} placeholder="Step remark" />
+        </Form.Item>
+        <Form.Item
+          name="elseLogic"
+          label="Logic / Payload"
+          tooltip='For IF_ELSE: JSON object to merge into the runtime payload when the rule matches. e.g. {"messageInformation": {"channel": "SMS"}}. For FUNCTION_V2/V3: JSON FunctionObject defining the Java class and method to call.'
+        >
+          <Input.TextArea rows={12} placeholder='{"key": "value"}' className="font-mono text-xs" />
+        </Form.Item>
+      </div>
     </Form>
   );
 };

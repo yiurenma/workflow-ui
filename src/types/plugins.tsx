@@ -1,16 +1,15 @@
 import { Node } from "@xyflow/react";
 import {
-  ApiOutlined,
-  CaretRightOutlined,
+  BranchesOutlined,
+  CloudDownloadOutlined,
+  CodeOutlined,
   FolderOutlined,
-  MessageOutlined,
-  SearchOutlined,
-  SwapOutlined,
-  ToolOutlined,
+  SafetyCertificateOutlined,
+  SendOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 
 export enum Plugin {
-  START = "Start",
   CONSUMER = "Consumer",
   CONSUMER_WITHOUT_ERROR = "Consumer_Without_Error",
   MESSAGE = "Message",
@@ -27,7 +26,6 @@ export type BaseNodeData = {
 };
 
 export type BaseNode = Node<BaseNodeData>;
-export type StartPluginProps = BaseNode;
 export type IfElsePluginProps = BaseNode;
 export type MessagePluginProps = BaseNode;
 export type FunctionPluginProps = BaseNode;
@@ -43,26 +41,23 @@ export const PluginMetadataMap: Record<
     backgroundColor?: string;
   }
 > = {
-  [Plugin.START]: {
-    icon: <CaretRightOutlined />,
-  },
   [Plugin.CONSUMER]: {
-    icon: <SearchOutlined />,
+    icon: <CloudDownloadOutlined />,
   },
   [Plugin.MESSAGE]: {
-    icon: <MessageOutlined />,
+    icon: <SendOutlined />,
   },
   [Plugin.IF_ELSE]: {
-    icon: <SwapOutlined />,
+    icon: <BranchesOutlined />,
   },
   [Plugin.FUNCTION]: {
-    icon: <ToolOutlined />,
+    icon: <CodeOutlined />,
   },
   [Plugin.CONSUMER_WITHOUT_ERROR]: {
-    icon: <ApiOutlined />,
+    icon: <SafetyCertificateOutlined />,
   },
   [Plugin.FUNCTION_V3]: {
-    icon: <ToolOutlined />,
+    icon: <ThunderboltOutlined />,
   },
 };
 
@@ -88,13 +83,11 @@ export const getPluginMenuList = (): PluginMenuGroup => {
   };
 
   Object.values(Plugin).forEach((plugin) => {
-    if (plugin !== Plugin.START) {
-      group.children.push({
-        key: plugin,
-        label: plugin,
-        icon: PluginMetadataMap[plugin].icon,
-      });
-    }
+    group.children.push({
+      key: plugin,
+      label: plugin,
+      icon: PluginMetadataMap[plugin].icon,
+    });
   });
 
   return [group];

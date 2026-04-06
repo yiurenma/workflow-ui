@@ -34,23 +34,9 @@ export function pluginToBackendType(p: Plugin): string {
       return 'FUNCTION_V2';
     case Plugin.FUNCTION_V3:
       return 'FUNCTION_V3';
-    case Plugin.START:
-      return 'CONSUMER';
     default:
       return 'CONSUMER';
   }
-}
-
-function createDefaultStartNode(): Node {
-  return {
-    id: START,
-    type: Plugin.START,
-    position: { x: 250, y: 100 },
-    data: {
-      label: 'Start',
-      icon: PluginMetadataMap[Plugin.START].icon,
-    },
-  };
 }
 
 function isEdgeLike(u: unknown): u is Record<string, string> {
@@ -67,12 +53,11 @@ export function workFlowToNodesAndEdges(workFlow: WorkFlow | null | undefined): 
   nodes: Node[];
   edges: Edge[];
 } {
-  const startNode = createDefaultStartNode();
   if (!workFlow?.pluginList?.length) {
-    return { nodes: [startNode], edges: [] };
+    return { nodes: [], edges: [] };
   }
 
-  const nodes: Node[] = [startNode];
+  const nodes: Node[] = [];
   for (const p of workFlow.pluginList) {
     const ui = p.uiMap as Record<string, unknown> | undefined;
     if (!ui || typeof ui.id !== 'string') continue;
@@ -151,7 +136,7 @@ export function mergeCanvasIntoWorkFlow(
   const resultPlugins: BackendPlugin[] = [];
 
   for (const node of nodes) {
-    if (node.id === START || node.type === Plugin.START) continue;
+    if (node.id === START) continue;
 
     const existing = prevPlugins.find(
       (p) => (p.uiMap as { id?: string } | undefined)?.id === node.id

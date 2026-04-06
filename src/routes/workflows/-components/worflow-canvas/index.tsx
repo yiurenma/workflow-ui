@@ -16,7 +16,6 @@ import { Plugin } from "@/types/plugins";
 import { FunctionPlugin } from "./convas/plugins/function-plugin";
 import type { WorkFlow } from "@/api/types";
 import WorkflowDrawer from "../workflow-drawer";
-import { StartPlugin } from "./convas/plugins/begin-plugin";
 import { IfElsePlugin } from "./convas/plugins/iflese-plugin";
 import { ButtonEdge } from "./convas/edge";
 import { useWorkflowState } from "./hooks/useWorkflowState";
@@ -31,7 +30,6 @@ import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
 // Node type mapping
 const nodeTypes: NodeTypes = {
   [Plugin.FUNCTION]: FunctionPlugin,
-  [Plugin.START]: StartPlugin,
   [Plugin.IF_ELSE]: IfElsePlugin,
   [Plugin.MESSAGE]: MessagePlugin,
   [Plugin.CONSUMER]: ConsumerPlugin,
