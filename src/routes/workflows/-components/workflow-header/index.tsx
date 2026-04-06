@@ -1,10 +1,11 @@
-import { ArrowLeftOutlined, BulbOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BulbOutlined, GithubOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
 import { Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
 import { useSaveWorkflow } from "@/api/hooks/workflow";
 import { onlineApi } from "@/api/services/online";
 import React, { useState } from "react";
+import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
 
 const { TextArea } = Input;
 
@@ -18,6 +19,16 @@ type WorkflowHeaderProps = {
 const defaultRunBody = `{\n  "messageInformation": {}\n}`;
 
 const AI_TOKEN_KEY = "ai_explain_token";
+
+function isValidToken(token: string | null): boolean {
+  if (!token) return false;
+  return (
+    token.startsWith("sk-ant-") ||
+    token.startsWith("ghp_") ||
+    token.startsWith("ghu_") ||
+    token.startsWith("ghs_")
+  );
+}
 
 function buildExplainPrompt(applicationName: string, workFlow: WorkFlow): string {
   const steps = (workFlow.pluginList ?? []).map((plugin, i) => {
@@ -117,8 +128,21 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [explainOpen, setExplainOpen] = useState(false);
   const [explainLoading, setExplainLoading] = useState(false);
   const [explainResult, setExplainResult] = useState<string | null>(null);
+
+  // Manual token entry modal (fallback)
   const [tokenInput, setTokenInput] = useState("");
   const [tokenPromptOpen, setTokenPromptOpen] = useState(false);
+
+  // GitHub OAuth Device Flow modal
+  const [deviceFlowOpen, setDeviceFlowOpen] = useState(false);
+
+  const handleOAuthSuccess = (token: string) => {
+    localStorage.setItem(AI_TOKEN_KEY, token);
+    setDeviceFlowOpen(false);
+    runExplain(token);
+  };
+
+  const deviceFlow = useGitHubDeviceFlow(handleOAuthSuccess);
 
   const saveFlow = async () => {
     if (!workFlow) {
@@ -168,12 +192,21 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
 
   const explainFlow = () => {
     const token = localStorage.getItem(AI_TOKEN_KEY);
-    if (!token) {
-      setTokenInput("");
-      setTokenPromptOpen(true);
+    if (!isValidToken(token)) {
+      // No valid token — start GitHub OAuth Device Flow
+      setDeviceFlowOpen(true);
+      deviceFlow.start();
       return;
     }
-    runExplain(token);
+    runExplain(token!);
+  };
+
+  const openManualTokenModal = () => {
+    // Cancel Device Flow and switch to manual entry
+    deviceFlow.cancel();
+    setDeviceFlowOpen(false);
+    setTokenInput("");
+    setTokenPromptOpen(true);
   };
 
   const saveTokenAndExplain = () => {
@@ -212,6 +245,102 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const clearToken = () => {
     localStorage.removeItem(AI_TOKEN_KEY);
     message.info("AI token cleared");
+  };
+
+  const cancelDeviceFlow = () => {
+    deviceFlow.cancel();
+    setDeviceFlowOpen(false);
+  };
+
+  const openGitHub = (verificationUri: string) => {
+    const opened = window.open(verificationUri, "_blank");
+    if (!opened) {
+      // Popup blocked — show the URL as fallback (handled in modal UI)
+      message.info(`Please open ${verificationUri} in your browser and enter the code.`);
+    }
+  };
+
+  // Derive Device Flow modal body based on current state
+  const renderDeviceFlowContent = () => {
+    const { state } = deviceFlow;
+
+    if (state.status === "requesting") {
+      return (
+        <div className="py-8 text-center text-zinc-400 text-sm">
+          <LoadingOutlined className="mr-2" />
+          Contacting GitHub…
+        </div>
+      );
+    }
+
+    if (state.status === "awaiting_user" || state.status === "polling") {
+      const { userCode, verificationUri } = state;
+      return (
+        <div className="space-y-4">
+          <Typography.Paragraph className="text-sm text-zinc-600">
+            Enter the code below on GitHub to authorize access to GitHub Models.
+          </Typography.Paragraph>
+          <div className="rounded-lg bg-amber-50 border border-amber-200 px-6 py-4 text-center">
+            <div className="text-2xl font-mono font-bold tracking-widest text-amber-700 select-all">
+              {userCode}
+            </div>
+            <div className="text-xs text-amber-500 mt-1">Click to copy</div>
+          </div>
+          <Button
+            type="primary"
+            icon={<GithubOutlined />}
+            block
+            onClick={() => openGitHub(verificationUri)}
+          >
+            Open GitHub to authorize
+          </Button>
+          {state.status === "polling" && (
+            <div className="text-center text-xs text-zinc-400">
+              <LoadingOutlined className="mr-1" />
+              Waiting for authorization…
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (state.status === "expired") {
+      return (
+        <div className="py-4 text-center">
+          <Typography.Text type="danger" className="text-sm">
+            Authorization timed out — please try again.
+          </Typography.Text>
+          <div className="mt-3">
+            <Button onClick={() => deviceFlow.start()}>Try again</Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (state.status === "denied") {
+      return (
+        <div className="py-4 text-center">
+          <Typography.Text type="danger" className="text-sm">
+            Authorization was denied on GitHub. You can also paste a token manually.
+          </Typography.Text>
+        </div>
+      );
+    }
+
+    if (state.status === "error") {
+      return (
+        <div className="py-4 text-center">
+          <Typography.Text type="danger" className="text-sm">
+            {state.message}
+          </Typography.Text>
+          <div className="mt-3">
+            <Button onClick={() => deviceFlow.start()}>Try again</Button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -260,7 +389,30 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         </Space>
       </Flex>
 
-      {/* Token setup modal */}
+      {/* GitHub OAuth Device Flow modal */}
+      <Modal
+        title={
+          <Space>
+            <GithubOutlined />
+            <span>Authorize with GitHub</span>
+          </Space>
+        }
+        open={deviceFlowOpen}
+        onCancel={cancelDeviceFlow}
+        footer={
+          <Space>
+            <Button type="link" size="small" className="text-xs text-zinc-400" onClick={openManualTokenModal}>
+              Paste a token manually
+            </Button>
+            <Button onClick={cancelDeviceFlow}>Cancel</Button>
+          </Space>
+        }
+        width={420}
+      >
+        {renderDeviceFlowContent()}
+      </Modal>
+
+      {/* Manual token entry modal (fallback) */}
       <Modal
         title="Set AI Token"
         open={tokenPromptOpen}
