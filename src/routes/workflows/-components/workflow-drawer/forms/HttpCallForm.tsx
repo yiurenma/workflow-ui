@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
-import { Form, Input, Select, Button, Space, Typography } from "antd";
+import { Form, Input, Select, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
+import EditorSection from "@/routes/workflows/-components/workflow-drawer/EditorSection";
 
 export type HttpCallFormValues = {
   description?: string;
@@ -52,20 +53,26 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
 
   return (
     <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
-      {/* Section 1 — Node Identity */}
-      <Form.Item
-        name="description"
-        label="Step Name"
-        tooltip="The name displayed on the canvas node. Keep it short and descriptive."
+      <EditorSection
+        kind="description"
+        title="Description"
+        subtitle="What this step is called on the canvas. Keep it short so the flow stays readable."
       >
-        <Input placeholder="Step description (shown as node label)" />
-      </Form.Item>
+        <Form.Item
+          name="description"
+          label="Step name"
+          className="!mb-0"
+          tooltip="The name displayed on the canvas node. Keep it short and descriptive."
+        >
+          <Input placeholder="Step description (shown as node label)" />
+        </Form.Item>
+      </EditorSection>
 
-      <div className="mb-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Trigger Rules</p>
-        <Typography.Text type="secondary" className="text-xs block mb-2">
-          All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
-        </Typography.Text>
+      <EditorSection
+        kind="rules"
+        title="Rules"
+        subtitle="When this step runs: every rule must match. Use JSONPath expressions against the runtime payload."
+      >
         <Form.List name="ruleList">
           {(fields, { add, remove }) => (
             <>
@@ -94,11 +101,13 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
             </>
           )}
         </Form.List>
-      </div>
+      </EditorSection>
 
-      {/* Section 2 — HTTP Configuration */}
-      <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50 mt-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">HTTP Configuration</p>
+      <EditorSection
+        kind="action"
+        title="Action"
+        subtitle="The HTTP call executed when rules match: URL, method, headers, body templates, and how to read the response."
+      >
         <Form.Item
           name="provider"
           label="Provider Name"
@@ -158,7 +167,7 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
         >
           <Input.TextArea rows={3} placeholder="JSONPath or schema to extract from response" />
         </Form.Item>
-      </div>
+      </EditorSection>
     </Form>
   );
 };
