@@ -26,6 +26,8 @@ import { ConsumerPlugin } from "./convas/plugins/consumer-plugin";
 import { MessagePlugin } from "./convas/plugins/message-plugin";
 import { ConsumerWithoutErrorPlugin } from "./convas/plugins/consumer-without-error-plugin";
 import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { MobileAddNodeSheet } from "./MobileAddNodeSheet";
 
 // Node type mapping
 const nodeTypes: NodeTypes = {
@@ -72,6 +74,8 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   workFlow,
   onWorkflowChange,
 }) => {
+  const isMobile = useIsMobile();
+
   // Initialize workflow state
   const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange } =
     useWorkflowState({ applicationName, workFlow, onWorkflowChange });
@@ -108,9 +112,11 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         connectionMode={ConnectionMode.Loose}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={["Delete", "Backspace"]}
+        panOnDrag={true}
+        minZoom={0.3}
       >
         <Controls />
-        <MiniMap />
+        {!isMobile && <MiniMap />}
         <Background
           variant={BackgroundVariant.Dots}
           gap={24}
@@ -118,6 +124,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           color="#CBD5E1"
           className="bg-zinc-50"
         />
+        {isMobile && <MobileAddNodeSheet setNodes={setNodes} />}
       </ReactFlow>
       <WorkflowDrawer
         open={drawerOpen}

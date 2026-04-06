@@ -62,20 +62,20 @@ export const Route = createRootRoute({
         }}
       >
         <Layout className="h-dvh bg-zinc-50">
-          <Header className="flex items-center justify-between px-4 md:px-8 h-12 leading-none bg-zinc-900 border-b border-zinc-800">
-            <div className="flex items-center gap-2.5 min-w-0">
+          <Header className="flex items-center justify-between px-3 md:px-8 h-12 leading-none bg-zinc-900 border-b border-zinc-800">
+            <div className="flex items-center gap-2 min-w-0 shrink-0">
               <AppstoreOutlined className="text-base text-zinc-400 shrink-0" />
-              <span className="font-semibold text-zinc-100 text-[13px] tracking-tight truncate">
+              <span className="font-semibold text-zinc-100 text-[13px] tracking-tight truncate hidden sm:inline">
                 Workflow Studio
               </span>
-              <span className="text-zinc-700 text-xs mx-1 shrink-0">|</span>
+              <span className="text-zinc-700 text-xs mx-1 shrink-0 hidden sm:inline">|</span>
             </div>
             <Menu
               mode="horizontal"
               theme="dark"
               selectable={false}
               items={menuItems}
-              className="border-none flex-1 justify-end min-w-0 max-md:!text-sm !bg-zinc-900"
+              className="border-none flex-1 justify-end min-w-0 !bg-zinc-900 [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
             />
           </Header>
           <Content className="flex-1 overflow-hidden">

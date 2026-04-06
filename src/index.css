@@ -106,3 +106,16 @@ body {
 .react-flow__controls-button:last-child {
   border-bottom: none !important;
 }
+
+@media (max-width: 767px) {
+  /* React Flow controls — bigger touch targets */
+  .react-flow__controls-button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* MiniMap — hidden on mobile (also toggled in component) */
+  .react-flow__minimap {
+    display: none !important;
+  }
+}

@@ -11,6 +11,7 @@ import { Link } from "@tanstack/react-router";
 import { Node, Edge } from "@xyflow/react";
 import type { WorkFlow } from "@/api/types";
 import { mergeCanvasIntoWorkFlow } from "@/api/mappers/workFlowMapper";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const Route = createFileRoute("/workflows/$applicationName")({
   component: RouteComponent,
@@ -24,6 +25,7 @@ function RouteComponent() {
   } catch {
     /* keep raw */
   }
+  const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
   const { data: workFlow, isLoading, isError } =
     useWorkflowQuery(applicationName);
@@ -69,7 +71,9 @@ function RouteComponent() {
   return (
     <ReactFlowProvider>
       <Layout className="h-full">
-        <WorkflowSider collapsed={collapsed} setCollapsed={setCollapsed} />
+        {!isMobile && (
+          <WorkflowSider collapsed={collapsed} setCollapsed={setCollapsed} />
+        )}
         <Layout className="h-full">
           <WorkflowHeader
             applicationName={applicationName}

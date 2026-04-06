@@ -5,7 +5,7 @@ import {
 } from "@/routes/workflows/-components/workflow-dialog/WorkflowDialogProvider";
 import SettingsModal from "@/routes/workflows/-components/settings-modal";
 import HistoryDrawer from "@/routes/workflows/-components/history-drawer";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Button,
@@ -22,6 +22,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { WorkflowEntitySettingRow } from "@/api/types";
 import React, { useMemo, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const Route = createFileRoute("/workflows/")({
   component: RouteComponent,
@@ -31,6 +32,7 @@ const pageSize = 20;
 
 const ApplicationList = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -173,7 +175,7 @@ const ApplicationList = () => {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className="p-8 bg-zinc-50 min-h-full">
+    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} bg-zinc-50 min-h-full`}>
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
         <div>
           <Typography.Title level={4} className="!mb-0 !text-zinc-900 !font-semibold tracking-tight">
@@ -183,30 +185,118 @@ const ApplicationList = () => {
             Manage and configure workflow applications
           </Typography.Text>
         </div>
-        <Space>
-          <Input.Search
-            placeholder="Search application name"
-            allowClear
-            size="middle"
-            style={{ width: 260 }}
-            value={search}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
-            }
-            onSearch={onSearch}
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={openCreateDialog}
-            className="font-medium"
-          >
-            New application
-          </Button>
-        </Space>
+        {!isMobile && (
+          <Space>
+            <Input.Search
+              placeholder="Search application name"
+              allowClear
+              size="middle"
+              style={{ width: 260 }}
+              value={search}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearch(e.target.value)
+              }
+              onSearch={onSearch}
+            />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={openCreateDialog}
+              className="font-medium"
+            >
+              New application
+            </Button>
+          </Space>
+        )}
       </Flex>
 
+      {isMobile && (
+        <Input.Search
+          placeholder="Search application name"
+          allowClear
+          size="middle"
+          value={search}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearch(e.target.value)
+          }
+          onSearch={onSearch}
+        />
+      )}
+
       <Spin spinning={isLoading || isFetching}>
+        {isMobile ? (
+          <div className="flex flex-col gap-2">
+            {(data?.content ?? []).map((record: WorkflowEntitySettingRow) => (
+              <div
+                key={String(record.id ?? record.applicationName)}
+                className="bg-white rounded-lg border border-zinc-200 shadow-sm px-4 py-3"
+                onClick={() =>
+                  navigate({
+                    to: "/workflows/$applicationName",
+                    params: { applicationName: record.applicationName },
+                  })
+                }
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0 pr-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-zinc-800 text-sm truncate">
+                        {record.applicationName}
+                      </span>
+                      {record.enabled ? (
+                        <Tag color="green" className="text-[10px] font-medium shrink-0">Active</Tag>
+                      ) : (
+                        <Tag className="text-[10px] font-medium text-zinc-400 shrink-0">Inactive</Tag>
+                      )}
+                    </div>
+                    <span className="text-zinc-500 text-xs mt-0.5 block truncate">
+                      {record.eimId ?? record.defaultServiceAccount ?? record.region ?? "—"}
+                    </span>
+                    <span className="text-zinc-400 text-xs mt-0.5 block">
+                      {record.lastModifiedDateTime ?? ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="text"
+                      size="small"
+                      className="text-zinc-400 px-1"
+                      onClick={(e) => { e.stopPropagation(); setSettingsTarget(record); }}
+                    >
+                      Settings
+                    </Button>
+                    <RightOutlined className="text-zinc-300 text-xs" />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(data?.content ?? []).length === 0 && !isLoading && !isFetching && (
+              <div className="text-center text-zinc-400 py-8 text-sm">No applications found</div>
+            )}
+            {/* Mobile pagination */}
+            {(data?.totalElements ?? 0) > pageSize && (
+              <div className="flex justify-between items-center pt-2">
+                <Button
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  size="small"
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-zinc-400">
+                  Page {page + 1} of {Math.ceil((data?.totalElements ?? 0) / pageSize)}
+                </span>
+                <Button
+                  disabled={(page + 1) * pageSize >= (data?.totalElements ?? 0)}
+                  onClick={() => setPage((p) => p + 1)}
+                  size="small"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
         <Table<WorkflowEntitySettingRow>
           rowKey={(r: WorkflowEntitySettingRow) =>
             String(r.id ?? r.applicationName)
@@ -226,7 +316,18 @@ const ApplicationList = () => {
             index % 2 === 1 ? "bg-zinc-50" : ""
           }
         />
+        )}
       </Spin>
+
+      {isMobile && (
+        <button
+          onClick={openCreateDialog}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center text-2xl hover:bg-indigo-700 active:scale-95 transition-all"
+          aria-label="New application"
+        >
+          <PlusOutlined />
+        </button>
+      )}
 
       <SettingsModal
         open={settingsTarget !== null}

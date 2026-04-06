@@ -11,6 +11,7 @@ import type { ColumnsType } from "antd/es/table";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useWorkflowRecordDetail } from "@/api/hooks/workflow";
 import type { WorkflowRecord } from "@/api/types";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const Route = createFileRoute("/records/$id")({
   component: RecordDetailPage,
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/records/$id")({
 
 function RecordDetailPage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { id } = Route.useParams();
   const numericId = Number(id);
   const { data, isLoading } = useWorkflowRecordDetail(isNaN(numericId) ? null : numericId);
@@ -37,7 +39,7 @@ function RecordDetailPage() {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className="p-8 bg-slate-50 min-h-full">
+    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} bg-slate-50 min-h-full`}>
       <Flex align="center" gap="middle">
         <Button type="link" className="px-0" onClick={() => navigate({ to: "/records" })}>
           ← Records
@@ -51,7 +53,7 @@ function RecordDetailPage() {
         {record && (
           <div className="bg-white rounded-lg shadow-sm p-6">
             <Typography.Title level={5} className="!mb-4">Record Details</Typography.Title>
-            <Descriptions bordered size="small" column={2}>
+            <Descriptions bordered size="small" column={isMobile ? 1 : 2}>
               <Descriptions.Item label="ID">{record.id}</Descriptions.Item>
               <Descriptions.Item label="Application">{record.applicationName ?? "—"}</Descriptions.Item>
               <Descriptions.Item label="Overall Status">
@@ -93,6 +95,7 @@ function RecordDetailPage() {
               dataSource={children}
               pagination={false}
               size="small"
+              scroll={isMobile ? { x: 600 } : undefined}
             />
           </div>
         )}

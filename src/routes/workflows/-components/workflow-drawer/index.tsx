@@ -5,6 +5,7 @@ import { Plugin } from "@/types/plugins";
 import HttpCallForm from "./forms/HttpCallForm";
 import LogicForm from "./forms/LogicForm";
 import { type PluginFormData } from "@/routes/workflows/-components/worflow-canvas/hooks/useWorkflowForm";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export type WorkflowDrawerProps = {
   open: boolean;
@@ -19,6 +20,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
   selectedNode,
   onFormChange,
 }) => {
+  const isMobile = useIsMobile();
   // Render form based on node type
   const renderForm = () => {
     if (!selectedNode) {
@@ -67,7 +69,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       placement="right"
       onClose={onClose}
       open={open}
-      width={420}
+      width={isMobile ? "100%" : 420}
       className="pb-20"
       styles={{
         header: {
