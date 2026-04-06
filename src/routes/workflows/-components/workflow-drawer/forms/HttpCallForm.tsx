@@ -4,7 +4,7 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
 import NodeSection from "../NodeSection";
-import { useJsonFormat } from "../useJsonFormat";
+import { tryFormatJson, useJsonFormat } from "../useJsonFormat";
 
 export type HttpCallFormValues = {
   description?: string;
@@ -42,9 +42,9 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
         httpRequestMethod: (action?.httpRequestMethod as string | undefined) ?? "POST",
         httpRequestUrlWithQueryParameter: action?.httpRequestUrlWithQueryParameter as string | undefined,
         internalHttpRequestUrlWithQueryParameter: action?.internalHttpRequestUrlWithQueryParameter as string | undefined,
-        httpRequestHeaders: action?.httpRequestHeaders as string | undefined,
-        httpRequestBody: action?.httpRequestBody as string | undefined,
-        trackingNumberSchemaInHttpResponse: action?.trackingNumberSchemaInHttpResponse as string | undefined,
+        httpRequestHeaders: tryFormatJson(action?.httpRequestHeaders as string | undefined),
+        httpRequestBody: tryFormatJson(action?.httpRequestBody as string | undefined),
+        trackingNumberSchemaInHttpResponse: tryFormatJson(action?.trackingNumberSchemaInHttpResponse as string | undefined),
       });
     }
   }, [selectedNode, form]);

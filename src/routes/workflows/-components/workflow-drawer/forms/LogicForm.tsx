@@ -4,7 +4,7 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowType, BackendWorkflowRule } from "@/api/types/operation";
 import NodeSection from "../NodeSection";
-import { useJsonFormat } from "../useJsonFormat";
+import { tryFormatJson, useJsonFormat } from "../useJsonFormat";
 
 export type LogicFormValues = {
   description?: string;
@@ -34,7 +34,7 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
         provider: action?.provider as string | undefined,
         type: action?.type as string | undefined,
         remark: action?.remark as string | undefined,
-        elseLogic: action?.elseLogic as string | undefined,
+        elseLogic: tryFormatJson(action?.elseLogic as string | undefined),
       });
     }
   }, [selectedNode, form]);
