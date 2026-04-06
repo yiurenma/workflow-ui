@@ -26,8 +26,8 @@ const NodeSection: React.FC<NodeSectionProps> = ({
   <div
     className={
       variant === "inset"
-        ? "mb-4 border border-zinc-100 rounded-lg p-3 bg-zinc-50"
-        : "mb-4"
+        ? "mb-4 border border-zinc-200 rounded-lg p-3 bg-zinc-50 shadow-sm"
+        : "mb-4 border border-zinc-200 rounded-lg p-3 bg-white shadow-sm"
     }
   >
     <div className="flex items-center gap-1 mb-1">
