@@ -44,13 +44,15 @@ const edgeTypes: EdgeTypes = {
 
 // Default edge options
 const defaultEdgeOptions = {
-  animated: true,
+  animated: false,
   markerEnd: {
     type: MarkerType.ArrowClosed,
+    color: "#94A3B8",
   },
   type: "buttonEdge",
   style: {
-    strokeWidth: 2,
+    strokeWidth: 1.5,
+    stroke: "#94A3B8",
   },
   zIndex: 1001,
 };
@@ -109,7 +111,13 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       >
         <Controls />
         <MiniMap />
-        <Background variant={BackgroundVariant.Dots} className="bg-gray-100" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={24}
+          size={1}
+          color="#CBD5E1"
+          className="bg-zinc-50"
+        />
       </ReactFlow>
       <WorkflowDrawer
         open={drawerOpen}

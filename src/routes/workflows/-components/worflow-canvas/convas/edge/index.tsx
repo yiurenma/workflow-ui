@@ -32,7 +32,7 @@ export const ButtonEdge: React.FC<EdgeProps> = ({
   });
 
   const selectedStyle = useMemo(() => {
-    return selected ? { strokeWidth: 2, stroke: "#1677ff" } : {};
+    return selected ? { strokeWidth: 2, stroke: "#4F46E5" } : {};
   }, [selected]);
 
   // Handle edge delete button click
@@ -65,7 +65,7 @@ export const ButtonEdge: React.FC<EdgeProps> = ({
           className="nodrag nopan opacity-0 hover:opacity-100 transition-opacity duration-300"
         >
           <button
-            className="cursor-pointer rounded-full bg-red-400 hover:bg-red-600 p-0.5 flex items-center justify-center w-4 h-4 shadow-sm"
+            className="cursor-pointer rounded-full bg-zinc-500 hover:bg-zinc-700 p-0.5 flex items-center justify-center w-4 h-4 shadow-sm transition-colors duration-150"
             type="button"
             onClick={onEdgeDelete}
             title="Delete connection"

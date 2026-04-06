@@ -1,6 +1,8 @@
 import { ConsumerPluginProps } from "@/types/plugins";
 import { Position, Handle, NodeProps } from "@xyflow/react";
 
+const ACCENT = "#3B82F6";
+
 export const ConsumerPlugin: React.FC<NodeProps<ConsumerPluginProps>> = ({
   data,
   selected,
@@ -8,24 +10,37 @@ export const ConsumerPlugin: React.FC<NodeProps<ConsumerPluginProps>> = ({
   return (
     <div
       className={`
-        relative flex items-stretch w-56 rounded-xl bg-white overflow-hidden
-        border shadow-sm transition-all
-        ${selected ? "border-blue-500 shadow-md ring-1 ring-blue-500/30" : "border-gray-200"}
+        relative flex flex-col w-52 rounded-lg bg-white overflow-hidden
+        border transition-all duration-150
+        ${selected
+          ? "border-indigo-300 ring-2 ring-indigo-500 ring-offset-1 shadow-sm"
+          : "border-zinc-200 shadow-sm hover:border-zinc-300 hover:shadow"
+        }
       `}
     >
-      <div className="w-1 shrink-0 bg-blue-500 rounded-l-xl" />
+      {/* Top accent strip */}
+      <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: ACCENT }} />
+
       <Handle id="target-handle" type="target" position={Position.Left} className="handle-style" />
-      <div className="flex flex-col gap-1 px-3 py-2 flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 text-blue-600 text-sm shrink-0">
-            {data.icon}
+
+      {/* Body */}
+      <div className="flex items-center gap-2.5 px-3 py-2.5 min-w-0">
+        <span
+          className="flex items-center justify-center w-[22px] h-[22px] rounded shrink-0 text-[13px]"
+          style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
+        >
+          {data.icon}
+        </span>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[11px] font-semibold text-zinc-800 leading-tight tracking-tight">
+            HTTP Fetch
           </span>
-          <span className="text-xs font-semibold text-blue-600 leading-none">Consumer</span>
-        </div>
-        <div className="text-xs text-gray-500 truncate leading-tight">
-          {data.label || "Click to configure"}
+          <span className="text-[10px] text-zinc-400 truncate leading-tight mt-0.5">
+            {data.label || "Unconfigured"}
+          </span>
         </div>
       </div>
+
       <Handle id="source-handle" type="source" position={Position.Right} className="handle-style" />
     </div>
   );

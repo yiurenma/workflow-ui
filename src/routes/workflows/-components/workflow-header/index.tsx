@@ -81,30 +81,34 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
       <Flex
         align="center"
         justify={"space-between"}
-        gap={"large"}
-        className="py-2.5 px-5 border-b border-slate-200 bg-white"
+        gap={"middle"}
+        className="py-2 px-4 border-b border-zinc-200 bg-white"
+        style={{ minHeight: 44 }}
       >
-        <Space size={"large"}>
+        <Space size={"middle"}>
           <Link to={`/workflows`}>
-            <ArrowLeftOutlined className="text-slate-600" />
+            <ArrowLeftOutlined className="text-zinc-400 hover:text-zinc-700 transition-colors" />
           </Link>
           <div className="flex flex-col">
-            <span className="font-semibold text-[18px] text-slate-800">
+            <span className="font-semibold text-[13px] text-zinc-800 tracking-tight">
               {isLoading ? "Loading..." : applicationName}
             </span>
           </div>
         </Space>
-        <Space size={"large"}>
-          <Button onClick={() => runFlow()} disabled={isLoading}>
-            <b>Run</b>
+        <Space size={"small"}>
+          <Button size="small" onClick={() => runFlow()} disabled={isLoading}
+            className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
+            Run
           </Button>
           <Button
+            size="small"
             type="primary"
             onClick={saveFlow}
             disabled={isLoading || saveWorkflow.isPending}
             loading={saveWorkflow.isPending}
+            className="text-xs font-medium"
           >
-            <b>Save</b>
+            Save
           </Button>
         </Space>
       </Flex>

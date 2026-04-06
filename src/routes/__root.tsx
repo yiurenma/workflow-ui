@@ -42,32 +42,40 @@ export const Route = createRootRoute({
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#2563eb",
-            borderRadius: 8,
+            colorPrimary: "#4F46E5",
+            borderRadius: 6,
           },
           components: {
             Layout: {
-              headerBg: "#ffffff",
+              headerBg: "#18181B",
             },
             Menu: {
-              horizontalItemSelectedColor: "#2563eb",
+              darkItemBg: "#18181B",
+              darkItemSelectedBg: "#27272A",
+              darkItemHoverBg: "#27272A",
+              darkItemColor: "#A1A1AA",
+              darkItemSelectedColor: "#F4F4F5",
+              darkItemHoverColor: "#F4F4F5",
+              horizontalItemSelectedColor: "#818CF8",
             },
           },
         }}
       >
-        <Layout className="h-dvh bg-slate-50">
-          <Header className="flex items-center justify-between px-4 md:px-8 h-14 leading-none bg-white border-b border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2 min-w-0">
-              <AppstoreOutlined className="text-xl text-slate-700 shrink-0" />
-              <span className="font-semibold text-slate-800 text-base truncate">
-                Application Management
+        <Layout className="h-dvh bg-zinc-50">
+          <Header className="flex items-center justify-between px-4 md:px-8 h-12 leading-none bg-zinc-900 border-b border-zinc-800">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <AppstoreOutlined className="text-base text-zinc-400 shrink-0" />
+              <span className="font-semibold text-zinc-100 text-[13px] tracking-tight truncate">
+                Workflow Studio
               </span>
+              <span className="text-zinc-700 text-xs mx-1 shrink-0">|</span>
             </div>
             <Menu
               mode="horizontal"
+              theme="dark"
               selectable={false}
               items={menuItems}
-              className="border-none flex-1 justify-end min-w-0 max-md:!text-sm bg-transparent"
+              className="border-none flex-1 justify-end min-w-0 max-md:!text-sm !bg-zinc-900"
             />
           </Header>
           <Content className="flex-1 overflow-hidden">

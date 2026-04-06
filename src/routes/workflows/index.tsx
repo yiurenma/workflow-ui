@@ -59,40 +59,49 @@ const ApplicationList = () => {
     setDebounced(search);
   };
 
+  const colTitle = (text: string) => (
+    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">{text}</span>
+  );
+
   const columns: ColumnsType<WorkflowEntitySettingRow> = [
     {
-      title: "Application name",
+      title: colTitle("Application"),
       dataIndex: "applicationName",
       key: "applicationName",
       ellipsis: true,
       render: (text: string) => (
-        <span className="font-medium text-slate-800">{text}</span>
+        <span className="font-medium text-zinc-800 text-sm">{text}</span>
       ),
     },
     {
-      title: "Description",
+      title: colTitle("Description"),
       key: "description",
       ellipsis: true,
-      render: (_: unknown, r: WorkflowEntitySettingRow) =>
-        r.eimId ?? r.defaultServiceAccount ?? r.region ?? "—",
+      render: (_: unknown, r: WorkflowEntitySettingRow) => (
+        <span className="text-zinc-500 text-sm">{r.eimId ?? r.defaultServiceAccount ?? r.region ?? "—"}</span>
+      ),
     },
     {
-      title: "Enabled",
+      title: colTitle("Status"),
       dataIndex: "enabled",
       key: "enabled",
-      width: 100,
+      width: 90,
       render: (v: boolean) =>
-        v ? <Tag color="green">Yes</Tag> : <Tag>No</Tag>,
+        v ? (
+          <Tag color="green" className="text-[10px] font-medium">Active</Tag>
+        ) : (
+          <Tag className="text-[10px] font-medium text-zinc-400">Inactive</Tag>
+        ),
     },
     {
-      title: "Last updated",
+      title: colTitle("Last updated"),
       dataIndex: "lastModifiedDateTime",
       key: "lastModifiedDateTime",
-      width: 220,
-      render: (v: string) => v ?? "—",
+      width: 210,
+      render: (v: string) => <span className="text-zinc-400 text-xs">{v ?? "—"}</span>,
     },
     {
-      title: "Actions",
+      title: colTitle("Actions"),
       key: "actions",
       width: 260,
       render: (_: unknown, record: WorkflowEntitySettingRow) => (
@@ -164,16 +173,22 @@ const ApplicationList = () => {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className="p-8 bg-slate-50 min-h-full">
+    <Flex vertical gap="large" flex={1} className="p-8 bg-zinc-50 min-h-full">
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
-        <Typography.Title level={3} className="!mb-0 text-slate-800">
-          Applications
-        </Typography.Title>
+        <div>
+          <Typography.Title level={4} className="!mb-0 !text-zinc-900 !font-semibold tracking-tight">
+            Applications
+          </Typography.Title>
+          <Typography.Text className="text-xs text-zinc-400">
+            Manage and configure workflow applications
+          </Typography.Text>
+        </div>
         <Space>
           <Input.Search
-            placeholder="Search by application name"
+            placeholder="Search application name"
             allowClear
-            style={{ width: 280 }}
+            size="middle"
+            style={{ width: 260 }}
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setSearch(e.target.value)
@@ -184,8 +199,9 @@ const ApplicationList = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={openCreateDialog}
+            className="font-medium"
           >
-            Create application
+            New application
           </Button>
         </Space>
       </Flex>
@@ -197,6 +213,7 @@ const ApplicationList = () => {
           }
           columns={columns}
           dataSource={data?.content ?? []}
+          size="middle"
           pagination={{
             current: page + 1,
             pageSize,
@@ -204,7 +221,10 @@ const ApplicationList = () => {
             showSizeChanger: false,
             onChange: (p: number) => setPage(p - 1),
           }}
-          className="bg-white rounded-lg shadow-sm"
+          className="bg-white rounded-lg shadow-sm border border-zinc-200"
+          rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
+            index % 2 === 1 ? "bg-zinc-50" : ""
+          }
         />
       </Spin>
 

@@ -1,11 +1,10 @@
 import React from "react";
-import { Drawer, Typography, Empty } from "antd";
+import { Drawer, Empty } from "antd";
 import { Node } from "@xyflow/react";
 import { Plugin } from "@/types/plugins";
 import HttpCallForm from "./forms/HttpCallForm";
 import LogicForm from "./forms/LogicForm";
 import { type PluginFormData } from "@/routes/workflows/-components/worflow-canvas/hooks/useWorkflowForm";
-const { Title } = Typography;
 
 export type WorkflowDrawerProps = {
   open: boolean;
@@ -54,17 +53,31 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
   return (
     <Drawer
       title={
-        <Title level={4}>
-          {selectedNode
-            ? `Configure: ${selectedNode.data?.label || "Unnamed Node"}`
-            : "Node Configuration"}
-        </Title>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
+            Node Configuration
+          </span>
+          <span className="text-sm font-semibold text-zinc-900 leading-tight">
+            {selectedNode
+              ? (String(selectedNode.data?.label || "Unnamed Node"))
+              : "Select a node"}
+          </span>
+        </div>
       }
       placement="right"
       onClose={onClose}
       open={open}
-      width={400}
+      width={420}
       className="pb-20"
+      styles={{
+        header: {
+          borderBottom: "1px solid #E4E4E7",
+          padding: "12px 16px",
+        },
+        body: {
+          padding: "16px",
+        },
+      }}
     >
       {renderForm()}
     </Drawer>

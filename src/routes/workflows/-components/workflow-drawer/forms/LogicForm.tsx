@@ -52,7 +52,7 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
       </Form.Item>
 
       <div className="mb-2">
-        <Typography.Title level={5} className="!mb-1">Trigger Rules</Typography.Title>
+        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Trigger Rules</p>
         <Typography.Text type="secondary" className="text-xs block mb-2">
           All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
         </Typography.Text>
@@ -87,8 +87,8 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
       </div>
 
       {/* Section 2 — Logic Configuration */}
-      <div className="border border-gray-100 rounded-lg p-3 bg-gray-50 mt-2">
-        <Typography.Title level={5} className="!mb-3">Logic Configuration</Typography.Title>
+      <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50 mt-2">
+        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">Logic Configuration</p>
         <Form.Item
           name="provider"
           label="Provider"

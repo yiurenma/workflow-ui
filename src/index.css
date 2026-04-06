@@ -43,17 +43,66 @@
 }
 
 .handle-style {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background-size: cover;
-  background-color: var(--color-sky-500);
+  background-color: #94A3B8;
   background-position: center;
   background-image: url("../src/assets/svg/plus.svg");
+  border: 1.5px solid #ffffff;
+  border-radius: 50%;
 }
 
+.handle-style:hover {
+  background-color: #4F46E5;
+  transform: scale(1.25);
+  transition: all 0.15s ease;
+}
+
+/* Tighten Ant Design letter-spacing globally */
 body {
   margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Refine Ant Design table headers */
+.ant-table-thead > tr > th {
+  background: #FAFAFA !important;
+  border-bottom: 1px solid #E4E4E7 !important;
+}
+
+/* Refine Ant Design drawer */
+.ant-drawer-header {
+  background: #FAFAFA !important;
+}
+
+/* React Flow minimap refinement */
+.react-flow__minimap {
+  border: 1px solid #E4E4E7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* React Flow controls refinement */
+.react-flow__controls {
+  border: 1px solid #E4E4E7 !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+
+.react-flow__controls-button {
+  border-bottom: 1px solid #E4E4E7 !important;
+  background: #ffffff !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #F4F4F5 !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
 }

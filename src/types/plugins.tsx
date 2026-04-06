@@ -18,6 +18,16 @@ export enum Plugin {
   FUNCTION_V3 = "Function_V3",
 }
 
+/** Professional display labels shown in the UI — keys are Plugin enum values */
+export const PluginDisplayName: Record<Plugin, string> = {
+  [Plugin.CONSUMER]: "HTTP Fetch",
+  [Plugin.CONSUMER_WITHOUT_ERROR]: "Safe Fetch",
+  [Plugin.MESSAGE]: "Dispatch",
+  [Plugin.IF_ELSE]: "Condition",
+  [Plugin.FUNCTION]: "Transform",
+  [Plugin.FUNCTION_V3]: "Transform+",
+};
+
 export type BaseNodeData = {
   label: string;
   color?: string;
@@ -43,21 +53,27 @@ export const PluginMetadataMap: Record<
 > = {
   [Plugin.CONSUMER]: {
     icon: <CloudDownloadOutlined />,
+    color: "#3B82F6",
   },
   [Plugin.MESSAGE]: {
     icon: <SendOutlined />,
+    color: "#7C3AED",
   },
   [Plugin.IF_ELSE]: {
     icon: <BranchesOutlined />,
+    color: "#D97706",
   },
   [Plugin.FUNCTION]: {
     icon: <CodeOutlined />,
+    color: "#059669",
   },
   [Plugin.CONSUMER_WITHOUT_ERROR]: {
     icon: <SafetyCertificateOutlined />,
+    color: "#0D9488",
   },
   [Plugin.FUNCTION_V3]: {
     icon: <ThunderboltOutlined />,
+    color: "#0891B2",
   },
 };
 
@@ -67,7 +83,7 @@ export type PluginMenu = {
   icon: React.ReactNode;
   children: {
     key: Plugin;
-    label: Plugin;
+    label: string;
     icon: React.ReactNode;
   }[];
 };
@@ -76,7 +92,7 @@ export type PluginMenuGroup = PluginMenu[];
 
 export const getPluginMenuList = (): PluginMenuGroup => {
   const group: PluginMenu = {
-    label: "Basic",
+    label: "Nodes",
     key: "basic",
     icon: <FolderOutlined />,
     children: [],
@@ -85,7 +101,7 @@ export const getPluginMenuList = (): PluginMenuGroup => {
   Object.values(Plugin).forEach((plugin) => {
     group.children.push({
       key: plugin,
-      label: plugin,
+      label: PluginDisplayName[plugin],
       icon: PluginMetadataMap[plugin].icon,
     });
   });
