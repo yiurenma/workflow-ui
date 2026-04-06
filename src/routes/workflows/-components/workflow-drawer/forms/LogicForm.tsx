@@ -3,6 +3,8 @@ import { Form, Input, Button, Space, Typography } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowType, BackendWorkflowRule } from "@/api/types/operation";
+import NodeSection from "../NodeSection";
+import { useJsonFormat } from "../useJsonFormat";
 
 export type LogicFormValues = {
   description?: string;
@@ -20,6 +22,7 @@ type LogicFormProps = {
 
 const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) => {
   const [form] = Form.useForm<LogicFormValues>();
+  const formatOnBlur = useJsonFormat(form, onValuesChange);
 
   useEffect(() => {
     if (selectedNode?.data) {
@@ -42,17 +45,20 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
 
   return (
     <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
-      {/* Section 1 — Node Identity */}
-      <Form.Item
-        name="description"
-        label="Step Name"
-        tooltip="The name displayed on the canvas node. Keep it short and descriptive."
-      >
-        <Input placeholder="Step description (shown as node label)" />
-      </Form.Item>
 
-      <div className="mb-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Trigger Rules</p>
+      {/* Panel 1 — Node Description */}
+      <NodeSection title="Node Description">
+        <Form.Item
+          name="description"
+          label="Step Name"
+          tooltip="The name displayed on the canvas node. Keep it short and descriptive."
+        >
+          <Input placeholder="Step description (shown as node label)" />
+        </Form.Item>
+      </NodeSection>
+
+      {/* Panel 2 — Rules */}
+      <NodeSection title="Rules">
         <Typography.Text type="secondary" className="text-xs block mb-2">
           All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
         </Typography.Text>
@@ -84,11 +90,10 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
             </>
           )}
         </Form.List>
-      </div>
+      </NodeSection>
 
-      {/* Section 2 — Logic Configuration */}
-      <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50 mt-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">Logic Configuration</p>
+      {/* Panel 3 — Action */}
+      <NodeSection title="Action" variant="inset">
         <Form.Item
           name="provider"
           label="Provider"
@@ -111,9 +116,15 @@ const LogicForm: React.FC<LogicFormProps> = ({ selectedNode, onValuesChange }) =
           label="Logic / Payload"
           tooltip='For IF_ELSE: JSON object to merge into the runtime payload when the rule matches. e.g. {"messageInformation": {"channel": "SMS"}}. For FUNCTION_V2/V3: JSON FunctionObject defining the Java class and method to call.'
         >
-          <Input.TextArea rows={12} placeholder='{"key": "value"}' className="font-mono text-xs" />
+          <Input.TextArea
+            rows={12}
+            placeholder='{"key": "value"}'
+            className="font-mono text-xs"
+            onBlur={formatOnBlur("elseLogic")}
+          />
         </Form.Item>
-      </div>
+      </NodeSection>
+
     </Form>
   );
 };

@@ -3,6 +3,8 @@ import { Form, Input, Select, Button, Space, Typography } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
+import NodeSection from "../NodeSection";
+import { useJsonFormat } from "../useJsonFormat";
 
 export type HttpCallFormValues = {
   description?: string;
@@ -25,6 +27,7 @@ type HttpCallFormProps = {
 
 const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChange }) => {
   const [form] = Form.useForm<HttpCallFormValues>();
+  const formatOnBlur = useJsonFormat(form, onValuesChange);
 
   useEffect(() => {
     if (selectedNode?.data) {
@@ -52,17 +55,20 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
 
   return (
     <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
-      {/* Section 1 — Node Identity */}
-      <Form.Item
-        name="description"
-        label="Step Name"
-        tooltip="The name displayed on the canvas node. Keep it short and descriptive."
-      >
-        <Input placeholder="Step description (shown as node label)" />
-      </Form.Item>
 
-      <div className="mb-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Trigger Rules</p>
+      {/* Panel 1 — Node Description */}
+      <NodeSection title="Node Description">
+        <Form.Item
+          name="description"
+          label="Step Name"
+          tooltip="The name displayed on the canvas node. Keep it short and descriptive."
+        >
+          <Input placeholder="Step description (shown as node label)" />
+        </Form.Item>
+      </NodeSection>
+
+      {/* Panel 2 — Rules */}
+      <NodeSection title="Rules">
         <Typography.Text type="secondary" className="text-xs block mb-2">
           All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
         </Typography.Text>
@@ -94,11 +100,10 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
             </>
           )}
         </Form.List>
-      </div>
+      </NodeSection>
 
-      {/* Section 2 — HTTP Configuration */}
-      <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50 mt-2">
-        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">HTTP Configuration</p>
+      {/* Panel 3 — Action */}
+      <NodeSection title="Action" variant="inset">
         <Form.Item
           name="provider"
           label="Provider Name"
@@ -142,23 +147,36 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
           label="Request Headers"
           tooltip='JSON object of HTTP headers. e.g. {"Authorization": "Bearer token", "Content-Type": "application/json"}'
         >
-          <Input.TextArea rows={3} placeholder='{"Content-Type": "application/json"}' />
+          <Input.TextArea
+            rows={3}
+            placeholder='{"Content-Type": "application/json"}'
+            onBlur={formatOnBlur("httpRequestHeaders")}
+          />
         </Form.Item>
         <Form.Item
           name="httpRequestBody"
           label="Request Body"
           tooltip='JSON body template. Use <<<$.field>>> to inject runtime values. e.g. {"customerId": "<<<$.messageInformation.customerId>>>"}'
         >
-          <Input.TextArea rows={5} placeholder="Request body template" />
+          <Input.TextArea
+            rows={5}
+            placeholder="Request body template"
+            onBlur={formatOnBlur("httpRequestBody")}
+          />
         </Form.Item>
         <Form.Item
           name="trackingNumberSchemaInHttpResponse"
           label="Response Extraction Schema"
           tooltip='JSON template to extract values from the HTTP response. Use <<<$.field>>> JSONPath. e.g. {"reference": "<<<$.data.id>>>"}. Leave as {} to skip extraction.'
         >
-          <Input.TextArea rows={3} placeholder="JSONPath or schema to extract from response" />
+          <Input.TextArea
+            rows={3}
+            placeholder="JSONPath or schema to extract from response"
+            onBlur={formatOnBlur("trackingNumberSchemaInHttpResponse")}
+          />
         </Form.Item>
-      </div>
+      </NodeSection>
+
     </Form>
   );
 };
