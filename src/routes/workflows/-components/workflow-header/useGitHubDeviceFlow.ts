@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 // Public OAuth App client_id — safe to commit (not a secret).
 // Replace with your GitHub OAuth App client_id before deploying.
-const GITHUB_OAUTH_CLIENT_ID = "Ov23liplaceholder00001";
+const GITHUB_OAUTH_CLIENT_ID = "Ov23liEP6mlAmOUsuVCn";
 
 const DEVICE_CODE_URL = "https://github.com/login/device/code";
 const ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
