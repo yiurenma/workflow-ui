@@ -1,4 +1,4 @@
-import { useEntitySettings, useDeleteApplication } from "@/api/hooks/workflow";
+import { useEntitySettings, useDeleteApplication, useAutoCopyWorkflow } from "@/api/hooks/workflow";
 import {
   useWorkflowDialog,
   WorkflowDialogProvider,
@@ -38,6 +38,9 @@ const ApplicationList = () => {
   const [historyTarget, setHistoryTarget] = useState<string | null>(null);
   const { openCreateDialog } = useWorkflowDialog();
   const deleteApplication = useDeleteApplication();
+  const autoCopyWorkflow = useAutoCopyWorkflow();
+  const [copySource, setCopySource] = useState<string | null>(null);
+  const [copyTargetName, setCopyTargetName] = useState("");
 
   const params = useMemo(
     () => ({
@@ -124,6 +127,16 @@ const ApplicationList = () => {
           </Button>
           <Button
             type="link"
+            className="px-0"
+            onClick={() => {
+              setCopySource(record.applicationName);
+              setCopyTargetName("");
+            }}
+          >
+            Copy
+          </Button>
+          <Button
+            type="link"
             danger
             className="px-0"
             onClick={() => {
@@ -206,6 +219,42 @@ const ApplicationList = () => {
         applicationName={historyTarget}
         onClose={() => setHistoryTarget(null)}
       />
+
+      <Modal
+        title="Copy workflow"
+        open={copySource !== null}
+        okText="Copy"
+        confirmLoading={autoCopyWorkflow.isPending}
+        onCancel={() => setCopySource(null)}
+        onOk={async () => {
+          if (!copySource) return;
+          try {
+            await autoCopyWorkflow.mutateAsync({
+              fromApplicationName: copySource,
+              toApplicationName: copyTargetName.trim(),
+            });
+            message.success("Workflow copied successfully");
+            setCopySource(null);
+          } catch (err: unknown) {
+            const error = err as { errorInfo?: { code: string; detail?: { cause?: string } }[] };
+            const cause = error?.errorInfo?.[0]?.detail?.cause;
+            message.error(cause ?? "Copy failed");
+          }
+        }}
+      >
+        <Flex vertical gap="small">
+          <Typography.Text>
+            Copy from: <strong>{copySource}</strong>
+          </Typography.Text>
+          <Input
+            placeholder="Target application name"
+            value={copyTargetName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCopyTargetName(e.target.value)
+            }
+          />
+        </Flex>
+      </Modal>
     </Flex>
   );
 };

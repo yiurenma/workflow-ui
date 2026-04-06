@@ -114,3 +114,19 @@ export const useWorkflowRecordDetail = (id: number | null) => {
     enabled: id != null,
   });
 };
+
+export const useAutoCopyWorkflow = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      fromApplicationName,
+      toApplicationName,
+    }: {
+      fromApplicationName: string;
+      toApplicationName: string;
+    }) => operationApi.autoCopyWorkflow(fromApplicationName, toApplicationName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.apps() });
+    },
+  });
+};

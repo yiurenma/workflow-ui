@@ -131,4 +131,15 @@ export const operationApi = {
     if (!response.ok) return handleApiError(response);
     return response.json();
   },
+
+  autoCopyWorkflow: async (
+    fromApplicationName: string,
+    toApplicationName: string
+  ): Promise<void> => {
+    const sp = new URLSearchParams({ fromApplicationName, toApplicationName });
+    const response = await json(`/workflow/autoCopy?${sp.toString()}`, {
+      method: 'POST',
+    });
+    if (!response.ok) return handleApiError(response);
+  },
 };
