@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, Select, Button, Space, Typography } from "antd";
+import { Form, Input, Select, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
@@ -57,7 +57,11 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
     <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
 
       {/* Panel 1 — Node Description */}
-      <NodeSection title="Node Description">
+      <NodeSection
+        title="Node Description"
+        subtitle="The name shown on the canvas. What is this step called?"
+        headingTooltip="Persisted as: plugin.description"
+      >
         <Form.Item
           name="description"
           label="Step Name"
@@ -68,10 +72,11 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
       </NodeSection>
 
       {/* Panel 2 — Rules */}
-      <NodeSection title="Rules">
-        <Typography.Text type="secondary" className="text-xs block mb-2">
-          All rules must match for this step to execute. Use JSONPath expressions against the runtime payload.
-        </Typography.Text>
+      <NodeSection
+        title="Rules"
+        subtitle="Run only when… — conditions that must all match before this step executes."
+        headingTooltip="Persisted as: plugin.ruleList[].key + ruleList[].remark"
+      >
         <Form.List name="ruleList">
           {(fields, { add, remove }) => (
             <>
@@ -103,7 +108,12 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
       </NodeSection>
 
       {/* Panel 3 — Action */}
-      <NodeSection title="Action" variant="inset">
+      <NodeSection
+        title="Action"
+        variant="inset"
+        subtitle="What the system does when this step runs."
+        headingTooltip="Persisted as: plugin.action (type, provider, httpRequest*, elseLogic, …)"
+      >
         <Form.Item
           name="provider"
           label="Provider Name"
