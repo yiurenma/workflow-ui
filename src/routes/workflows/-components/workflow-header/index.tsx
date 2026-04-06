@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BulbOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
 import { Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
@@ -17,6 +17,89 @@ type WorkflowHeaderProps = {
 
 const defaultRunBody = `{\n  "messageInformation": {}\n}`;
 
+const AI_TOKEN_KEY = "ai_explain_token";
+
+function buildExplainPrompt(applicationName: string, workFlow: WorkFlow): string {
+  const steps = (workFlow.pluginList ?? []).map((plugin, i) => {
+    const type = plugin.action?.type ?? "UNKNOWN";
+    const desc = plugin.description ?? `Step ${i + 1}`;
+    const rulesCount = plugin.ruleList?.length ?? 0;
+    const linkingId = plugin.linkingIdOfRuleListAndAction ?? "";
+    const url = plugin.action?.httpRequestUrlWithQueryParameter
+      ? JSON.stringify(plugin.action.httpRequestUrlWithQueryParameter)
+      : null;
+    return `  ${i + 1}. [${type}] ${desc} (linkingId: ${linkingId}, rules: ${rulesCount})${url ? ` → ${url}` : ""}`;
+  });
+
+  return `You are an expert software architect. Explain the following workflow pipeline clearly and concisely for a developer.
+
+Application: "${applicationName}"
+Total steps: ${steps.length}
+
+Steps:
+${steps.join("\n") || "  (no steps configured yet)"}
+
+Provide:
+1. A 1-sentence summary of what this workflow does end-to-end
+2. A brief description of each step and its role in the pipeline
+3. How data flows through the steps (what gets enriched or transformed)
+4. Any notable patterns or potential concerns you observe
+
+Be concise — use plain language, no jargon. Format with numbered sections.`;
+}
+
+async function callAI(token: string, prompt: string): Promise<string> {
+  // Detect token type by prefix
+  const isAnthropic = token.startsWith("sk-ant-");
+  const isGitHub = token.startsWith("ghp_") || token.startsWith("ghu_") || token.startsWith("ghs_");
+
+  if (isAnthropic) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": token,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Anthropic API error ${res.status}: ${err}`);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text ?? "(no response)";
+  }
+
+  if (isGitHub) {
+    const res = await fetch("https://models.inference.ai.azure.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1024,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`GitHub Models API error ${res.status}: ${err}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "(no response)";
+  }
+
+  throw new Error("Unrecognised token format. Use an Anthropic key (sk-ant-…) or a GitHub token (ghp_… / ghu_…).");
+}
+
 const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   applicationName,
   workFlow,
@@ -29,6 +112,13 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [confirmationNumber, setConfirmationNumber] = useState("test-confirmation");
   const [runResult, setRunResult] = useState<string | null>(null);
   const [runLoading, setRunLoading] = useState(false);
+
+  // Explain state
+  const [explainOpen, setExplainOpen] = useState(false);
+  const [explainLoading, setExplainLoading] = useState(false);
+  const [explainResult, setExplainResult] = useState<string | null>(null);
+  const [tokenInput, setTokenInput] = useState("");
+  const [tokenPromptOpen, setTokenPromptOpen] = useState(false);
 
   const saveFlow = async () => {
     if (!workFlow) {
@@ -76,6 +166,54 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
     }
   };
 
+  const explainFlow = () => {
+    const token = localStorage.getItem(AI_TOKEN_KEY);
+    if (!token) {
+      setTokenInput("");
+      setTokenPromptOpen(true);
+      return;
+    }
+    runExplain(token);
+  };
+
+  const saveTokenAndExplain = () => {
+    const t = tokenInput.trim();
+    if (!t) {
+      message.error("Please enter a token");
+      return;
+    }
+    localStorage.setItem(AI_TOKEN_KEY, t);
+    setTokenPromptOpen(false);
+    runExplain(t);
+  };
+
+  const runExplain = async (token: string) => {
+    const current = onSave ? onSave() : workFlow;
+    if (!current) {
+      message.error("No workflow data available");
+      return;
+    }
+    setExplainResult(null);
+    setExplainOpen(true);
+    setExplainLoading(true);
+    try {
+      const prompt = buildExplainPrompt(applicationName, current);
+      const result = await callAI(token, prompt);
+      setExplainResult(result);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setExplainResult(`Error: ${msg}`);
+      message.error("AI explain failed");
+    } finally {
+      setExplainLoading(false);
+    }
+  };
+
+  const clearToken = () => {
+    localStorage.removeItem(AI_TOKEN_KEY);
+    message.info("AI token cleared");
+  };
+
   return (
     <>
       <Flex
@@ -96,6 +234,15 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
           </div>
         </Space>
         <Space size={"small"}>
+          <Button
+            size="small"
+            icon={<BulbOutlined />}
+            onClick={explainFlow}
+            disabled={isLoading}
+            className="text-xs font-medium text-amber-600 border-amber-300 hover:border-amber-400 hover:text-amber-700"
+          >
+            Explain
+          </Button>
           <Button size="small" onClick={() => runFlow()} disabled={isLoading}
             className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
             Run
@@ -112,6 +259,60 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
           </Button>
         </Space>
       </Flex>
+
+      {/* Token setup modal */}
+      <Modal
+        title="Set AI Token"
+        open={tokenPromptOpen}
+        onCancel={() => setTokenPromptOpen(false)}
+        onOk={saveTokenAndExplain}
+        okText="Save & Explain"
+        width={480}
+      >
+        <Typography.Paragraph type="secondary" className="text-sm">
+          Enter an <strong>Anthropic API key</strong> (<code>sk-ant-…</code>) or a{" "}
+          <strong>GitHub personal access token</strong> (<code>ghp_…</code> / <code>ghu_…</code>)
+          with GitHub Models access. Stored in <code>localStorage</code> — never sent to this server.
+        </Typography.Paragraph>
+        <Input.Password
+          placeholder="sk-ant-… or ghp_…"
+          value={tokenInput}
+          onChange={(e) => setTokenInput(e.target.value)}
+          onPressEnter={saveTokenAndExplain}
+          autoFocus
+        />
+      </Modal>
+
+      {/* Explain result modal */}
+      <Modal
+        title={
+          <Space>
+            <BulbOutlined className="text-amber-500" />
+            <span>AI Workflow Explainer — {applicationName}</span>
+          </Space>
+        }
+        open={explainOpen}
+        onCancel={() => setExplainOpen(false)}
+        footer={
+          <Space>
+            <Button size="small" onClick={clearToken} type="text" className="text-zinc-400 text-xs">
+              Clear token
+            </Button>
+            <Button onClick={() => setExplainOpen(false)}>Close</Button>
+          </Space>
+        }
+        width={680}
+      >
+        {explainLoading ? (
+          <div className="py-10 text-center text-zinc-400 text-sm">
+            Analysing workflow with AI…
+          </div>
+        ) : explainResult ? (
+          <pre className="whitespace-pre-wrap text-sm text-zinc-700 leading-relaxed font-sans">
+            {explainResult}
+          </pre>
+        ) : null}
+      </Modal>
 
       <Modal
         title="Run against Online API"
