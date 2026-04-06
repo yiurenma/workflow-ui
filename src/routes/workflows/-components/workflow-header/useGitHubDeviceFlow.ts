@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // Replace with your GitHub OAuth App client_id before deploying.
 const GITHUB_OAUTH_CLIENT_ID = "Ov23liEP6mlAmOUsuVCn";
 
-const DEVICE_CODE_URL = "https://github.com/login/device/code";
-const ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
+// Use app-origin proxy (Vercel rewrite + Vite dev server) so requests are same-origin and not blocked by CORS.
+const DEVICE_CODE_URL = "/api/proxy/github/login/device/code";
+const ACCESS_TOKEN_URL = "/api/proxy/github/login/oauth/access_token";
 const SCOPE = "read:user";
 const MAX_NETWORK_RETRIES = 3;
 

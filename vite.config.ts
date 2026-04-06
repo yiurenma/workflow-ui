@@ -32,6 +32,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api\/proxy\/online/, '/api'),
         },
+        // Same-origin proxy so GitHub OAuth device flow works in the browser (avoids CORS on github.com).
+        '/api/proxy/github': {
+          target: 'https://github.com',
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api\/proxy\/github/, ''),
+        },
       },
     },
   }
