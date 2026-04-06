@@ -7,7 +7,6 @@ import type {
   WorkFlow,
 } from '@/api/types/operation';
 
-const START = 'start-node';
 
 export function backendTypeToPlugin(t: string): Plugin {
   const u = (t || '').toUpperCase().replace(/-/g, '');
@@ -136,7 +135,7 @@ export function mergeCanvasIntoWorkFlow(
   const resultPlugins: BackendPlugin[] = [];
 
   for (const node of nodes) {
-    if (node.id === START) continue;
+    if (node.id === 'start-node') continue;
 
     const existing = prevPlugins.find(
       (p) => (p.uiMap as { id?: string } | undefined)?.id === node.id
@@ -178,7 +177,7 @@ export function mergeCanvasIntoWorkFlow(
   }
 
   const uiMapList = edges
-    .filter((e) => e.source !== START && e.target !== START)
+    .filter((e) => e.source !== 'start-node' && e.target !== 'start-node')
     .map((e) => ({
       animated: true,
       markerEnd: { type: 'arrowclosed' },

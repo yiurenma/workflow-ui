@@ -42,9 +42,6 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       case Plugin.FUNCTION_V3:
         return <LogicForm selectedNode={selectedNode} onValuesChange={onValuesChange} />;
 
-      case Plugin.START:
-        return <Empty description="START node has no configuration" />;
-
       default:
         return (
           <Empty

@@ -1,7 +1,6 @@
 import { Connection, Edge, useReactFlow, addEdge } from "@xyflow/react";
 import { useCallback } from "react";
 import { message } from "antd";
-import { Plugin } from "@/types/plugins";
 
 type UseWorkflowConnectionsProps = {
     setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void;
@@ -31,12 +30,6 @@ export const useWorkflowConnections = ({ setEdges }: UseWorkflowConnectionsProps
             const targetNode = getNode(connection.target as string);
 
             if (!sourceNode || !targetNode) {
-                return;
-            }
-
-            // Validation 2: Check if target is a Start node
-            if (targetNode.type === Plugin.START) {
-                message.error("Cannot connect to Start node");
                 return;
             }
 
