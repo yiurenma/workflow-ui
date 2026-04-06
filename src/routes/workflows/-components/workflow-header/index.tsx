@@ -25,6 +25,8 @@ function isValidToken(token: string | null): boolean {
   return (
     token.startsWith("sk-ant-") ||
     token.startsWith("ghp_") ||
+    token.startsWith("github_pat_") ||
+    token.startsWith("gho_") ||
     token.startsWith("ghu_") ||
     token.startsWith("ghs_")
   );
@@ -62,7 +64,12 @@ Be concise — use plain language, no jargon. Format with numbered sections.`;
 async function callAI(token: string, prompt: string): Promise<string> {
   // Detect token type by prefix
   const isAnthropic = token.startsWith("sk-ant-");
-  const isGitHub = token.startsWith("ghp_") || token.startsWith("ghu_") || token.startsWith("ghs_");
+  const isGitHub =
+    token.startsWith("ghp_") ||
+    token.startsWith("github_pat_") ||
+    token.startsWith("gho_") ||
+    token.startsWith("ghu_") ||
+    token.startsWith("ghs_");
 
   if (isAnthropic) {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -108,7 +115,9 @@ async function callAI(token: string, prompt: string): Promise<string> {
     return data.choices?.[0]?.message?.content ?? "(no response)";
   }
 
-  throw new Error("Unrecognised token format. Use an Anthropic key (sk-ant-…) or a GitHub token (ghp_… / ghu_…).");
+  throw new Error(
+    "Unrecognised token format. Use an Anthropic key (sk-ant-…) or a GitHub token (ghp_…, github_pat_…, gho_ from device login, ghu_…).",
+  );
 }
 
 const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
@@ -423,11 +432,12 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
       >
         <Typography.Paragraph type="secondary" className="text-sm">
           Enter an <strong>Anthropic API key</strong> (<code>sk-ant-…</code>) or a{" "}
-          <strong>GitHub personal access token</strong> (<code>ghp_…</code> / <code>ghu_…</code>)
-          with GitHub Models access. Stored in <code>localStorage</code> — never sent to this server.
+          <strong>GitHub token</strong> (PAT <code>ghp_…</code> / fine-grained <code>github_pat_…</code>, or{" "}
+          device-flow OAuth <code>gho_…</code>) with GitHub Models access. Stored in <code>localStorage</code> — never
+          sent to this server.
         </Typography.Paragraph>
         <Input.Password
-          placeholder="sk-ant-… or ghp_…"
+          placeholder="sk-ant-… or ghp_… / gho_…"
           value={tokenInput}
           onChange={(e) => setTokenInput(e.target.value)}
           onPressEnter={saveTokenAndExplain}
