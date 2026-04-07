@@ -16,10 +16,24 @@ export const test = base.extend({
 export { expect } from '@playwright/test';
 
 /**
+ * Get UK_DRFI_1 workflow as template
+ */
+async function getTemplateWorkflow(): Promise<any> {
+  const response = await fetch(`${OPERATION_API}/workflow?applicationName=UK_DRFI_1`);
+  if (response.ok) {
+    const data = await response.json();
+    return { pluginList: data.pluginList || [], uiMapList: data.uiMapList || [] };
+  }
+  return { pluginList: [], uiMapList: [] };
+}
+
+/**
  * Create a test application if it doesn't exist
  */
-async function createTestApplication(applicationName: string): Promise<void> {
+async function createTestApplication(applicationName: string, withWorkflow: boolean = false): Promise<void> {
   const url = `${OPERATION_API}/workflow?applicationName=${encodeURIComponent(applicationName)}`;
+
+  const workflow = withWorkflow ? await getTemplateWorkflow() : { pluginList: [], uiMapList: [] };
 
   try {
     const response = await fetch(url, {
@@ -27,10 +41,7 @@ async function createTestApplication(applicationName: string): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        pluginList: [],
-        uiMapList: [],
-      }),
+      body: JSON.stringify(workflow),
     });
 
     if (response.ok) {
@@ -50,11 +61,10 @@ async function createTestApplication(applicationName: string): Promise<void> {
  * Ensure required test applications exist in UAT
  */
 async function ensureTestApplications(): Promise<void> {
-  const testApps = [
-    'E2E_TEST_APP_1',
-    'E2E_TEST_APP_2',
-    'E2E_TEST_APP_3',
-  ];
+  // Create apps with empty workflow for basic tests
+  await createTestApplication('E2E_TEST_APP_1', false);
+  await createTestApplication('E2E_TEST_APP_2', false);
 
-  await Promise.all(testApps.map(app => createTestApplication(app)));
+  // Create app with UK_DRFI_1 workflow for canvas/node editor tests
+  await createTestApplication('E2E_TEST_CANVAS', true);
 }
