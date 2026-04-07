@@ -12,7 +12,8 @@
     "build": "vite build",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node node_modules/@playwright/test/cli.js test"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
@@ -29,6 +30,7 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@eslint/js": "^9.21.0",
     "@tanstack/react-router-devtools": "^1.114.22",
     "@tanstack/router-plugin": "^1.114.22",

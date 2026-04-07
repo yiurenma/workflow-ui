@@ -322,15 +322,18 @@ const ApplicationList = () => {
               <div
                 key={String(record.id ?? record.applicationName)}
                 className="bg-white rounded-lg border border-zinc-200 shadow-sm px-4 py-3"
-                onClick={() =>
-                  navigate({
-                    to: "/workflows/$applicationName",
-                    params: { applicationName: record.applicationName },
-                  })
-                }
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 pr-3">
+                  {/* Navigation zone — only tapping the info area navigates */}
+                  <div
+                    className="flex-1 min-w-0 pr-3 cursor-pointer"
+                    onClick={() =>
+                      navigate({
+                        to: "/workflows/$applicationName",
+                        params: { applicationName: record.applicationName },
+                      })
+                    }
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-zinc-800 text-sm truncate">
                         {record.applicationName}
@@ -348,12 +351,13 @@ const ApplicationList = () => {
                       {record.lastModifiedDateTime ?? ""}
                     </span>
                   </div>
+                  {/* Actions zone — no navigate handler; ghost clicks stay here */}
                   <div className="flex items-center gap-1 shrink-0">
                     <Button
                       type="text"
                       size="small"
                       className="text-zinc-400 px-1"
-                      onClick={(e) => { e.stopPropagation(); setSettingsTarget(record); }}
+                      onClick={() => setSettingsTarget(record)}
                     >
                       Settings
                     </Button>
@@ -363,7 +367,6 @@ const ApplicationList = () => {
                         size="small"
                         icon={<EllipsisOutlined />}
                         className="text-zinc-400 px-1"
-                        onClick={(e) => e.stopPropagation()}
                       />
                     </Dropdown>
                     <RightOutlined className="text-zinc-300 text-xs" />
