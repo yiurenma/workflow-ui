@@ -6,6 +6,7 @@ import { useSaveWorkflow } from "@/api/hooks/workflow";
 import { onlineApi } from "@/api/services/online";
 import React, { useState } from "react";
 import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
+import { SimpleMarkdown } from "./SimpleMarkdown";
 
 const { TextArea } = Input;
 
@@ -32,33 +33,82 @@ function isValidToken(token: string | null): boolean {
   );
 }
 
+function truncate(value: unknown, maxLen = 500): string {
+  if (value === undefined || value === null) return "(none)";
+  const s = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+  return s.length > maxLen ? s.slice(0, maxLen) + " …[truncated]" : s;
+}
+
 function buildExplainPrompt(applicationName: string, workFlow: WorkFlow): string {
   const steps = (workFlow.pluginList ?? []).map((plugin, i) => {
-    const type = plugin.action?.type ?? "UNKNOWN";
+    const action = plugin.action;
+    const type = action?.type ?? "UNKNOWN";
     const desc = plugin.description ?? `Step ${i + 1}`;
-    const rulesCount = plugin.ruleList?.length ?? 0;
-    const linkingId = plugin.linkingIdOfRuleListAndAction ?? "";
-    const url = plugin.action?.httpRequestUrlWithQueryParameter
-      ? JSON.stringify(plugin.action.httpRequestUrlWithQueryParameter)
-      : null;
-    return `  ${i + 1}. [${type}] ${desc} (linkingId: ${linkingId}, rules: ${rulesCount})${url ? ` → ${url}` : ""}`;
+    const provider = action?.provider ?? "(none)";
+    const method = action?.httpRequestMethod ?? "";
+    const url = action?.httpRequestUrlWithQueryParameter
+      ? truncate(action.httpRequestUrlWithQueryParameter, 300)
+      : "";
+    const body = action?.httpRequestBody ? truncate(action.httpRequestBody) : "";
+    const elseLogic = action?.elseLogic ? truncate(action.elseLogic) : "";
+
+    const rulesBlock =
+      (plugin.ruleList ?? []).length === 0
+        ? "    (no rules — always executes)"
+        : (plugin.ruleList ?? [])
+            .map(
+              (r, ri) =>
+                `    ${ri + 1}. JSONPath: ${r.key ?? "(empty)"}${r.remark ? `\n       Meaning: ${r.remark}` : ""}`
+            )
+            .join("\n");
+
+    const actionBlock = [
+      `    type: ${type}`,
+      `    provider: ${provider}`,
+      method ? `    method: ${method}` : "",
+      url ? `    url: ${url}` : "",
+      body ? `    request body: ${body}` : "",
+      elseLogic ? `    logic/payload: ${elseLogic}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    return `### Step ${i + 1} — ${desc}
+
+  Rules (all must match for this step to execute):
+${rulesBlock}
+
+  Action:
+${actionBlock}`;
   });
 
-  return `You are an expert software architect. Explain the following workflow pipeline clearly and concisely for a developer.
+  return `You are an expert software architect. Explain the following workflow pipeline to a developer or business analyst.
 
 Application: "${applicationName}"
 Total steps: ${steps.length}
 
-Steps:
-${steps.join("\n") || "  (no steps configured yet)"}
+${steps.join("\n\n") || "  (no steps configured yet)"}
 
-Provide:
-1. A 1-sentence summary of what this workflow does end-to-end
-2. A brief description of each step and its role in the pipeline
-3. How data flows through the steps (what gets enriched or transformed)
-4. Any notable patterns or potential concerns you observe
+---
 
-Be concise — use plain language, no jargon. Format with numbered sections.`;
+Please provide the following, formatted in Markdown with ## headings and bullet lists:
+
+## Summary
+One sentence describing what this workflow does end-to-end.
+
+## Step-by-Step Explanation
+For each step:
+- Explain what it does in plain English
+- Explain what each **rule** means — what condition must be true for this step to run
+- Explain what the **action** does — what system it calls, what data it sends or transforms, what the payload/logic achieves
+
+## Data Flow
+How data flows through the steps — what gets enriched, transformed, or routed.
+
+## Observations
+Any notable patterns, potential concerns, or suggestions you notice.
+
+Use plain language. Avoid jargon. Format each step as a ## heading.`;
 }
 
 async function callAI(token: string, prompt: string): Promise<string> {
@@ -470,9 +520,9 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             Analysing workflow with AI…
           </div>
         ) : explainResult ? (
-          <pre className="whitespace-pre-wrap text-sm text-zinc-700 leading-relaxed font-sans">
-            {explainResult}
-          </pre>
+          <div className="max-h-[60vh] overflow-y-auto pr-1">
+            <SimpleMarkdown content={explainResult} />
+          </div>
         ) : null}
       </Modal>
 

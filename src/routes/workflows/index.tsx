@@ -304,11 +304,13 @@ const ApplicationList = () => {
           columns={columns}
           dataSource={data?.content ?? []}
           size="middle"
+          scroll={{ y: "calc(100vh - 320px)" }}
           pagination={{
             current: page + 1,
             pageSize,
             total: data?.totalElements ?? 0,
             showSizeChanger: false,
+            showTotal: (total: number) => `${total} total`,
             onChange: (p: number) => setPage(p - 1),
           }}
           className="bg-white rounded-lg shadow-sm border border-zinc-200"

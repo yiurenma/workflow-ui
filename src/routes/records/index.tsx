@@ -40,6 +40,7 @@ function RecordsPage() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [page, setPage] = useState(0);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [filters, setFilters] = useState<{
     applicationName?: string;
     overallStatus?: string;
@@ -136,13 +137,14 @@ function RecordsPage() {
           value={draft.overallStatus}
           onChange={(v) => setDraft((d) => ({ ...d, overallStatus: v }))}
         />
-        {!isMobile && (
+        {/* Extra filters — always shown on desktop; toggled via "More filters" on mobile */}
+        {(!isMobile || showMoreFilters) && (
           <>
             <Flex vertical gap={4}>
               <Typography.Text type="secondary" className="text-xs">Confirmation No.</Typography.Text>
               <Input
                 placeholder="Confirmation number"
-                style={{ width: 180 }}
+                style={isMobile ? undefined : { width: 180 }}
                 value={draft.transactionConfirmationNumber ?? ""}
                 onChange={(e) => setDraft((d) => ({ ...d, transactionConfirmationNumber: e.target.value || undefined }))}
               />
@@ -151,7 +153,7 @@ function RecordsPage() {
               <Typography.Text type="secondary" className="text-xs">Tracking No.</Typography.Text>
               <Input
                 placeholder="Tracking number"
-                style={{ width: 160 }}
+                style={isMobile ? undefined : { width: 160 }}
                 value={draft.trackingNumber ?? ""}
                 onChange={(e) => setDraft((d) => ({ ...d, trackingNumber: e.target.value || undefined }))}
               />
@@ -160,7 +162,7 @@ function RecordsPage() {
               <Typography.Text type="secondary" className="text-xs">Customer ID</Typography.Text>
               <Input
                 placeholder="Customer ID"
-                style={{ width: 140 }}
+                style={isMobile ? undefined : { width: 140 }}
                 value={draft.customerId ?? ""}
                 onChange={(e) => setDraft((d) => ({ ...d, customerId: e.target.value || undefined }))}
               />
@@ -169,7 +171,7 @@ function RecordsPage() {
               <Typography.Text type="secondary" className="text-xs">From</Typography.Text>
               <DatePicker
                 showTime
-                style={{ width: 180 }}
+                style={isMobile ? undefined : { width: 180 }}
                 value={draft.from ? dayjs(draft.from) : null}
                 onChange={(d) => setDraft((prev) => ({ ...prev, from: d ? d.toISOString() : undefined }))}
               />
@@ -178,7 +180,7 @@ function RecordsPage() {
               <Typography.Text type="secondary" className="text-xs">To</Typography.Text>
               <DatePicker
                 showTime
-                style={{ width: 180 }}
+                style={isMobile ? undefined : { width: 180 }}
                 value={draft.to ? dayjs(draft.to) : null}
                 onChange={(d) => setDraft((prev) => ({ ...prev, to: d ? d.toISOString() : undefined }))}
               />
@@ -186,6 +188,11 @@ function RecordsPage() {
           </>
         )}
         <Space>
+          {isMobile && (
+            <Button type="text" size="small" onClick={() => setShowMoreFilters((v) => !v)}>
+              {showMoreFilters ? "Fewer filters" : "More filters"}
+            </Button>
+          )}
           <Button type="primary" onClick={applyFilters}>Search</Button>
           <Button onClick={resetFilters}>Reset</Button>
         </Space>
@@ -270,10 +277,11 @@ function RecordsPage() {
             pageSize: PAGE_SIZE,
             total: data?.totalElements ?? 0,
             showSizeChanger: false,
+            showTotal: (total: number) => `${total} total`,
             onChange: (p) => setPage(p - 1),
           }}
           className="bg-white rounded-lg shadow-sm"
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1200, y: "calc(100vh - 360px)" }}
         />
         )}
       </Spin>
