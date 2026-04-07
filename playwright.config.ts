@@ -1,8 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Use the pre-installed Chromium binary (Playwright 1.56 browsers at rev 1194)
-const CHROMIUM_EXEC = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
@@ -11,9 +8,6 @@ export default defineConfig({
   use: {
     baseURL: 'https://workflow-ui-gamma.vercel.app',
     trace: 'on-first-retry',
-    launchOptions: {
-      executablePath: CHROMIUM_EXEC,
-    },
   },
   projects: [
     {
@@ -21,8 +15,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'Mobile Safari (via Chromium)',
-      use: { ...devices['iPhone 12'] },
+      name: 'Mobile Chrome',
+      use: {
+        ...devices['iPhone 12'],
+        // Use Chromium to simulate mobile, since WebKit is not supported on this platform
+      },
     },
   ],
 });
