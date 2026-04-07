@@ -11,6 +11,7 @@ import {
   Button,
   Flex,
   Input,
+  Pagination,
   Space,
   Spin,
   Table,
@@ -308,20 +309,26 @@ const ApplicationList = () => {
           columns={columns}
           dataSource={data?.content ?? []}
           size="middle"
-          pagination={{
-            current: page + 1,
-            pageSize,
-            total: data?.totalElements ?? 0,
-            showSizeChanger: false,
-            hideOnSinglePage: false,
-            showTotal: (total: number) => `${total} total`,
-            onChange: (p: number) => setPage(p - 1),
-          }}
+          pagination={false}
           className="bg-white rounded-lg shadow-sm border border-zinc-200"
           rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
             index % 2 === 1 ? "bg-zinc-50" : ""
           }
         />
+        <Flex justify="space-between" align="center" className="pt-2">
+          <Typography.Text className="text-xs text-zinc-400">
+            {data?.totalElements ?? 0} total
+          </Typography.Text>
+          <Pagination
+            current={page + 1}
+            pageSize={pageSize}
+            total={data?.totalElements ?? 0}
+            showSizeChanger={false}
+            hideOnSinglePage={false}
+            onChange={(p: number) => setPage(p - 1)}
+            size="small"
+          />
+        </Flex>
         )}
       </Spin>
 

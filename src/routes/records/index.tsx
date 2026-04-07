@@ -4,6 +4,7 @@ import {
   DatePicker,
   Flex,
   Input,
+  Pagination,
   Select,
   Space,
   Spin,
@@ -276,18 +277,24 @@ function RecordsPage() {
           rowKey={(r) => String(r.id)}
           columns={columns}
           dataSource={data?.content ?? []}
-          pagination={{
-            current: page + 1,
-            pageSize: PAGE_SIZE,
-            total: data?.totalElements ?? 0,
-            showSizeChanger: false,
-            hideOnSinglePage: false,
-            showTotal: (total: number) => `${total} total`,
-            onChange: (p) => setPage(p - 1),
-          }}
+          pagination={false}
           className="bg-white rounded-lg shadow-sm"
           scroll={{ x: 1200 }}
         />
+        <Flex justify="space-between" align="center" className="pt-2">
+          <Typography.Text className="text-xs text-slate-400">
+            {data?.totalElements ?? 0} total
+          </Typography.Text>
+          <Pagination
+            current={page + 1}
+            pageSize={PAGE_SIZE}
+            total={data?.totalElements ?? 0}
+            showSizeChanger={false}
+            hideOnSinglePage={false}
+            onChange={(p) => setPage(p - 1)}
+            size="small"
+          />
+        </Flex>
         )}
       </Spin>
     </Flex>
