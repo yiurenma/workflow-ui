@@ -4,7 +4,7 @@ test.describe('Node Editor (TC-NODE)', () => {
   test.beforeEach(async ({ page }) => {
     // Open the first available application's canvas
     await page.goto('/workflows/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const openBtn = page.getByRole('link', { name: 'Open' }).first();
     if (await openBtn.count() === 0) {
@@ -12,7 +12,7 @@ test.describe('Node Editor (TC-NODE)', () => {
       return;
     }
     await openBtn.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     // Wait for canvas to render
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
   });

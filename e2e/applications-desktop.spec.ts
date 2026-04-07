@@ -5,7 +5,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/workflows/');
     // Wait for the list to stabilise
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(searchInput).toBeVisible();
     await searchInput.fill('__unlikely_search_string__');
     await searchInput.press('Enter');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     // Either a result or empty state — no crash
     await expect(page.locator('body')).not.toBeEmpty();
   });
