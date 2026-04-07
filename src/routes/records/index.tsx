@@ -116,7 +116,7 @@ function RecordsPage() {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} bg-slate-50 min-h-full`}>
+    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} bg-slate-50 h-full overflow-y-auto`}>
       <Typography.Title level={3} className="!mb-0 text-slate-800">
         Execution Records
       </Typography.Title>
@@ -245,25 +245,29 @@ function RecordsPage() {
               <div className="text-center text-slate-400 py-8 text-sm">No records found</div>
             )}
             {/* Mobile pagination */}
-            {(data?.totalElements ?? 0) > PAGE_SIZE && (
-              <div className="flex justify-between items-center pt-2">
-                <Button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  size="small"
-                >
-                  Previous
-                </Button>
-                <span className="text-xs text-slate-400">
-                  Page {page + 1} of {Math.ceil((data?.totalElements ?? 0) / PAGE_SIZE)}
+            {(data?.totalElements ?? 0) > 0 && (
+              <div className="flex flex-col gap-1 pt-2">
+                <span className="text-xs text-slate-400 text-center">
+                  {data?.totalElements ?? 0} total · Page {page + 1} of {Math.max(1, Math.ceil((data?.totalElements ?? 0) / PAGE_SIZE))}
                 </span>
-                <Button
-                  disabled={(page + 1) * PAGE_SIZE >= (data?.totalElements ?? 0)}
-                  onClick={() => setPage((p) => p + 1)}
-                  size="small"
-                >
-                  Next
-                </Button>
+                {(data?.totalElements ?? 0) > PAGE_SIZE && (
+                  <div className="flex justify-between items-center">
+                    <Button
+                      disabled={page === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      size="small"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      disabled={(page + 1) * PAGE_SIZE >= (data?.totalElements ?? 0)}
+                      onClick={() => setPage((p) => p + 1)}
+                      size="small"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -281,7 +285,7 @@ function RecordsPage() {
             onChange: (p) => setPage(p - 1),
           }}
           className="bg-white rounded-lg shadow-sm"
-          scroll={{ x: 1200, y: "calc(100vh - 360px)" }}
+          scroll={{ x: 1200 }}
         />
         )}
       </Spin>

@@ -175,7 +175,7 @@ const ApplicationList = () => {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} bg-zinc-50 min-h-full`}>
+    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} bg-zinc-50 h-full overflow-y-auto`}>
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
         <div>
           <Typography.Title level={4} className="!mb-0 !text-zinc-900 !font-semibold tracking-tight">
@@ -274,25 +274,29 @@ const ApplicationList = () => {
               <div className="text-center text-zinc-400 py-8 text-sm">No applications found</div>
             )}
             {/* Mobile pagination */}
-            {(data?.totalElements ?? 0) > pageSize && (
-              <div className="flex justify-between items-center pt-2">
-                <Button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  size="small"
-                >
-                  Previous
-                </Button>
-                <span className="text-xs text-zinc-400">
-                  Page {page + 1} of {Math.ceil((data?.totalElements ?? 0) / pageSize)}
+            {(data?.totalElements ?? 0) > 0 && (
+              <div className="flex flex-col gap-1 pt-2">
+                <span className="text-xs text-zinc-400 text-center">
+                  {data?.totalElements ?? 0} total · Page {page + 1} of {Math.max(1, Math.ceil((data?.totalElements ?? 0) / pageSize))}
                 </span>
-                <Button
-                  disabled={(page + 1) * pageSize >= (data?.totalElements ?? 0)}
-                  onClick={() => setPage((p) => p + 1)}
-                  size="small"
-                >
-                  Next
-                </Button>
+                {(data?.totalElements ?? 0) > pageSize && (
+                  <div className="flex justify-between items-center">
+                    <Button
+                      disabled={page === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      size="small"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      disabled={(page + 1) * pageSize >= (data?.totalElements ?? 0)}
+                      onClick={() => setPage((p) => p + 1)}
+                      size="small"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -304,7 +308,6 @@ const ApplicationList = () => {
           columns={columns}
           dataSource={data?.content ?? []}
           size="middle"
-          scroll={{ y: "calc(100vh - 320px)" }}
           pagination={{
             current: page + 1,
             pageSize,
