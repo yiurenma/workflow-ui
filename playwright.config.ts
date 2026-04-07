@@ -18,7 +18,8 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: {
         ...devices['iPhone 12'],
-        // Use Chromium to simulate mobile, since WebKit is not supported on this platform
+        // Override to use Chromium instead of WebKit (not supported on this Mac)
+        browserName: 'chromium',
       },
     },
   ],

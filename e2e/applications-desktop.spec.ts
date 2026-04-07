@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 // These tests run in Desktop Chrome project (≥ 768 px)
 test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
@@ -6,6 +6,11 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await page.goto('/workflows/');
     // Wait for the list to stabilise
     await page.waitForLoadState('networkidle');
+    // Skip entire suite when running in a mobile viewport
+    const width = page.viewportSize()?.width ?? 1280;
+    if (width < 768) {
+      test.skip();
+    }
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {

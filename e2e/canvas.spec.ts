@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Canvas / Artboard (TC-CANVAS)', () => {
   test('TC-CANVAS-01 canvas loads for an application', async ({ page }) => {
