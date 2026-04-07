@@ -5,8 +5,8 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import tsconfigPaths from "vite-tsconfig-paths";
 import mockServer from 'vite-plugin-mock-dev-server';
 
-const RENDER_OPERATION = 'https://workflow-operation-api.onrender.com'
-const RENDER_ONLINE = 'https://workflow-online-api.onrender.com'
+const DO_OPERATION = 'https://workflow-operation-api-n9sbp.ondigitalocean.app'
+const DO_ONLINE    = 'https://workflow-online-api-nr3e4.ondigitalocean.app'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -23,12 +23,12 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api/proxy/operation': {
-          target: RENDER_OPERATION,
+          target: DO_OPERATION,
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api\/proxy\/operation/, '/api'),
         },
         '/api/proxy/online': {
-          target: RENDER_ONLINE,
+          target: DO_ONLINE,
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api\/proxy\/online/, '/api'),
         },

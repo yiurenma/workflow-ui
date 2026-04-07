@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/proxy/operation/(.*)",
-      "destination": "https://workflow-operation-api.onrender.com/api/$1"
+      "destination": "https://workflow-operation-api-n9sbp.ondigitalocean.app/api/$1"
     },
     {
       "source": "/api/proxy/online/(.*)",
-      "destination": "https://workflow-online-api.onrender.com/api/$1"
+      "destination": "https://workflow-online-api-nr3e4.ondigitalocean.app/api/$1"
     },
     {
       "source": "/api/proxy/github/(.*)",
