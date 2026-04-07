@@ -22,7 +22,7 @@ export const Route = createFileRoute("/records/")({
   component: RecordsPage,
 });
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 5;
 
 const OVERALL_STATUS_OPTIONS = [
   "INITIATION",
@@ -281,6 +281,7 @@ function RecordsPage() {
             pageSize: PAGE_SIZE,
             total: data?.totalElements ?? 0,
             showSizeChanger: false,
+            hideOnSinglePage: false,
             showTotal: (total: number) => `${total} total`,
             onChange: (p) => setPage(p - 1),
           }}

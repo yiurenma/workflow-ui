@@ -28,7 +28,7 @@ export const Route = createFileRoute("/workflows/")({
   component: RouteComponent,
 });
 
-const pageSize = 20;
+const pageSize = 5;
 
 const ApplicationList = () => {
   const navigate = useNavigate();
@@ -313,6 +313,7 @@ const ApplicationList = () => {
             pageSize,
             total: data?.totalElements ?? 0,
             showSizeChanger: false,
+            hideOnSinglePage: false,
             showTotal: (total: number) => `${total} total`,
             onChange: (p: number) => setPage(p - 1),
           }}
