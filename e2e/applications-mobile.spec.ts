@@ -1,10 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-// These tests run in the Mobile Safari project (iPhone 12 viewport)
+// Mobile card-view tests — skip automatically on desktop viewport (≥ 768px)
 test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/workflows/');
     await page.waitForLoadState('load');
+    // Skip entire suite when running in a desktop viewport
+    const width = page.viewportSize()?.width ?? 390;
+    if (width >= 768) {
+      test.skip();
+    }
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {

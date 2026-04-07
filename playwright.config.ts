@@ -9,7 +9,7 @@ export default defineConfig({
   retries: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
     launchOptions: {
       executablePath: CHROMIUM_EXEC,
@@ -20,7 +20,6 @@ export default defineConfig({
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: '**/applications-mobile.spec.ts',
     },
     {
       name: 'Mobile Chrome',
@@ -30,7 +29,6 @@ export default defineConfig({
         hasTouch: true,
         isMobile: true,
       },
-      testIgnore: '**/applications-desktop.spec.ts',
     },
   ],
 });
