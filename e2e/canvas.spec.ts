@@ -35,6 +35,11 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     expect(errors.filter(e => !e.includes('ResizeObserver'))).toHaveLength(0);
   });
 
+  test('TC-CANVAS-05 Straighten button is visible on canvas', async ({ page }) => {
+    await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /straighten/i })).toBeVisible({ timeout: 5000 });
+  });
+
   test('TC-CANVAS-04 canvas shows empty state when pluginList absent', async ({ page }) => {
     await page.route(
       (url) =>
