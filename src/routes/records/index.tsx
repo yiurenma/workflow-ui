@@ -247,28 +247,19 @@ function RecordsPage() {
             )}
             {/* Mobile pagination */}
             {(data?.totalElements ?? 0) > 0 && (
-              <div className="flex flex-col gap-1 pt-2">
-                <span className="text-xs text-slate-400 text-center">
-                  {data?.totalElements ?? 0} total · Page {page + 1} of {Math.max(1, Math.ceil((data?.totalElements ?? 0) / PAGE_SIZE))}
+              <div className="flex flex-col items-center gap-1 pt-2">
+                <span className="text-xs text-slate-400">
+                  {data?.totalElements ?? 0} total
                 </span>
-                {(data?.totalElements ?? 0) > PAGE_SIZE && (
-                  <div className="flex justify-between items-center">
-                    <Button
-                      disabled={page === 0}
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                      size="small"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      disabled={(page + 1) * PAGE_SIZE >= (data?.totalElements ?? 0)}
-                      onClick={() => setPage((p) => p + 1)}
-                      size="small"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
+                <Pagination
+                  current={page + 1}
+                  pageSize={PAGE_SIZE}
+                  total={data?.totalElements ?? 0}
+                  showSizeChanger={false}
+                  hideOnSinglePage={false}
+                  onChange={(p) => setPage(p - 1)}
+                  size="small"
+                />
               </div>
             )}
           </div>

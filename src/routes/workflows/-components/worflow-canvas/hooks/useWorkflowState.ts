@@ -53,12 +53,15 @@ export const useWorkflowState = ({
 
   useEffect(() => {
     if (workFlow != null) {
-      const mapped = workFlowToNodesAndEdges(workFlow);
-      setNodes(mapped.nodes);
-      setEdges(mapped.edges);
-    } else if (applicationName) {
-      setNodes([]);
-      setEdges([]);
+      try {
+        const mapped = workFlowToNodesAndEdges(workFlow);
+        setNodes(mapped.nodes);
+        setEdges(mapped.edges);
+      } catch (err) {
+        console.error('[WorkflowState] Failed to map workflow to nodes/edges:', err);
+        setNodes([]);
+        setEdges([]);
+      }
     } else {
       setNodes([]);
       setEdges([]);

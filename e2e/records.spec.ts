@@ -20,13 +20,7 @@ test.describe('Records list (TC-REC)', () => {
   });
 
   test('TC-REC-03 pagination visible', async ({ page }) => {
-    // Desktop: Ant Design Pagination component; Mobile: custom Previous/Next buttons
-    const hasPagination = await page.locator('.ant-pagination').first()
-      .waitFor({ state: 'visible', timeout: 8000 })
-      .then(() => true).catch(() => false);
-    const hasMobilePrev = await page.getByRole('button', { name: 'Previous' }).first()
-      .waitFor({ state: 'visible', timeout: 8000 })
-      .then(() => true).catch(() => false);
-    expect(hasPagination || hasMobilePrev).toBe(true);
+    const pagination = page.locator('.ant-pagination').first();
+    await expect(pagination).toBeVisible({ timeout: 8000 });
   });
 });

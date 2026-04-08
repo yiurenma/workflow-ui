@@ -7,6 +7,7 @@ import { onlineApi } from "@/api/services/online";
 import React, { useState } from "react";
 import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
 import { SimpleMarkdown } from "./SimpleMarkdown";
+import { JsonPathModal } from "./JsonPathModal";
 
 const { TextArea } = Input;
 
@@ -194,6 +195,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
 
   // GitHub OAuth Device Flow modal
   const [deviceFlowOpen, setDeviceFlowOpen] = useState(false);
+  const [jsonPathOpen, setJsonPathOpen] = useState(false);
 
   const handleOAuthSuccess = (token: string) => {
     localStorage.setItem(AI_TOKEN_KEY, token);
@@ -431,6 +433,13 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
           >
             Explain
           </Button>
+          <Button
+            size="small"
+            onClick={() => setJsonPathOpen(true)}
+            className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
+          >
+            JsonPath
+          </Button>
           <Button size="small" onClick={() => runFlow()} disabled={isLoading}
             className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
             Run
@@ -525,6 +534,8 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
           </div>
         ) : null}
       </Modal>
+
+      <JsonPathModal open={jsonPathOpen} onClose={() => setJsonPathOpen(false)} />
 
       <Modal
         title="Run against Online API"

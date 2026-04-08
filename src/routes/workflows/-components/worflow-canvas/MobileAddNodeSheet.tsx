@@ -1,9 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Drawer } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useReactFlow, Node } from "@xyflow/react";
 import { humanId } from "human-id";
 import { Plugin, PluginMetadataMap, PluginDisplayName, pluginMenuList } from "@/types/plugins";
+
+const FAB_POS_KEY = "workflow_canvas_fab_pos";
+const EDGE_MARGIN = 16;
+const FAB_SIZE = 48;
+
+function loadPos(): { x: number; y: number } {
+  try {
+    const raw = localStorage.getItem(FAB_POS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return { x: EDGE_MARGIN, y: window.innerHeight - 96 };
+}
 
 type MobileAddNodeSheetProps = {
   setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void;
@@ -11,6 +23,14 @@ type MobileAddNodeSheetProps = {
 
 export const MobileAddNodeSheet: React.FC<MobileAddNodeSheetProps> = ({ setNodes }) => {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(loadPos);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+    moved: boolean;
+  } | null>(null);
   const { screenToFlowPosition } = useReactFlow();
 
   const addNodeAtCenter = (pluginType: Plugin) => {
@@ -33,12 +53,55 @@ export const MobileAddNodeSheet: React.FC<MobileAddNodeSheetProps> = ({ setNodes
     setOpen(false);
   };
 
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: pos.x,
+      origY: pos.y,
+      moved: false,
+    };
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    if (!dragRef.current.moved && Math.abs(dx) + Math.abs(dy) >= 5) {
+      dragRef.current.moved = true;
+    }
+    setPos({ x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current) return;
+    const { moved } = dragRef.current;
+    dragRef.current = null;
+    if (!moved) {
+      setOpen(true);
+      return;
+    }
+    const w = window.innerWidth;
+    const snapX = e.clientX < w / 2 ? EDGE_MARGIN : w - EDGE_MARGIN - FAB_SIZE;
+    const snapY = Math.min(
+      Math.max(e.clientY - FAB_SIZE / 2, EDGE_MARGIN),
+      window.innerHeight - EDGE_MARGIN - FAB_SIZE
+    );
+    const newPos = { x: snapX, y: snapY };
+    setPos(newPos);
+    localStorage.setItem(FAB_POS_KEY, JSON.stringify(newPos));
+  };
+
   return (
     <>
-      {/* Floating + button */}
+      {/* Draggable floating + button */}
       <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-20 left-4 z-50 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center text-xl hover:bg-indigo-700 active:scale-95 transition-all"
+        style={{ position: "fixed", left: pos.x, top: pos.y, touchAction: "none" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        className="z-50 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center text-xl hover:bg-indigo-700 active:scale-95 transition-all"
         aria-label="Add node"
       >
         <PlusOutlined />
