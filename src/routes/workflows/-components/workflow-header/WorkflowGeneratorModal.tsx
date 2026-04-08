@@ -94,6 +94,15 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
         const end = cleaned.lastIndexOf("}");
         if (start !== -1 && end !== -1) cleaned = cleaned.slice(start, end + 1);
       }
+
+      // Truncation detection — response was cut off before the closing brace
+      if (!cleaned.trimEnd().endsWith("}")) {
+        throw new Error(
+          "The AI response was cut off before it finished (token limit reached). " +
+          "Try describing a simpler workflow with fewer steps, or break it into smaller parts."
+        );
+      }
+
       // Use JSON5 to parse — tolerates unquoted keys, trailing commas, comments
       const parsed = JSON5.parse(cleaned) as WorkFlow;
 

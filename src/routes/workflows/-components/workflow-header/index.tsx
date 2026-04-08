@@ -116,7 +116,7 @@ Any notable patterns, potential concerns, or suggestions you notice.
 Use plain language. Avoid jargon. Format each step as a ## heading.`;
 }
 
-async function callAI(token: string, prompt: string): Promise<string> {
+async function callAI(token: string, prompt: string, maxTokens = 1024): Promise<string> {
   // Detect token type by prefix
   const isAnthropic = token.startsWith("sk-ant-");
   const isGitHub =
@@ -137,7 +137,7 @@ async function callAI(token: string, prompt: string): Promise<string> {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1024,
+        max_tokens: maxTokens,
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -159,7 +159,7 @@ async function callAI(token: string, prompt: string): Promise<string> {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 1024,
+        max_tokens: maxTokens,
       }),
     });
     if (!res.ok) {
@@ -324,7 +324,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const callAIForGenerator = async (prompt: string): Promise<string> => {
     const token = localStorage.getItem(AI_TOKEN_KEY);
     if (!isValidToken(token)) throw new Error("No valid AI token");
-    return callAI(token!, prompt);
+    return callAI(token!, prompt, 8192);
   };
 
   const handleGeneratorNeedToken = () => {
