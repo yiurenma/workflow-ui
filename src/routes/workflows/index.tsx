@@ -403,17 +403,20 @@ const ApplicationList = () => {
           </div>
         ) : (
           <>
-            <Table<WorkflowEntitySettingRow>
-              rowKey={(r: WorkflowEntitySettingRow) => String(r.id ?? r.applicationName)}
-              columns={columns}
-              dataSource={data?.content ?? []}
-              size="middle"
-              pagination={false}
-              className="bg-white rounded-lg shadow-sm border border-zinc-200"
-              rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
-                index % 2 === 1 ? "bg-zinc-50" : ""
-              }
-            />
+            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+              <Table<WorkflowEntitySettingRow>
+                rowKey={(r: WorkflowEntitySettingRow) => String(r.id ?? r.applicationName)}
+                columns={columns}
+                dataSource={data?.content ?? []}
+                size="middle"
+                pagination={false}
+                className="bg-white rounded-lg shadow-sm border border-zinc-200"
+                style={{ minWidth: 700 }}
+                rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
+                  index % 2 === 1 ? "bg-zinc-50" : ""
+                }
+              />
+            </div>
             <Flex justify="space-between" align="center" className="pt-2">
               <Typography.Text className="text-xs text-zinc-400">
                 {data?.totalElements ?? 0} total
