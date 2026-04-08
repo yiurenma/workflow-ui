@@ -83,4 +83,15 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await page.getByRole('button', { name: 'Cancel' }).click();
     expect(page.url()).toBe(urlBefore);
   });
+
+  test('TC-APP-DESK-10 Settings modal shows Application Name rename field', async ({ page }) => {
+    const settingsBtn = page.getByRole('button', { name: 'Settings' }).first();
+    await settingsBtn.click();
+    const modal = page.locator('.ant-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    // The rename input must be present and pre-filled with current application name
+    const nameInput = modal.getByLabel(/application name/i);
+    await expect(nameInput).toBeVisible({ timeout: 3000 });
+    await expect(nameInput).not.toHaveValue('');
+  });
 });

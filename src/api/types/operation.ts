@@ -43,6 +43,7 @@ export interface EntitySettingPatch {
   defaultServiceAccount?: string;
   region?: string;
   retryProperties?: string;
+  newApplicationName?: string;
 }
 
 export interface WorkflowRecord {
