@@ -46,7 +46,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onGenerated: (workflow: WorkFlow) => void;
-  callAI: (prompt: string) => Promise<string>;
+  callAI: (prompt: string, onProgress?: (msg: string) => void) => Promise<string>;
   isTokenAvailable: boolean;
   onNeedToken: () => void;
 };
@@ -61,6 +61,7 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
 }) => {
   const [userPrompt, setUserPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("Generating…");
   const [rawResult, setRawResult] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
@@ -75,13 +76,14 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
     }
 
     setLoading(true);
+    setLoadingText("Generating…");
     setRawResult(null);
     setParseError(null);
 
     const fullPrompt = `${WORKFLOW_GENERATOR_SYSTEM_PROMPT}\n\nUser request:\n${userPrompt.trim()}`;
 
     try {
-      const result = await callAI(fullPrompt);
+      const result = await callAI(fullPrompt, (msg) => setLoadingText(msg));
       setRawResult(result);
 
       // Strip markdown code fences and extract the JSON object/array portion
@@ -141,7 +143,7 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
             disabled={loading}
             icon={loading ? <LoadingOutlined /> : <RobotOutlined />}
           >
-            {loading ? "Generating…" : "Generate"}
+            {loading ? loadingText : "Generate"}
           </Button>
         </Space>
       }
@@ -164,7 +166,13 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
             autoFocus
           />
         </div>
-        {!isTokenAvailable && (
+        {loading && loadingText !== "Generating…" && (
+          <Typography.Text className="text-xs text-indigo-500">
+            <LoadingOutlined className="mr-1" />
+            {loadingText}
+          </Typography.Text>
+        )}
+        {!isTokenAvailable && !loading && (
           <Typography.Text type="warning" className="text-xs">
             No AI token saved — clicking Generate will prompt you to log in with GitHub or paste a token.
           </Typography.Text>
