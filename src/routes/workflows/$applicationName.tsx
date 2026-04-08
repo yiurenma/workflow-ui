@@ -27,12 +27,17 @@ function RouteComponent() {
   }
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
-  const { data: workFlow, isLoading, isError } =
-    useWorkflowQuery(applicationName);
+  const { data: workFlow, isLoading, isError } = useWorkflowQuery(applicationName);
+
+  // Generated workflow overrides the server-fetched one on the canvas
+  const [generatedWorkflow, setGeneratedWorkflow] = useState<WorkFlow | null>(null);
 
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
   const straightenRef = useRef<(() => void) | null>(null);
+
+  // Always points at the latest effective base (avoids stale closures in handleSave)
+  const effectiveWorkflowRef = useRef<WorkFlow | null>(null);
 
   const handleWorkflowChange = useCallback((nodes: Node[], edges: Edge[]) => {
     nodesRef.current = nodes;
@@ -40,11 +45,10 @@ function RouteComponent() {
   }, []);
 
   const handleSave = useCallback((): WorkFlow | null => {
-    if (workFlow == null) return null;
-    const nodes = nodesRef.current;
-    const edges = edgesRef.current;
-    return mergeCanvasIntoWorkFlow(workFlow, nodes, edges);
-  }, [workFlow]);
+    const base = effectiveWorkflowRef.current;
+    if (base == null) return null;
+    return mergeCanvasIntoWorkFlow(base, nodesRef.current, edgesRef.current);
+  }, []);
 
   if (isLoading) {
     return (
@@ -69,6 +73,10 @@ function RouteComponent() {
     );
   }
 
+  // Generated workflow takes priority; falls back to server data
+  const effectiveWorkflow: WorkFlow = generatedWorkflow ?? workFlow;
+  effectiveWorkflowRef.current = effectiveWorkflow;
+
   return (
     <ReactFlowProvider>
       <Layout className="h-full">
@@ -78,14 +86,15 @@ function RouteComponent() {
         <Layout className="h-full">
           <WorkflowHeader
             applicationName={applicationName}
-            workFlow={workFlow}
+            workFlow={effectiveWorkflow}
             onSave={handleSave}
             onStraighten={() => straightenRef.current?.()}
+            onWorkflowGenerated={(wf) => setGeneratedWorkflow(wf)}
           />
           <Content className="h-full overflow-hidden">
             <WorkflowEditor
               applicationName={applicationName}
-              workFlow={workFlow}
+              workFlow={effectiveWorkflow}
               onWorkflowChange={handleWorkflowChange}
               straightenRef={straightenRef}
             />
