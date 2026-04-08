@@ -86,4 +86,14 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     await expect(page.locator('.ant-dropdown-menu').getByText('JsonPath')).toBeVisible({ timeout: 3000 });
     await expect(page.locator('.ant-dropdown-menu').getByText('Run')).toBeVisible({ timeout: 3000 });
   });
+
+  test('TC-CANVAS-MOB-09 node drawer opens from bottom on mobile', async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    if (width >= 768) test.skip();
+    // Click first canvas node to open the drawer
+    const node = page.locator('.react-flow__node').first();
+    await node.click({ timeout: 10_000 });
+    const drawer = page.locator('.ant-drawer-bottom');
+    await expect(drawer).toBeVisible({ timeout: 5000 });
+  });
 });
