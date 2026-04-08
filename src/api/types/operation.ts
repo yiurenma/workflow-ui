@@ -24,6 +24,7 @@ export interface WorkflowEntitySettingRow {
   eimId?: string;
   defaultServiceAccount?: string;
   retryProperties?: string;
+  description?: string;
   createdDate?: string;
   /** Auditing field name from workflow-operation-api (Jackson) */
   createdDateTime?: string;
@@ -43,6 +44,8 @@ export interface EntitySettingPatch {
   defaultServiceAccount?: string;
   region?: string;
   retryProperties?: string;
+  newApplicationName?: string;
+  description?: string;
 }
 
 export interface WorkflowRecord {

@@ -35,6 +35,11 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     expect(errors.filter(e => !e.includes('ResizeObserver'))).toHaveLength(0);
   });
 
+  test('TC-CANVAS-05 Straighten button is visible on canvas', async ({ page }) => {
+    await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /straighten/i })).toBeVisible({ timeout: 5000 });
+  });
+
   test('TC-CANVAS-04 canvas shows empty state when pluginList absent', async ({ page }) => {
     await page.route(
       (url) =>
@@ -51,6 +56,35 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     await page.waitForTimeout(2000);
     const hasCrash = errors.filter(e => !e.includes('ResizeObserver')).length > 0;
     expect(hasCrash).toBe(false);
+  });
+});
+
+test.describe('AI Workflow Generator (TC-GENERATOR)', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupMocks(page);
+    await page.goto('/workflows/test-app-01');
+    await page.waitForLoadState('load');
+    await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
+  });
+
+  test('TC-GENERATOR-01 Generate button accessible from header', async ({ page }) => {
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) {
+      await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 5000 });
+    } else {
+      await expect(page.getByRole('button', { name: /generate/i })).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('TC-GENERATOR-02 Generate modal opens', async ({ page }) => {
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) {
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.locator('.ant-dropdown-menu').getByText('Generate').click();
+    } else {
+      await page.getByRole('button', { name: /generate/i }).click();
+    }
+    await expect(page.locator('.ant-modal').filter({ hasText: 'AI Workflow Generator' })).toBeVisible({ timeout: 5000 });
   });
 });
 

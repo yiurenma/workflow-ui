@@ -16,6 +16,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
   useEffect(() => {
     if (open && record) {
       form.setFieldsValue({
+        newApplicationName: record.applicationName ?? "",
+        description: record.description ?? "",
         enabled: record.enabled ?? true,
         asyncMode: record.asyncMode ?? true,
         retry: record.retry ?? false,
@@ -31,10 +33,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
 
   const handleOk = async () => {
     try {
-      const values = await form.validateFields();
+      const { newApplicationName, description, ...rest } = await form.validateFields();
+      const patch = { ...rest, description } as Parameters<typeof patchSetting.mutateAsync>[0]['patch'];
+      // Only send newApplicationName if it differs from current
+      if (newApplicationName && newApplicationName.trim() !== record!.applicationName) {
+        patch.newApplicationName = newApplicationName.trim();
+      }
       await patchSetting.mutateAsync({
         applicationName: record!.applicationName,
-        patch: values,
+        patch,
       });
       message.success("Settings updated");
       onClose();
@@ -54,6 +61,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
       destroyOnClose
     >
       <Form form={form} layout="vertical" className="mt-4">
+        <Form.Item
+          name="newApplicationName"
+          label="Application Name (rename)"
+          rules={[{ required: true, whitespace: true, message: "Application name is required" }]}
+        >
+          <Input placeholder="New application name" />
+        </Form.Item>
+        <Form.Item name="description" label="Description">
+          <Input.TextArea rows={2} placeholder="Human-readable description of this workflow" />
+        </Form.Item>
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item name="enabled" label="Enabled" valuePropName="checked">
             <Switch />

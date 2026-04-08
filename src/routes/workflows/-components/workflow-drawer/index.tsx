@@ -52,24 +52,49 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
     }
   };
 
+  const drawerTitle = (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
+        Node Configuration
+      </span>
+      <span className="text-sm font-semibold text-zinc-900 leading-tight">
+        {selectedNode
+          ? (String(selectedNode.data?.label || "Unnamed Node"))
+          : "Select a node"}
+      </span>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        title={drawerTitle}
+        placement="bottom"
+        height="auto"
+        onClose={onClose}
+        open={open}
+        styles={{
+          wrapper: { maxHeight: "80dvh" },
+          header: { borderBottom: "1px solid #E4E4E7", padding: "12px 16px" },
+          body: {
+            padding: "16px",
+            paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
+            overflowY: "auto",
+          },
+        }}
+      >
+        {renderForm()}
+      </Drawer>
+    );
+  }
+
   return (
     <Drawer
-      title={
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
-            Node Configuration
-          </span>
-          <span className="text-sm font-semibold text-zinc-900 leading-tight">
-            {selectedNode
-              ? (String(selectedNode.data?.label || "Unnamed Node"))
-              : "Select a node"}
-          </span>
-        </div>
-      }
+      title={drawerTitle}
       placement="right"
       onClose={onClose}
       open={open}
-      width={isMobile ? "100%" : 420}
+      width={420}
       className="pb-20"
       styles={{
         header: {

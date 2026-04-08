@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
+  Panel,
   BackgroundVariant,
   NodeTypes,
   EdgeTypes,
@@ -11,7 +12,9 @@ import {
   MarkerType,
   Node,
   Edge,
+  useReactFlow,
 } from "@xyflow/react";
+import { Button } from "antd";
 import { Plugin } from "@/types/plugins";
 import { FunctionPlugin } from "./convas/plugins/function-plugin";
 import type { WorkFlow } from "@/api/types";
@@ -28,6 +31,33 @@ import { ConsumerWithoutErrorPlugin } from "./convas/plugins/consumer-without-er
 import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { MobileAddNodeSheet } from "./MobileAddNodeSheet";
+
+const X_COLUMN = 300;
+const Y_STEP = 120;
+
+/** Sort nodes top-to-bottom, reassign y positions in equal increments. */
+function straightenNodes(nodes: Node[]): Node[] {
+  const sorted = [...nodes].sort((a, b) => a.position.y - b.position.y);
+  return sorted.map((node, i) => ({
+    ...node,
+    position: { x: X_COLUMN, y: i * Y_STEP },
+  }));
+}
+
+function StraightenButton({ setNodes }: { setNodes: React.Dispatch<React.SetStateAction<Node[]>> }) {
+  const { fitView } = useReactFlow();
+  const handleClick = useCallback(() => {
+    setNodes((prev) => straightenNodes(prev));
+    setTimeout(() => fitView({ duration: 300 }), 50);
+  }, [setNodes, fitView]);
+  return (
+    <Panel position="top-right">
+      <Button size="small" onClick={handleClick} style={{ marginTop: 4 }}>
+        Straighten
+      </Button>
+    </Panel>
+  );
+}
 
 // Node type mapping
 const nodeTypes: NodeTypes = {
@@ -124,6 +154,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           color="#CBD5E1"
           className="bg-zinc-50"
         />
+        <StraightenButton setNodes={setNodes} />
         {isMobile && <MobileAddNodeSheet setNodes={setNodes} />}
       </ReactFlow>
       <WorkflowDrawer

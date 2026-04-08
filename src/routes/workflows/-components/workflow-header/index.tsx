@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined, RobotOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
 import { Dropdown, Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
 import { SimpleMarkdown } from "./SimpleMarkdown";
 import { JsonPathModal } from "./JsonPathModal";
+import { WorkflowGeneratorModal } from "./WorkflowGeneratorModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const { TextArea } = Input;
@@ -17,6 +18,7 @@ type WorkflowHeaderProps = {
   workFlow?: WorkFlow;
   isLoading?: boolean;
   onSave?: () => WorkFlow | null;
+  onWorkflowGenerated?: (workflow: WorkFlow) => void;
 };
 
 const defaultRunBody = `{\n  "messageInformation": {}\n}`;
@@ -177,6 +179,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   workFlow,
   isLoading,
   onSave,
+  onWorkflowGenerated,
 }) => {
   const isMobile = useIsMobile();
   const saveWorkflow = useSaveWorkflow();
@@ -198,6 +201,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   // GitHub OAuth Device Flow modal
   const [deviceFlowOpen, setDeviceFlowOpen] = useState(false);
   const [jsonPathOpen, setJsonPathOpen] = useState(false);
+  const [generatorOpen, setGeneratorOpen] = useState(false);
 
   const handleOAuthSuccess = (token: string) => {
     localStorage.setItem(AI_TOKEN_KEY, token);
@@ -313,6 +317,18 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const cancelDeviceFlow = () => {
     deviceFlow.cancel();
     setDeviceFlowOpen(false);
+  };
+
+  const callAIForGenerator = async (prompt: string): Promise<string> => {
+    const token = localStorage.getItem(AI_TOKEN_KEY);
+    if (!isValidToken(token)) throw new Error("No valid AI token");
+    return callAI(token!, prompt);
+  };
+
+  const handleGeneratorNeedToken = () => {
+    setGeneratorOpen(false);
+    setDeviceFlowOpen(true);
+    deviceFlow.start();
   };
 
   const openGitHub = (verificationUri: string) => {
@@ -440,6 +456,12 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                       disabled: !!isLoading,
                     },
                     {
+                      key: "generate",
+                      label: "Generate",
+                      icon: <RobotOutlined />,
+                      onClick: () => setGeneratorOpen(true),
+                    },
+                    {
                       key: "jsonpath",
                       label: "JsonPath",
                       onClick: () => setJsonPathOpen(true),
@@ -476,6 +498,14 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 className="text-xs font-medium text-amber-600 border-amber-300 hover:border-amber-400 hover:text-amber-700"
               >
                 Explain
+              </Button>
+              <Button
+                size="small"
+                icon={<RobotOutlined />}
+                onClick={() => setGeneratorOpen(true)}
+                className="text-xs font-medium text-indigo-600 border-indigo-300 hover:border-indigo-400 hover:text-indigo-700"
+              >
+                Generate
               </Button>
               <Button
                 size="small"
@@ -582,6 +612,15 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
       </Modal>
 
       <JsonPathModal open={jsonPathOpen} onClose={() => setJsonPathOpen(false)} />
+
+      <WorkflowGeneratorModal
+        open={generatorOpen}
+        onClose={() => setGeneratorOpen(false)}
+        onGenerated={(wf) => { onWorkflowGenerated?.(wf); }}
+        callAI={callAIForGenerator}
+        isTokenAvailable={isValidToken(localStorage.getItem(AI_TOKEN_KEY))}
+        onNeedToken={handleGeneratorNeedToken}
+      />
 
       <Modal
         title="Run against Online API"

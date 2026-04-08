@@ -171,10 +171,11 @@ const ApplicationList = () => {
     },
     {
       title: colTitle("Description"),
+      dataIndex: "description",
       key: "description",
       ellipsis: true,
-      render: (_: unknown, r: WorkflowEntitySettingRow) => (
-        <span className="text-zinc-500 text-sm">{r.eimId ?? r.defaultServiceAccount ?? r.region ?? "—"}</span>
+      render: (v: string | undefined) => (
+        <span className="text-zinc-500 text-sm">{v ?? "—"}</span>
       ),
     },
     {
@@ -345,7 +346,7 @@ const ApplicationList = () => {
                       )}
                     </div>
                     <span className="text-zinc-500 text-xs mt-0.5 block truncate">
-                      {record.eimId ?? record.defaultServiceAccount ?? record.region ?? "—"}
+                      {record.description ?? record.eimId ?? record.defaultServiceAccount ?? record.region ?? "—"}
                     </span>
                     <span className="text-zinc-400 text-xs mt-0.5 block">
                       {record.lastModifiedDateTime ?? ""}
