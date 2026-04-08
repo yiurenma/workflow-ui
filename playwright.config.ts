@@ -12,13 +12,14 @@ export default defineConfig({
   projects: [
     {
       name: 'Desktop Chrome',
+      testMatch: ['**/applications-desktop.spec.ts', '**/canvas.spec.ts', '**/explain.spec.ts', '**/navigation.spec.ts', '**/node-editor.spec.ts', '**/records.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'Mobile Chrome',
+      testMatch: ['**/applications-mobile.spec.ts', '**/canvas.spec.ts', '**/explain.spec.ts', '**/navigation.spec.ts', '**/node-editor.spec.ts', '**/records.spec.ts'],
       use: {
         ...devices['iPhone 12'],
-        // Override to use Chromium instead of WebKit (not supported on this Mac)
         browserName: 'chromium',
       },
     },

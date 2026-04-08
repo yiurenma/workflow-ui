@@ -1,88 +1,53 @@
 import { test, expect } from './fixtures';
 
-// Mobile viewport tests — skip automatically on desktop viewport (≥ 768px)
 test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/workflows/');
     await page.waitForLoadState('networkidle');
-    // Skip entire suite when running in a desktop viewport
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) {
-      test.skip();
-    }
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {
-    // Mobile card view — no <table> element visible, but cards should exist
-    const table = page.locator('table');
     const cards = page.locator('.ant-spin-container .flex.flex-col');
-    // At narrow viewport, table should be hidden and cards visible
     await expect(cards.first()).toBeVisible();
   });
 
   test('TC-APP-MOB-02 Desktop view toggle renders table', async ({ page }) => {
     const desktopToggle = page.getByRole('button', { name: 'Desktop view' });
-    if (await desktopToggle.count() === 0) {
-      test.skip();
-      return;
-    }
+    await expect(desktopToggle).toBeVisible({ timeout: 10_000 });
     await desktopToggle.click();
     await expect(page.locator('table').first()).toBeVisible();
   });
 
   test('TC-APP-MOB-03 Mobile view toggle restores card view', async ({ page }) => {
-    // First switch to desktop view
     const desktopToggle = page.getByRole('button', { name: 'Desktop view' });
-    if (await desktopToggle.count() === 0) {
-      test.skip();
-      return;
-    }
+    await expect(desktopToggle).toBeVisible({ timeout: 10_000 });
     await desktopToggle.click();
     await expect(page.locator('table').first()).toBeVisible();
-    // Switch back
     await page.getByRole('button', { name: 'Mobile view' }).click();
     await expect(page.locator('table')).toHaveCount(0);
   });
 
   test('TC-APP-MOB-04 card info area tap navigates to canvas', async ({ page }) => {
-    // Look for card info zone (the cursor-pointer div inside card)
     const cardInfoArea = page.locator('.cursor-pointer').first();
-    if (await cardInfoArea.count() === 0) {
-      test.skip();
-      return;
-    }
+    await expect(cardInfoArea).toBeVisible({ timeout: 10_000 });
     await cardInfoArea.click();
-    // URL should change away from /workflows/
     await page.waitForURL(/\/workflows\/.+/);
     expect(page.url()).toMatch(/\/workflows\/.+/);
   });
 
   test('TC-APP-MOB-05 ellipsis menu → History opens drawer (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('[aria-label="more"]').first();
-    if (await ellipsisBtn.count() === 0) {
-      // Try alt selector
-      const altBtn = page.locator('.anticon-ellipsis').first();
-      if (await altBtn.count() === 0) {
-        test.skip();
-        return;
-      }
-      await altBtn.click();
-    } else {
-      await ellipsisBtn.click();
-    }
+    const ellipsisBtn = page.locator('[aria-label="more"], .anticon-ellipsis').first();
+    await expect(ellipsisBtn).toBeVisible({ timeout: 10_000 });
     const urlBefore = page.url();
-    // Click History in dropdown
+    await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'History' }).click();
     await expect(page.locator('.ant-drawer')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
   test('TC-APP-MOB-06 ellipsis menu → Copy opens modal (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('.anticon-ellipsis').first();
-    if (await ellipsisBtn.count() === 0) {
-      test.skip();
-      return;
-    }
+    const ellipsisBtn = page.locator('[aria-label="more"], .anticon-ellipsis').first();
+    await expect(ellipsisBtn).toBeVisible({ timeout: 10_000 });
     const urlBefore = page.url();
     await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Copy' }).click();
@@ -91,11 +56,8 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   });
 
   test('TC-APP-MOB-07 ellipsis menu → Delete shows confirm (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('.anticon-ellipsis').first();
-    if (await ellipsisBtn.count() === 0) {
-      test.skip();
-      return;
-    }
+    const ellipsisBtn = page.locator('[aria-label="more"], .anticon-ellipsis').first();
+    await expect(ellipsisBtn).toBeVisible({ timeout: 10_000 });
     const urlBefore = page.url();
     await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Delete' }).click();
@@ -106,10 +68,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
 
   test('TC-APP-MOB-08 Settings button opens modal (no navigation)', async ({ page }) => {
     const settingsBtn = page.getByRole('button', { name: 'Settings' }).first();
-    if (await settingsBtn.count() === 0) {
-      test.skip();
-      return;
-    }
+    await expect(settingsBtn).toBeVisible({ timeout: 10_000 });
     const urlBefore = page.url();
     await settingsBtn.click();
     await expect(page.locator('.ant-modal')).toBeVisible();
@@ -125,7 +84,6 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     const fab = page.locator('button[aria-label="New application"]');
     await expect(fab).toBeVisible();
     await fab.click();
-    // A dialog/modal should appear for creating a new application
     await expect(page.locator('.ant-modal, .ant-drawer')).toBeVisible();
   });
 });
