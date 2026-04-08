@@ -212,3 +212,17 @@ export async function setupMocks(page: Page) {
     },
   );
 }
+
+/**
+ * On mobile, header actions (Explain, JsonPath, Run) are inside the ⋯ dropdown.
+ * On desktop they are direct buttons. This helper abstracts both.
+ */
+export async function clickCanvasHeaderAction(page: Page, name: string) {
+  const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+  if (isMobile) {
+    await page.getByRole('button', { name: /more actions/i }).click();
+    await page.locator('.ant-dropdown-menu').getByText(name).click();
+  } else {
+    await page.getByRole('button', { name: new RegExp(name, 'i') }).click();
+  }
+}

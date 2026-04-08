@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { setupMocks } from './mocks';
+import { setupMocks, clickCanvasHeaderAction } from './mocks';
 
 test.describe('Canvas / Artboard (TC-CANVAS)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
-    // Navigate directly to a known canvas URL using mock app name
     await page.goto('/workflows/test-app-01');
     await page.waitForLoadState('load');
   });
@@ -14,9 +13,16 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     await expect(canvas).toBeVisible({ timeout: 15_000 });
   });
 
-  test('TC-CANVAS-02 Explain button visible in header', async ({ page }) => {
+  test('TC-CANVAS-02 header actions accessible', async ({ page }) => {
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
-    await expect(page.getByRole('button', { name: /explain/i })).toBeVisible({ timeout: 10_000 });
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) {
+      // On mobile, secondary actions are in the ⋯ overflow dropdown; Save is always visible
+      await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('button', { name: /save/i })).toBeVisible({ timeout: 5000 });
+    } else {
+      await expect(page.getByRole('button', { name: /explain/i })).toBeVisible({ timeout: 10_000 });
+    }
   });
 
   test('TC-CANVAS-03 no JS error on canvas load', async ({ page }) => {
@@ -56,17 +62,22 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
   });
 
-  test('TC-JSONPATH-01 JsonPath button visible', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /jsonpath/i })).toBeVisible({ timeout: 5000 });
+  test('TC-JSONPATH-01 JsonPath accessible from header', async ({ page }) => {
+    const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
+    if (isMobile) {
+      await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 5000 });
+    } else {
+      await expect(page.getByRole('button', { name: /jsonpath/i })).toBeVisible({ timeout: 5000 });
+    }
   });
 
   test('TC-JSONPATH-02 modal opens', async ({ page }) => {
-    await page.getByRole('button', { name: /jsonpath/i }).click();
+    await clickCanvasHeaderAction(page, 'JsonPath');
     await expect(page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-JSONPATH-03 valid expression returns result', async ({ page }) => {
-    await page.getByRole('button', { name: /jsonpath/i }).click();
+    await clickCanvasHeaderAction(page, 'JsonPath');
     const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
     await modal.getByPlaceholder('$.customer.id').fill('$.customer.id');
     await modal.locator('textarea').fill('{"customer":{"id":"C001"}}');
@@ -75,7 +86,7 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
   });
 
   test('TC-JSONPATH-04 invalid JSON shows error', async ({ page }) => {
-    await page.getByRole('button', { name: /jsonpath/i }).click();
+    await clickCanvasHeaderAction(page, 'JsonPath');
     const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
     await modal.locator('textarea').fill('{ invalid json');
     await modal.getByRole('button', { name: 'Validate' }).click();
@@ -83,7 +94,7 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
   });
 
   test('TC-JSONPATH-05 no-match expression shows "(no match)"', async ({ page }) => {
-    await page.getByRole('button', { name: /jsonpath/i }).click();
+    await clickCanvasHeaderAction(page, 'JsonPath');
     const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
     await modal.getByPlaceholder('$.customer.id').fill('$.nonexistent.field');
     await modal.locator('textarea').fill('{"customer":{"id":"C001"}}');

@@ -63,4 +63,27 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     const visible = await fab.isVisible().catch(() => false);
     expect(visible).toBe(false);
   });
+
+  test('TC-CANVAS-MOB-06 Save button visible on mobile canvas', async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    if (width >= 768) test.skip();
+    await expect(page.getByRole('button', { name: /save/i })).toBeVisible({ timeout: 5000 });
+  });
+
+  test('TC-CANVAS-MOB-07 overflow menu trigger visible on mobile', async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    if (width >= 768) test.skip();
+    const moreBtn = page.getByRole('button', { name: /more actions/i });
+    await expect(moreBtn).toBeVisible({ timeout: 5000 });
+  });
+
+  test('TC-CANVAS-MOB-08 overflow menu contains Explain, JsonPath, Run', async ({ page }) => {
+    const width = page.viewportSize()?.width ?? 1280;
+    if (width >= 768) test.skip();
+    const moreBtn = page.getByRole('button', { name: /more actions/i });
+    await moreBtn.tap();
+    await expect(page.locator('.ant-dropdown-menu').getByText('Explain')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.ant-dropdown-menu').getByText('JsonPath')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.ant-dropdown-menu').getByText('Run')).toBeVisible({ timeout: 3000 });
+  });
 });

@@ -1,6 +1,6 @@
-import { ArrowLeftOutlined, BulbOutlined, GithubOutlined, LoadingOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
-import { Flex, Space, Button, message, Modal, Input, Typography } from "antd";
+import { Dropdown, Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
 import { useSaveWorkflow } from "@/api/hooks/workflow";
 import { onlineApi } from "@/api/services/online";
@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
 import { SimpleMarkdown } from "./SimpleMarkdown";
 import { JsonPathModal } from "./JsonPathModal";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const { TextArea } = Input;
 
@@ -177,6 +178,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   isLoading,
   onSave,
 }) => {
+  const isMobile = useIsMobile();
   const saveWorkflow = useSaveWorkflow();
   const [runOpen, setRunOpen] = useState(false);
   const [runBody, setRunBody] = useState(defaultRunBody);
@@ -424,36 +426,80 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
           </div>
         </Space>
         <Space size={"small"}>
-          <Button
-            size="small"
-            icon={<BulbOutlined />}
-            onClick={explainFlow}
-            disabled={isLoading}
-            className="text-xs font-medium text-amber-600 border-amber-300 hover:border-amber-400 hover:text-amber-700"
-          >
-            Explain
-          </Button>
-          <Button
-            size="small"
-            onClick={() => setJsonPathOpen(true)}
-            className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
-          >
-            JsonPath
-          </Button>
-          <Button size="small" onClick={() => runFlow()} disabled={isLoading}
-            className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
-            Run
-          </Button>
-          <Button
-            size="small"
-            type="primary"
-            onClick={saveFlow}
-            disabled={isLoading || saveWorkflow.isPending}
-            loading={saveWorkflow.isPending}
-            className="text-xs font-medium"
-          >
-            Save
-          </Button>
+          {isMobile ? (
+            <>
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    {
+                      key: "explain",
+                      label: "Explain",
+                      icon: <BulbOutlined />,
+                      onClick: explainFlow,
+                      disabled: !!isLoading,
+                    },
+                    {
+                      key: "jsonpath",
+                      label: "JsonPath",
+                      onClick: () => setJsonPathOpen(true),
+                    },
+                    {
+                      key: "run",
+                      label: "Run",
+                      onClick: () => runFlow(),
+                      disabled: !!isLoading,
+                    },
+                  ],
+                }}
+              >
+                <Button size="small" icon={<EllipsisOutlined />} aria-label="More actions" />
+              </Dropdown>
+              <Button
+                size="small"
+                type="primary"
+                onClick={saveFlow}
+                disabled={isLoading || saveWorkflow.isPending}
+                loading={saveWorkflow.isPending}
+                className="text-xs font-medium"
+              >
+                Save
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="small"
+                icon={<BulbOutlined />}
+                onClick={explainFlow}
+                disabled={isLoading}
+                className="text-xs font-medium text-amber-600 border-amber-300 hover:border-amber-400 hover:text-amber-700"
+              >
+                Explain
+              </Button>
+              <Button
+                size="small"
+                onClick={() => setJsonPathOpen(true)}
+                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
+              >
+                JsonPath
+              </Button>
+              <Button size="small" onClick={() => runFlow()} disabled={isLoading}
+                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
+                Run
+              </Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={saveFlow}
+                disabled={isLoading || saveWorkflow.isPending}
+                loading={saveWorkflow.isPending}
+                className="text-xs font-medium"
+              >
+                Save
+              </Button>
+            </>
+          )}
         </Space>
       </Flex>
 
