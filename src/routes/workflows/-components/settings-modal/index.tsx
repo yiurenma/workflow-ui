@@ -17,6 +17,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
     if (open && record) {
       form.setFieldsValue({
         newApplicationName: record.applicationName ?? "",
+        description: record.description ?? "",
         enabled: record.enabled ?? true,
         asyncMode: record.asyncMode ?? true,
         retry: record.retry ?? false,
@@ -32,8 +33,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
 
   const handleOk = async () => {
     try {
-      const { newApplicationName, ...rest } = await form.validateFields();
-      const patch = { ...rest } as Parameters<typeof patchSetting.mutateAsync>[0]['patch'];
+      const { newApplicationName, description, ...rest } = await form.validateFields();
+      const patch = { ...rest, description } as Parameters<typeof patchSetting.mutateAsync>[0]['patch'];
       // Only send newApplicationName if it differs from current
       if (newApplicationName && newApplicationName.trim() !== record!.applicationName) {
         patch.newApplicationName = newApplicationName.trim();
@@ -66,6 +67,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, record, onClose }) 
           rules={[{ required: true, whitespace: true, message: "Application name is required" }]}
         >
           <Input placeholder="New application name" />
+        </Form.Item>
+        <Form.Item name="description" label="Description">
+          <Input.TextArea rows={2} placeholder="Human-readable description of this workflow" />
         </Form.Item>
         <div className="grid grid-cols-2 gap-x-4">
           <Form.Item name="enabled" label="Enabled" valuePropName="checked">
