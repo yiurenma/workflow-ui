@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Input, Button, Typography, Space, message } from "antd";
 import { RobotOutlined, LoadingOutlined } from "@ant-design/icons";
+import JSON5 from "json5";
 import type { WorkFlow } from "@/api/types";
 
 export const WORKFLOW_GENERATOR_SYSTEM_PROMPT = `You are an expert workflow architect. Given a plain-English description of a business process, you output a JSON workflow definition that conforms exactly to the following schema.
@@ -38,7 +39,8 @@ Rules:
 - Positions should be laid out top-to-bottom: x=300, y = (index * 150).
 - ruleList should use realistic JSONPath expressions (e.g. $.customer.status).
 - All string values must be non-empty.
-- Output ONLY valid JSON. No markdown, no explanation, no code fences. Raw JSON object only.`;
+- Output ONLY valid RFC 8259 JSON. All property names MUST be double-quoted strings. No single quotes, no unquoted keys, no trailing commas, no comments.
+- No markdown, no explanation, no code fences. Raw JSON object only.`;
 
 type Props = {
   open: boolean;
@@ -82,9 +84,18 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
       const result = await callAI(fullPrompt);
       setRawResult(result);
 
-      // Strip possible markdown code fences if the model adds them despite instructions
-      const cleaned = result.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
-      const parsed = JSON.parse(cleaned) as WorkFlow;
+      // Strip markdown code fences and extract the JSON object/array portion
+      let cleaned = result.trim();
+      // Remove leading/trailing code fences
+      cleaned = cleaned.replace(/^```(?:json5?|javascript|js)?\s*/i, "").replace(/\s*```\s*$/i, "");
+      // If still contains fences (multi-block), extract between first { and last }
+      if (!cleaned.startsWith("{")) {
+        const start = cleaned.indexOf("{");
+        const end = cleaned.lastIndexOf("}");
+        if (start !== -1 && end !== -1) cleaned = cleaned.slice(start, end + 1);
+      }
+      // Use JSON5 to parse — tolerates unquoted keys, trailing commas, comments
+      const parsed = JSON5.parse(cleaned) as WorkFlow;
 
       if (!Array.isArray(parsed.pluginList)) {
         throw new Error("Generated JSON is missing pluginList array");

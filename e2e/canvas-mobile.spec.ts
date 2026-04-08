@@ -77,11 +77,12 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     await expect(moreBtn).toBeVisible({ timeout: 5000 });
   });
 
-  test('TC-CANVAS-MOB-08 overflow menu contains Explain, JsonPath, Run', async ({ page }) => {
+  test('TC-CANVAS-MOB-08 overflow menu contains Straighten, Explain, JsonPath, Run', async ({ page }) => {
     const width = page.viewportSize()?.width ?? 1280;
     if (width >= 768) test.skip();
     const moreBtn = page.getByRole('button', { name: /more actions/i });
     await moreBtn.tap();
+    await expect(page.locator('.ant-dropdown-menu').getByText('Straighten')).toBeVisible({ timeout: 3000 });
     await expect(page.locator('.ant-dropdown-menu').getByText('Explain')).toBeVisible({ timeout: 3000 });
     await expect(page.locator('.ant-dropdown-menu').getByText('JsonPath')).toBeVisible({ timeout: 3000 });
     await expect(page.locator('.ant-dropdown-menu').getByText('Run')).toBeVisible({ timeout: 3000 });

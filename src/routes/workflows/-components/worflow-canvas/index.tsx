@@ -1,10 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
-  Panel,
   BackgroundVariant,
   NodeTypes,
   EdgeTypes,
@@ -14,7 +13,6 @@ import {
   Edge,
   useReactFlow,
 } from "@xyflow/react";
-import { Button } from "antd";
 import { Plugin } from "@/types/plugins";
 import { FunctionPlugin } from "./convas/plugins/function-plugin";
 import type { WorkFlow } from "@/api/types";
@@ -44,19 +42,23 @@ function straightenNodes(nodes: Node[]): Node[] {
   }));
 }
 
-function StraightenButton({ setNodes }: { setNodes: React.Dispatch<React.SetStateAction<Node[]>> }) {
+/** Registers the straighten action into the provided ref so the parent can call it. */
+function StraightenRegistrar({
+  setNodes,
+  straightenRef,
+}: {
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  straightenRef: React.MutableRefObject<(() => void) | null>;
+}) {
   const { fitView } = useReactFlow();
-  const handleClick = useCallback(() => {
-    setNodes((prev) => straightenNodes(prev));
-    setTimeout(() => fitView({ duration: 300 }), 50);
-  }, [setNodes, fitView]);
-  return (
-    <Panel position="top-right">
-      <Button size="small" onClick={handleClick} style={{ marginTop: 4 }}>
-        Straighten
-      </Button>
-    </Panel>
-  );
+  useEffect(() => {
+    straightenRef.current = () => {
+      setNodes((prev) => straightenNodes(prev));
+      setTimeout(() => fitView({ duration: 300 }), 50);
+    };
+    return () => { straightenRef.current = null; };
+  }, [setNodes, fitView, straightenRef]);
+  return null;
 }
 
 // Node type mapping
@@ -93,6 +95,7 @@ export type WorkflowEditorProps = {
   applicationName: string;
   workFlow?: WorkFlow | null;
   onWorkflowChange?: (nodes: Node[], edges: Edge[]) => void;
+  straightenRef?: React.MutableRefObject<(() => void) | null>;
 };
 
 /**
@@ -103,6 +106,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   applicationName,
   workFlow,
   onWorkflowChange,
+  straightenRef,
 }) => {
   const isMobile = useIsMobile();
 
@@ -154,7 +158,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           color="#CBD5E1"
           className="bg-zinc-50"
         />
-        <StraightenButton setNodes={setNodes} />
+        {straightenRef && <StraightenRegistrar setNodes={setNodes} straightenRef={straightenRef} />}
         {isMobile && <MobileAddNodeSheet setNodes={setNodes} />}
       </ReactFlow>
       <WorkflowDrawer

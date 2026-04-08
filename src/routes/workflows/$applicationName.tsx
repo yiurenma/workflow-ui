@@ -32,6 +32,7 @@ function RouteComponent() {
 
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
+  const straightenRef = useRef<(() => void) | null>(null);
 
   const handleWorkflowChange = useCallback((nodes: Node[], edges: Edge[]) => {
     nodesRef.current = nodes;
@@ -79,12 +80,14 @@ function RouteComponent() {
             applicationName={applicationName}
             workFlow={workFlow}
             onSave={handleSave}
+            onStraighten={() => straightenRef.current?.()}
           />
           <Content className="h-full overflow-hidden">
             <WorkflowEditor
               applicationName={applicationName}
               workFlow={workFlow}
               onWorkflowChange={handleWorkflowChange}
+              straightenRef={straightenRef}
             />
           </Content>
         </Layout>

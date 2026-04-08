@@ -19,6 +19,7 @@ type WorkflowHeaderProps = {
   isLoading?: boolean;
   onSave?: () => WorkFlow | null;
   onWorkflowGenerated?: (workflow: WorkFlow) => void;
+  onStraighten?: () => void;
 };
 
 const defaultRunBody = `{\n  "messageInformation": {}\n}`;
@@ -180,6 +181,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   isLoading,
   onSave,
   onWorkflowGenerated,
+  onStraighten,
 }) => {
   const isMobile = useIsMobile();
   const saveWorkflow = useSaveWorkflow();
@@ -449,6 +451,12 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 menu={{
                   items: [
                     {
+                      key: "straighten",
+                      label: "Straighten",
+                      onClick: () => onStraighten?.(),
+                      disabled: !!isLoading,
+                    },
+                    {
                       key: "explain",
                       label: "Explain",
                       icon: <BulbOutlined />,
@@ -490,6 +498,14 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             </>
           ) : (
             <>
+              <Button
+                size="small"
+                onClick={() => onStraighten?.()}
+                disabled={isLoading}
+                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
+              >
+                Straighten
+              </Button>
               <Button
                 size="small"
                 icon={<BulbOutlined />}
