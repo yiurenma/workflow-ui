@@ -73,8 +73,15 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         height="auto"
         onClose={onClose}
         open={open}
+        mask={false}
         styles={{
-          wrapper: { maxHeight: "80dvh" },
+          wrapper: {
+            maxHeight: "65dvh",
+            boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            overflow: "hidden",
+          },
           header: { borderBottom: "1px solid #E4E4E7", padding: "12px 16px" },
           body: {
             padding: "16px",
