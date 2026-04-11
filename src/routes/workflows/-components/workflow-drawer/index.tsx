@@ -79,7 +79,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 
   const drawerTitle = (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
+      <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
         Node Configuration
       </span>
       <span className="text-sm font-semibold text-zinc-900 leading-tight">
@@ -98,6 +98,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         onClose={onClose}
         open={open}
         mask={false}
+        aria-label="Node Configuration"
         styles={{
           wrapper: {
             maxHeight: "70dvh",
@@ -138,6 +139,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       onClose={onClose}
       open={open}
       width={drawerWidth}
+      aria-label="Node Configuration"
       styles={{
         header: { borderBottom: "1px solid #E4E4E7", padding: "12px 16px" },
         body: { padding: "16px", position: "relative", overflowY: "auto" },
