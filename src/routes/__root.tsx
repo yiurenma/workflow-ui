@@ -42,40 +42,77 @@ export const Route = createRootRoute({
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#4F46E5",
-            borderRadius: 6,
+            colorPrimary: "#5B5BD6",
+            borderRadius: 8,
+            fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            colorBgContainer: "#FFFFFF",
+            colorBorder: "#E2DDD9",
+            colorBorderSecondary: "#EDE9E5",
+            colorText: "#1A1918",
+            colorTextSecondary: "#6B6560",
           },
           components: {
             Layout: {
-              headerBg: "#18181B",
+              headerBg: "#0F0F16",
+              bodyBg: "#F8F7F5",
             },
             Menu: {
-              darkItemBg: "#18181B",
-              darkItemSelectedBg: "#27272A",
-              darkItemHoverBg: "#27272A",
-              darkItemColor: "#A1A1AA",
-              darkItemSelectedColor: "#F4F4F5",
-              darkItemHoverColor: "#F4F4F5",
-              horizontalItemSelectedColor: "#818CF8",
+              darkItemBg: "#0F0F16",
+              darkItemSelectedBg: "#1E1E2C",
+              darkItemHoverBg: "#1E1E2C",
+              darkItemColor: "#9A9AAA",
+              darkItemSelectedColor: "#EEEEF8",
+              darkItemHoverColor: "#EEEEF8",
+              horizontalItemSelectedColor: "#A5A5F0",
+            },
+            Button: {
+              borderRadius: 8,
+              fontWeight: 500,
+            },
+            Table: {
+              headerBg: "#FAFAF8",
+            },
+            Modal: {
+              borderRadiusLG: 14,
+            },
+            Drawer: {
+              borderRadiusLG: 14,
             },
           },
         }}
       >
-        <Layout className="h-dvh bg-zinc-50">
-          <Header className="flex items-center justify-between px-3 md:px-8 h-12 leading-none bg-zinc-900 border-b border-zinc-800">
-            <div className="flex items-center gap-2 min-w-0 shrink-0">
-              <AppstoreOutlined className="text-base text-zinc-400 shrink-0" />
-              <span className="font-semibold text-zinc-100 text-[13px] tracking-tight truncate hidden sm:inline">
+        <Layout className="h-dvh" style={{ background: "#F8F7F5" }}>
+          <Header
+            className="flex items-center justify-between px-3 md:px-8 leading-none"
+            style={{ height: 52, background: "#0F0F16", borderBottom: "1px solid #1E1E2C" }}
+          >
+            <div className="flex items-center gap-2.5 min-w-0 shrink-0">
+              <div
+                className="flex items-center justify-center w-[26px] h-[26px] rounded-md shrink-0"
+                style={{
+                  background: "rgba(165,165,240,0.10)",
+                  border: "1px solid rgba(165,165,240,0.18)",
+                }}
+              >
+                <AppstoreOutlined className="text-[12px]" style={{ color: "#A5A5F0" }} />
+              </div>
+              <span
+                className="font-semibold text-[13px] truncate hidden sm:inline"
+                style={{ color: "#EAEAF6", letterSpacing: "-0.025em" }}
+              >
                 Workflow Studio
               </span>
-              <span className="text-zinc-700 text-xs mx-1 shrink-0 hidden sm:inline">|</span>
+              <span className="text-xs mx-1 shrink-0 hidden sm:inline" style={{ color: "#2A2A3A" }}>
+                |
+              </span>
             </div>
             <Menu
               mode="horizontal"
               theme="dark"
               selectable={false}
               items={menuItems}
-              className="border-none flex-1 justify-end min-w-0 !bg-zinc-900 [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
+              className="border-none flex-1 justify-end min-w-0 [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
+              style={{ background: "#0F0F16" }}
             />
           </Header>
           <Content className="flex-1 overflow-hidden">

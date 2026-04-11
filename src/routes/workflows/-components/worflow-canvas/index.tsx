@@ -76,17 +76,17 @@ const edgeTypes: EdgeTypes = {
   buttonEdge: ButtonEdge,
 };
 
-// Default edge options
+// Default edge options — warm gray tones to match the quiet luxury palette
 const defaultEdgeOptions = {
   animated: false,
   markerEnd: {
     type: MarkerType.ArrowClosed,
-    color: "#94A3B8",
+    color: "#C4BEB9",
   },
   type: "buttonEdge",
   style: {
     strokeWidth: 1.5,
-    stroke: "#94A3B8",
+    stroke: "#C4BEB9",
   },
   zIndex: 1001,
 };
@@ -155,8 +155,8 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           variant={BackgroundVariant.Dots}
           gap={24}
           size={1}
-          color="#CBD5E1"
-          className="bg-zinc-50"
+          color="#D8D3CE"
+          style={{ background: "#F8F7F5" }}
         />
         {straightenRef && <StraightenRegistrar setNodes={setNodes} straightenRef={straightenRef} />}
         {isMobile && <MobileAddNodeSheet setNodes={setNodes} />}
