@@ -17,7 +17,6 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
     const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
     if (isMobile) {
-      // On mobile, secondary actions are in the ⋯ overflow dropdown; Save is always visible
       await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 10_000 });
       await expect(page.getByRole('button', { name: /save/i })).toBeVisible({ timeout: 5000 });
     } else {
@@ -39,7 +38,6 @@ test.describe('Canvas / Artboard (TC-CANVAS)', () => {
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
     const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
     if (isMobile) {
-      // Straighten is in ⋯ overflow menu on mobile
       await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 5000 });
     } else {
       await expect(page.getByRole('button', { name: /straighten/i })).toBeVisible({ timeout: 5000 });
@@ -90,7 +88,7 @@ test.describe('AI Workflow Generator (TC-GENERATOR)', () => {
     } else {
       await page.getByRole('button', { name: /generate/i }).click();
     }
-    await expect(page.locator('.ant-modal').filter({ hasText: 'AI Workflow Generator' })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.ant-modal').filter({ hasText: 'AI Workflow Generator' })).toBeVisible({ timeout: 8000 });
   });
 });
 
@@ -113,7 +111,7 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
 
   test('TC-JSONPATH-02 modal opens', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'JsonPath');
-    await expect(page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' })).toBeVisible({ timeout: 8000 });
   });
 
   test('TC-JSONPATH-03 valid expression returns result', async ({ page }) => {

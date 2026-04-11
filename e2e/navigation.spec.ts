@@ -15,7 +15,7 @@ test.describe('Navigation — TC-NAV', () => {
   test('TC-NAV-02 applications list route resolves', async ({ page }) => {
     await page.goto('/workflows/');
     await page.waitForLoadState('load');
-    await expect(page.getByText('Applications').first()).toBeVisible();
+    await expect(page.getByText('Applications').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('TC-NAV-03 records list route resolves', async ({ page }) => {

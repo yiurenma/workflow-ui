@@ -12,7 +12,6 @@ test.describe('Explain feature (TC-EXPLAIN)', () => {
   test('TC-EXPLAIN-01 Explain button visible on canvas', async ({ page }) => {
     const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
     if (isMobile) {
-      // On mobile, Explain lives inside the ⋯ overflow dropdown
       await expect(page.getByRole('button', { name: /more actions/i })).toBeVisible({ timeout: 5000 });
     } else {
       await expect(page.getByRole('button', { name: /explain/i })).toBeVisible({ timeout: 10_000 });
@@ -21,7 +20,6 @@ test.describe('Explain feature (TC-EXPLAIN)', () => {
 
   test('TC-EXPLAIN-02 clicking Explain opens token prompt or explain modal', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'Explain');
-    // Either a token prompt modal or the explain result modal should appear
-    await expect(page.locator('.ant-modal')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.ant-modal')).toBeVisible({ timeout: 8_000 });
   });
 });

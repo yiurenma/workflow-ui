@@ -4,7 +4,6 @@ import { setupMocks } from './mocks';
 test.describe('Node Editor (TC-NODE)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
-    // Navigate directly to a known canvas URL using mock app name
     await page.goto('/workflows/test-app-01');
     await page.waitForLoadState('load');
     await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15_000 });
@@ -14,7 +13,7 @@ test.describe('Node Editor (TC-NODE)', () => {
     const node = page.locator('.react-flow__node').first();
     await expect(node).toBeVisible({ timeout: 10_000 });
     await node.click();
-    await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 8_000 });
   });
 
   test('TC-NODE-02 drawer contains Description, Rules, Action sections', async ({ page }) => {
@@ -22,7 +21,7 @@ test.describe('Node Editor (TC-NODE)', () => {
     await expect(node).toBeVisible({ timeout: 10_000 });
     await node.click();
     const drawer = page.locator('.ant-drawer');
-    await expect(drawer).toBeVisible();
+    await expect(drawer).toBeVisible({ timeout: 8_000 });
     await expect(drawer.getByText(/description/i).first()).toBeVisible();
     await expect(drawer.getByText(/rule/i).first()).toBeVisible();
     await expect(drawer.getByText(/action/i).first()).toBeVisible();

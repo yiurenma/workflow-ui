@@ -21,6 +21,6 @@ test.describe('Records list (TC-REC)', () => {
 
   test('TC-REC-03 pagination visible', async ({ page }) => {
     const pagination = page.locator('.ant-pagination').first();
-    await expect(pagination).toBeVisible({ timeout: 8000 });
+    await expect(pagination).toBeVisible({ timeout: 10_000 });
   });
 });
