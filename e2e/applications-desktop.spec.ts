@@ -1,17 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { setupMocks } from './mocks';
 
-// Desktop table tests — skip automatically on mobile viewport (< 768px)
+// Desktop table tests — testMatch in playwright.config.ts ensures this only runs on Desktop Chrome
 test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
     await page.waitForLoadState('load');
-    // Skip entire suite when running in a mobile viewport
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width < 768) {
-      test.skip();
-    }
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {

@@ -1,17 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { setupMocks } from './mocks';
 
-// Mobile card-view tests — skip automatically on desktop viewport (≥ 768px)
+// Mobile card-view tests — testMatch in playwright.config.ts ensures this only runs on Mobile Chrome
 test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
     await page.waitForLoadState('load');
-    // Skip entire suite when running in a desktop viewport
-    const width = page.viewportSize()?.width ?? 390;
-    if (width >= 768) {
-      test.skip();
-    }
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {

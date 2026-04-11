@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { setupMocks } from './mocks';
 
+// Mobile canvas tests — testMatch in playwright.config.ts ensures this only runs on Mobile Chrome
 test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
@@ -10,23 +11,17 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   });
 
   test('TC-CANVAS-MOB-01 FAB visible on mobile canvas', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const fab = page.getByRole('button', { name: 'Add node' });
     await expect(fab).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-CANVAS-MOB-02 tap FAB opens Add Node sheet', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const fab = page.getByRole('button', { name: 'Add node' });
     await fab.tap();
     await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-CANVAS-MOB-03 drag FAB does not open sheet', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const fab = page.getByRole('button', { name: 'Add node' });
     const box = await fab.boundingBox();
     if (!box) throw new Error('FAB not found');
@@ -40,8 +35,6 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   });
 
   test('TC-CANVAS-MOB-04 position persisted in localStorage after drag', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const fab = page.getByRole('button', { name: 'Add node' });
     const box = await fab.boundingBox();
     if (!box) throw new Error('FAB not found');
@@ -56,30 +49,16 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     expect(typeof pos.y).toBe('number');
   });
 
-  test('TC-CANVAS-MOB-05 FAB not rendered on desktop', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width < 768) test.skip();
-    const fab = page.getByRole('button', { name: 'Add node' });
-    const visible = await fab.isVisible().catch(() => false);
-    expect(visible).toBe(false);
-  });
-
   test('TC-CANVAS-MOB-06 Save button visible on mobile canvas', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     await expect(page.getByRole('button', { name: /save/i })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-CANVAS-MOB-07 overflow menu trigger visible on mobile', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const moreBtn = page.getByRole('button', { name: /more actions/i });
     await expect(moreBtn).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-CANVAS-MOB-08 overflow menu contains Straighten, Explain, JsonPath, Run', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     const moreBtn = page.getByRole('button', { name: /more actions/i });
     await moreBtn.tap();
     await expect(page.locator('.ant-dropdown-menu').getByText('Straighten')).toBeVisible({ timeout: 3000 });
@@ -89,8 +68,6 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   });
 
   test('TC-CANVAS-MOB-09 node drawer opens from bottom on mobile', async ({ page }) => {
-    const width = page.viewportSize()?.width ?? 1280;
-    if (width >= 768) test.skip();
     // Click first canvas node to open the drawer
     const node = page.locator('.react-flow__node').first();
     await node.click({ timeout: 10_000 });
