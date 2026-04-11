@@ -117,8 +117,8 @@ function RecordsPage() {
   ];
 
   return (
-    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} bg-slate-50 h-full overflow-y-auto`}>
-      <Typography.Title level={3} className="!mb-0 text-slate-800">
+    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} h-full overflow-y-auto`} style={{ background: "#ffffff" }}>
+      <Typography.Title level={3} className="!mb-0" style={{ color: "#161616" }}>
         Execution Records
       </Typography.Title>
 
@@ -205,26 +205,27 @@ function RecordsPage() {
             {(data?.content ?? []).map((record: WorkflowRecord) => (
               <div
                 key={String(record.id)}
-                className="bg-white rounded-lg border border-slate-200 shadow-sm px-4 py-3"
+                className="px-4 py-3"
+                style={{ background: "#f4f4f4", border: "1px solid #e0e0e0", borderRadius: 0 }}
                 onClick={() => navigate({ to: "/records/$id", params: { id: String(record.id) } })}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-slate-800 text-sm">#{record.id}</span>
+                      <span className="font-semibold text-sm" style={{ color: "#161616" }}>#{record.id}</span>
                       {record.overallStatus && (
                         <Tag className="text-[10px] font-medium shrink-0">{record.overallStatus}</Tag>
                       )}
                     </div>
-                    <span className="text-slate-600 text-xs mt-0.5 block truncate">
+                    <span className="text-xs mt-0.5 block truncate" style={{ color: "#525252", letterSpacing: "0.16px" }}>
                       {record.applicationName ?? "—"}
                     </span>
                     {record.transactionConfirmationNumber && (
-                      <span className="text-slate-400 text-xs block truncate">
+                      <span className="text-xs block truncate" style={{ color: "#6f6f6f", letterSpacing: "0.16px" }}>
                         Conf: {record.transactionConfirmationNumber}
                       </span>
                     )}
-                    <span className="text-slate-400 text-xs block">
+                    <span className="text-xs block" style={{ color: "#6f6f6f", letterSpacing: "0.32px" }}>
                       {record.createdDateTime ?? ""}
                     </span>
                   </div>
@@ -243,12 +244,12 @@ function RecordsPage() {
               </div>
             ))}
             {(data?.content ?? []).length === 0 && !isLoading && !isFetching && (
-              <div className="text-center text-slate-400 py-8 text-sm">No records found</div>
+              <div className="text-center py-8 text-sm" style={{ color: "#525252" }}>No records found</div>
             )}
             {/* Mobile pagination */}
             {(data?.totalElements ?? 0) > 0 && (
               <div className="flex flex-col items-center gap-1 pt-2">
-                <span className="text-xs text-slate-400">
+                <span className="text-xs" style={{ color: "#525252", letterSpacing: "0.32px" }}>
                   {data?.totalElements ?? 0} total
                 </span>
                 <Pagination
@@ -270,11 +271,12 @@ function RecordsPage() {
               columns={columns}
               dataSource={data?.content ?? []}
               pagination={false}
-              className="bg-white rounded-lg shadow-sm"
+              className="bg-white"
+              style={{ borderRadius: 0, border: "1px solid #e0e0e0" }}
               scroll={{ x: 1200 }}
             />
             <Flex justify="space-between" align="center" className="pt-2">
-              <Typography.Text className="text-xs text-slate-400">
+              <Typography.Text className="text-xs" style={{ color: "#525252", letterSpacing: "0.32px" }}>
                 {data?.totalElements ?? 0} total
               </Typography.Text>
               <Pagination

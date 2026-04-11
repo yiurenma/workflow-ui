@@ -79,10 +79,10 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 
   const drawerTitle = (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
+      <span className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
         Node Configuration
       </span>
-      <span className="text-sm font-semibold text-zinc-900 leading-tight">
+      <span className="text-sm font-semibold leading-tight" style={{ color: "#161616" }}>
         {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
       </span>
     </div>
@@ -102,9 +102,9 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         styles={{
           wrapper: {
             maxHeight: "70dvh",
-            boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
+            boxShadow: "0 -2px 6px rgba(0,0,0,0.3)",
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
             overflow: "hidden",
           },
           content: {
@@ -113,9 +113,10 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
             maxHeight: "70dvh",
           },
           header: {
-            borderBottom: "1px solid #E4E4E7",
+            borderBottom: "1px solid #c6c6c6",
             padding: "12px 16px",
             flexShrink: 0,
+            background: "#f4f4f4",
           },
           body: {
             flex: "1 1 0",
@@ -123,6 +124,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
             overflowY: "auto",
             padding: "16px",
             paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
+            background: "#ffffff",
           },
         }}
       >
@@ -141,8 +143,8 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       width={drawerWidth}
       aria-label="Node Configuration"
       styles={{
-        header: { borderBottom: "1px solid #E4E4E7", padding: "12px 16px" },
-        body: { padding: "16px", position: "relative", overflowY: "auto" },
+        header: { borderBottom: "1px solid #c6c6c6", padding: "12px 16px", background: "#f4f4f4" },
+        body: { padding: "16px", position: "relative", overflowY: "auto", background: "#ffffff" },
       }}
     >
       {/* Drag handle — left edge of drawer body */}
@@ -161,7 +163,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         }}
         onMouseEnter={(e) =>
           ((e.currentTarget as HTMLDivElement).style.background =
-            "rgba(99,102,241,0.15)")
+            "rgba(15,98,254,0.12)")
         }
         onMouseLeave={(e) =>
           ((e.currentTarget as HTMLDivElement).style.background = "transparent")

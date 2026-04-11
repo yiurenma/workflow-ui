@@ -526,14 +526,14 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         justify={"space-between"}
         gap={"middle"}
         className="py-2 px-4 bg-white"
-        style={{ minHeight: 44, borderBottom: "1px solid var(--ql-border)" }}
+        style={{ minHeight: 44, borderBottom: "1px solid #c6c6c6" }}
       >
         <Space size={"middle"}>
           <Link to={`/workflows`}>
-            <ArrowLeftOutlined className="text-zinc-400 hover:text-zinc-700 transition-colors" />
+            <ArrowLeftOutlined style={{ color: "#525252" }} className="hover:text-[#161616] transition-colors" />
           </Link>
           <div className="flex flex-col">
-            <span className="font-semibold text-[13px] text-zinc-800 tracking-tight">
+            <span className="font-semibold text-[13px] tracking-[0.16px]" style={{ color: "#161616" }}>
               {isLoading ? "Loading..." : applicationName}
             </span>
           </div>
@@ -598,7 +598,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 onClick={() => onStraighten?.()}
                 disabled={isLoading}
                 className="text-xs font-medium"
-                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}
+                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
               >
                 Straighten
               </Button>
@@ -607,7 +607,8 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 icon={<BulbOutlined />}
                 onClick={explainFlow}
                 disabled={isLoading}
-                className="text-xs font-medium text-amber-600 border-amber-300 hover:border-amber-400 hover:text-amber-700"
+                className="text-xs font-medium"
+                style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
               >
                 Explain
               </Button>
@@ -616,7 +617,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 icon={<RobotOutlined />}
                 onClick={() => setGeneratorOpen(true)}
                 className="text-xs font-medium"
-                style={{ color: "var(--ql-accent)", borderColor: "#A5A5F0" }}
+                style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
               >
                 Generate
               </Button>
@@ -624,13 +625,13 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 size="small"
                 onClick={() => setJsonPathOpen(true)}
                 className="text-xs font-medium"
-                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}
+                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
               >
                 JsonPath
               </Button>
               <Button size="small" onClick={() => runFlow()} disabled={isLoading}
                 className="text-xs font-medium"
-                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}>
+                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}>
                 Run
               </Button>
               <Button

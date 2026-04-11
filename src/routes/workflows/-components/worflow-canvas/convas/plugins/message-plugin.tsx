@@ -9,12 +9,12 @@ export const MessagePlugin: React.FC<NodeProps<MessagePluginProps>> = ({
 }) => {
   return (
     <div
-      className="relative flex flex-col w-52 rounded-xl bg-white overflow-hidden border transition-all duration-150"
+      className="relative flex flex-col w-52 bg-white overflow-hidden border transition-all duration-150"
       style={{
-        borderColor: selected ? "#A5A5F0" : "var(--ql-border)",
+        borderColor: selected ? "#0f62fe" : "var(--cds-border-subtle)",
         boxShadow: selected
-          ? "0 0 0 2px #5B5BD6, 0 2px 8px rgba(91,91,214,0.15)"
-          : "var(--ql-shadow-sm)",
+          ? "0 0 0 2px #0f62fe"
+          : "none",
       }}
     >
       {/* Top accent strip */}
@@ -31,10 +31,10 @@ export const MessagePlugin: React.FC<NodeProps<MessagePluginProps>> = ({
           {data.icon}
         </span>
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-[11px] font-semibold leading-tight tracking-tight" style={{ color: "var(--ql-text-primary)" }}>
+          <span className="text-[11px] font-semibold leading-tight tracking-tight" style={{ color: "#161616" }}>
             Dispatch
           </span>
-          <span className="text-[10px] truncate leading-tight mt-0.5" style={{ color: "var(--ql-text-muted)" }}>
+          <span className="text-[10px] truncate leading-tight mt-0.5" style={{ color: "#525252" }}>
             {data.label || "Unconfigured"}
           </span>
         </div>

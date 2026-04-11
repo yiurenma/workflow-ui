@@ -39,19 +39,19 @@ function RecordDetailPage() {
   ];
 
   return (
-    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} bg-slate-50 min-h-full`}>
+    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} min-h-full`} style={{ background: "#ffffff" }}>
       <Flex align="center" gap="middle">
         <Button type="link" className="px-0" onClick={() => navigate({ to: "/records" })}>
           ← Records
         </Button>
-        <Typography.Title level={3} className="!mb-0 text-slate-800">
+        <Typography.Title level={3} className="!mb-0" style={{ color: "#161616" }}>
           Record #{id}
         </Typography.Title>
       </Flex>
 
       <Spin spinning={isLoading}>
         {record && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="p-6" style={{ background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 0 }}>
             <Typography.Title level={5} className="!mb-4">Record Details</Typography.Title>
             <Descriptions bordered size="small" column={isMobile ? 1 : 2}>
               <Descriptions.Item label="ID">{record.id}</Descriptions.Item>
@@ -85,7 +85,7 @@ function RecordDetailPage() {
         )}
 
         {children.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-4">
+          <div className="p-6 mt-4" style={{ background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 0 }}>
             <Typography.Title level={5} className="!mb-4">
               Child Records ({children.length})
             </Typography.Title>

@@ -26,22 +26,27 @@ const NodeSection: React.FC<NodeSectionProps> = ({
   <div
     className={
       variant === "inset"
-        ? "mb-4 border border-zinc-200 rounded-lg p-3 bg-zinc-50 shadow-sm"
-        : "mb-4 border border-zinc-200 rounded-lg p-3 bg-white shadow-sm"
+        ? "mb-4 p-3"
+        : "mb-4 p-3"
     }
+    style={{
+      background: variant === "inset" ? "#f4f4f4" : "#ffffff",
+      border: "1px solid #e0e0e0",
+      borderRadius: 0,
+    }}
   >
     <div className="flex items-center gap-1 mb-1">
-      <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">
+      <p className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
         {title}
       </p>
       {headingTooltip && (
         <Tooltip title={headingTooltip}>
-          <InfoCircleOutlined className="text-[10px] text-zinc-300 cursor-help" />
+          <InfoCircleOutlined className="text-[10px] cursor-help" style={{ color: "#8d8d8d" }} />
         </Tooltip>
       )}
     </div>
     {subtitle && (
-      <p className="text-xs text-zinc-600 mb-3">{subtitle}</p>
+      <p className="text-xs mb-3" style={{ color: "#525252", letterSpacing: "0.16px" }}>{subtitle}</p>
     )}
     {children}
   </div>

@@ -42,62 +42,76 @@ export const Route = createRootRoute({
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#7C4A3A",
-            colorPrimaryHover: "#9A5C49",
-            borderRadius: 8,
-            fontFamily: "'DM Sans', system-ui, sans-serif",
-            colorBgContainer: "#FFFFFF",
-            colorBorder: "#DDD8D0",
-            colorBorderSecondary: "#EAE6DF",
-            colorText: "#2A2520",
-            colorTextSecondary: "#6B6560",
-            colorBgLayout: "#F9F7F4",
+            colorPrimary: "#0f62fe",
+            colorPrimaryHover: "#0353e9",
+            borderRadius: 0,
+            fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif',
+            colorBgContainer: "#ffffff",
+            colorBorder: "#c6c6c6",
+            colorBorderSecondary: "#e0e0e0",
+            colorText: "#161616",
+            colorTextSecondary: "#525252",
+            colorBgLayout: "#ffffff",
+            colorError: "#da1e28",
+            colorSuccess: "#24a148",
+            colorWarning: "#f1c21b",
           },
           components: {
             Layout: {
-              headerBg: "#2A2520",
-              bodyBg: "#F9F7F4",
+              headerBg: "#161616",
+              bodyBg: "#ffffff",
             },
             Menu: {
-              darkItemBg: "#2A2520",
-              darkItemSelectedBg: "#3D3530",
-              darkItemHoverBg: "#3D3530",
-              darkItemColor: "#C9A87C",
-              darkItemSelectedColor: "#E8E0D5",
-              darkItemHoverColor: "#E8E0D5",
-              horizontalItemSelectedColor: "#C9A87C",
+              darkItemBg: "#161616",
+              darkItemSelectedBg: "#262626",
+              darkItemHoverBg: "#262626",
+              darkItemColor: "#c6c6c6",
+              darkItemSelectedColor: "#ffffff",
+              darkItemHoverColor: "#ffffff",
+              horizontalItemSelectedColor: "#ffffff",
             },
             Button: {
-              borderRadius: 8,
-              fontWeight: 500,
+              borderRadius: 0,
+              fontWeight: 400,
+              controlHeight: 40,
             },
             Table: {
-              headerBg: "#F3F0EB",
-              rowHoverBg: "#EEF5F0",
+              headerBg: "#f4f4f4",
+              rowHoverBg: "#f4f4f4",
+              borderColor: "#e0e0e0",
             },
             Modal: {
-              borderRadiusLG: 14,
+              borderRadiusLG: 0,
             },
             Drawer: {
-              borderRadiusLG: 14,
+              borderRadiusLG: 0,
+            },
+            Input: {
+              borderRadius: 0,
+              colorBgContainer: "#f4f4f4",
+              activeBorderColor: "#0f62fe",
+              hoverBorderColor: "#0f62fe",
+            },
+            Tag: {
+              borderRadius: 24,
             },
           },
         }}
       >
-        <Layout className="h-dvh" style={{ background: "#F9F7F4" }}>
+        <Layout className="h-dvh" style={{ background: "#ffffff" }}>
           <Header
             className="flex items-center justify-between px-3 md:px-8 leading-none border-b"
-            style={{ height: 52, background: "#2A2520", borderColor: "#3D3530" }}
+            style={{ height: 48, background: "#161616", borderColor: "#393939" }}
           >
             <div className="flex items-center gap-2.5 min-w-0 shrink-0">
-              <AppstoreOutlined className="text-base shrink-0" style={{ color: "#C9A87C" }} />
+              <AppstoreOutlined className="text-base shrink-0" style={{ color: "#ffffff" }} />
               <span
                 className="font-semibold truncate hidden sm:inline"
-                style={{ fontFamily: "'Lora', Georgia, serif", color: "#E8E0D5", fontSize: 15, letterSpacing: "0.02em" }}
+                style={{ fontFamily: '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif', color: "#ffffff", fontSize: 14, letterSpacing: "0.16px", fontWeight: 600 }}
               >
                 Workflow Studio
               </span>
-              <span className="text-xs mx-1 shrink-0 hidden sm:inline" style={{ color: "#3D3530" }}>
+              <span className="text-xs mx-1 shrink-0 hidden sm:inline" style={{ color: "#525252" }}>
                 |
               </span>
             </div>
@@ -107,7 +121,7 @@ export const Route = createRootRoute({
               selectable={false}
               items={menuItems}
               className="border-none flex-1 justify-end min-w-0 [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
-              style={{ background: "#2A2520" }}
+              style={{ background: "#161616" }}
             />
           </Header>
           <Content className="flex-1 overflow-hidden">

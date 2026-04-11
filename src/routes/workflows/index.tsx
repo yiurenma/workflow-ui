@@ -156,7 +156,7 @@ const ApplicationList = () => {
   });
 
   const colTitle = (text: string) => (
-    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">{text}</span>
+    <span className="text-[11px] font-semibold uppercase tracking-[0.32px]" style={{ color: "#525252" }}>{text}</span>
   );
 
   const columns: ColumnsType<WorkflowEntitySettingRow> = [
@@ -166,7 +166,7 @@ const ApplicationList = () => {
       key: "applicationName",
       ellipsis: true,
       render: (text: string) => (
-        <span className="font-medium text-zinc-800 text-sm">{text}</span>
+        <span className="font-semibold text-sm" style={{ color: "#161616" }}>{text}</span>
       ),
     },
     {
@@ -175,7 +175,7 @@ const ApplicationList = () => {
       key: "description",
       ellipsis: true,
       render: (v: string | undefined) => (
-        <span className="text-zinc-500 text-sm">{v ?? "—"}</span>
+        <span className="text-sm" style={{ color: "#525252", letterSpacing: "0.16px" }}>{v ?? "—"}</span>
       ),
     },
     {
@@ -185,9 +185,9 @@ const ApplicationList = () => {
       width: 90,
       render: (v: boolean) =>
         v ? (
-          <Tag style={{ backgroundColor: "#EAF3EE", color: "#2A6B4A", borderColor: "#A8CCBA", fontSize: 11, fontWeight: 500, borderRadius: 6 }}>Active</Tag>
+          <Tag style={{ backgroundColor: "#edf5ff", color: "#0f62fe", borderColor: "#a6c8ff", fontSize: 11, fontWeight: 400, borderRadius: 24, letterSpacing: "0.16px" }}>Active</Tag>
         ) : (
-          <Tag style={{ backgroundColor: "#F3F0EB", color: "#9C9690", borderColor: "#DDD8D0", fontSize: 11, fontWeight: 500, borderRadius: 6 }}>Inactive</Tag>
+          <Tag style={{ backgroundColor: "#f4f4f4", color: "#525252", borderColor: "#c6c6c6", fontSize: 11, fontWeight: 400, borderRadius: 24, letterSpacing: "0.16px" }}>Inactive</Tag>
         ),
     },
     {
@@ -195,7 +195,7 @@ const ApplicationList = () => {
       dataIndex: "lastModifiedDateTime",
       key: "lastModifiedDateTime",
       width: 210,
-      render: (v: string) => <span className="text-zinc-400 text-xs">{v ?? "—"}</span>,
+      render: (v: string) => <span className="text-xs" style={{ color: "#525252", letterSpacing: "0.32px" }}>{v ?? "—"}</span>,
     },
     {
       title: colTitle("Actions"),
@@ -242,13 +242,13 @@ const ApplicationList = () => {
   ];
 
   return (
-    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} h-full overflow-y-auto`} style={{ background: "var(--ql-bg)" }}>
+    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} h-full overflow-y-auto`} style={{ background: "#ffffff" }}>
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
         <div>
-          <Typography.Title level={4} className="!mb-0 !text-zinc-900 !font-semibold tracking-tight">
+          <Typography.Title level={4} className="!mb-0 !font-semibold" style={{ color: "#161616", letterSpacing: 0 }}>
             Applications
           </Typography.Title>
-          <Typography.Text className="text-xs text-zinc-400">
+          <Typography.Text className="text-xs" style={{ color: "#525252", letterSpacing: "0.32px" }}>
             Manage and configure workflow applications
           </Typography.Text>
         </div>
@@ -322,8 +322,8 @@ const ApplicationList = () => {
             {(data?.content ?? []).map((record: WorkflowEntitySettingRow) => (
               <div
                 key={String(record.id ?? record.applicationName)}
-                className="bg-white rounded-xl shadow-sm px-4 py-3"
-                style={{ border: "1px solid var(--ql-border)" }}
+                className="px-4 py-3"
+                style={{ background: "#f4f4f4", border: "1px solid #e0e0e0", borderRadius: 0 }}
               >
                 <div className="flex items-center justify-between">
                   {/* Navigation zone — only tapping the info area navigates */}
@@ -337,19 +337,19 @@ const ApplicationList = () => {
                     }
                   >
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm truncate" style={{ color: "#2A2520" }}>
+                      <span className="font-semibold text-sm truncate" style={{ color: "#161616" }}>
                         {record.applicationName}
                       </span>
                       {record.enabled ? (
-                        <Tag style={{ backgroundColor: "#EAF3EE", color: "#2A6B4A", borderColor: "#A8CCBA", fontSize: 11, fontWeight: 500, borderRadius: 6 }} className="shrink-0">Active</Tag>
+                        <Tag style={{ backgroundColor: "#edf5ff", color: "#0f62fe", borderColor: "#a6c8ff", fontSize: 11, fontWeight: 400, borderRadius: 24 }} className="shrink-0">Active</Tag>
                       ) : (
-                        <Tag style={{ backgroundColor: "#F3F0EB", color: "#9C9690", borderColor: "#DDD8D0", fontSize: 11, fontWeight: 500, borderRadius: 6 }} className="shrink-0">Inactive</Tag>
+                        <Tag style={{ backgroundColor: "#f4f4f4", color: "#525252", borderColor: "#c6c6c6", fontSize: 11, fontWeight: 400, borderRadius: 24 }} className="shrink-0">Inactive</Tag>
                       )}
                     </div>
-                    <span className="text-xs mt-0.5 block truncate" style={{ color: "#6B6560" }}>
+                    <span className="text-xs mt-0.5 block truncate" style={{ color: "#525252", letterSpacing: "0.16px" }}>
                       {record.description ?? record.eimId ?? record.defaultServiceAccount ?? record.region ?? "—"}
                     </span>
-                    <span className="text-xs mt-0.5 block" style={{ color: "#9C9690" }}>
+                    <span className="text-xs mt-0.5 block" style={{ color: "#6f6f6f", letterSpacing: "0.32px" }}>
                       {record.lastModifiedDateTime ?? ""}
                     </span>
                   </div>
@@ -358,7 +358,8 @@ const ApplicationList = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="text-zinc-400 px-1"
+                      className="text-xs px-1"
+                      style={{ color: "#525252" }}
                       onClick={() => setSettingsTarget(record)}
                     >
                       Settings
@@ -368,21 +369,22 @@ const ApplicationList = () => {
                         type="text"
                         size="small"
                         icon={<EllipsisOutlined />}
-                        className="text-zinc-400 px-1"
+                        className="px-1"
+                        style={{ color: "#525252" }}
                       />
                     </Dropdown>
-                    <RightOutlined className="text-zinc-300 text-xs" />
+                    <RightOutlined className="text-xs" style={{ color: "#c6c6c6" }} />
                   </div>
                 </div>
               </div>
             ))}
             {(data?.content ?? []).length === 0 && !isLoading && !isFetching && (
-              <div className="text-center text-zinc-400 py-8 text-sm">No applications found</div>
+              <div className="text-center py-8 text-sm" style={{ color: "#525252" }}>No applications found</div>
             )}
             {/* Mobile pagination */}
             {(data?.totalElements ?? 0) > 0 && (
               <div className="flex flex-col gap-1 pt-2">
-                <span className="text-xs text-zinc-400 text-center">
+                <span className="text-xs text-center" style={{ color: "#525252", letterSpacing: "0.32px" }}>
                   {data?.totalElements ?? 0} total · Page {page + 1} of {Math.max(1, Math.ceil((data?.totalElements ?? 0) / pageSize))}
                 </span>
                 {(data?.totalElements ?? 0) > pageSize && (
@@ -411,15 +413,13 @@ const ApplicationList = () => {
                 dataSource={data?.content ?? []}
                 size="middle"
                 pagination={false}
-                className="bg-white rounded-xl shadow-sm"
-                style={{ minWidth: 700, border: "1px solid var(--ql-border)" }}
-                rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
-                  index % 2 === 1 ? "bg-[#F3F1EE]" : ""
-                }
+                className="bg-white"
+                style={{ minWidth: 700, border: "1px solid #e0e0e0", borderRadius: 0 }}
+                rowClassName={() => ""}
               />
             </div>
             <Flex justify="space-between" align="center" className="pt-2">
-              <Typography.Text className="text-xs text-zinc-400">
+              <Typography.Text className="text-xs" style={{ color: "#525252", letterSpacing: "0.32px" }}>
                 {data?.totalElements ?? 0} total
               </Typography.Text>
               <Pagination
@@ -442,10 +442,10 @@ const ApplicationList = () => {
           onPointerDown={onFabPointerDown}
           onPointerMove={onFabPointerMove}
           onPointerUp={onFabPointerUp}
-          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x, background: "var(--ql-accent)" }}
+          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x, background: "#0f62fe" }}
           className="z-50 w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl touch-none select-none"
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--ql-accent-hover)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--ql-accent)"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#0353e9"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#0f62fe"; }}
           aria-label="New application"
         >
           <PlusOutlined />
