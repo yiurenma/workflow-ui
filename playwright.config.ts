@@ -1,25 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Use the pre-installed Chromium binary (Playwright 1.56 browsers at rev 1194)
-const CHROMIUM_EXEC = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
   retries: 1,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:5174',
+    baseURL: 'https://workflow-ui-gamma.vercel.app',
     trace: 'on-first-retry',
-    launchOptions: {
-      executablePath: CHROMIUM_EXEC,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    },
+    screenshot: 'on',
   },
   projects: [
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
+      testMatch: [
+        '**/navigation.spec.ts',
+        '**/records.spec.ts',
+        '**/applications-desktop.spec.ts',
+        '**/canvas.spec.ts',
+        '**/node-editor.spec.ts',
+        '**/node-editor-enhanced.spec.ts',
+        '**/explain.spec.ts',
+      ],
     },
     {
       name: 'Mobile Chrome',
@@ -29,6 +32,12 @@ export default defineConfig({
         hasTouch: true,
         isMobile: true,
       },
+      testMatch: [
+        '**/navigation.spec.ts',
+        '**/records.spec.ts',
+        '**/applications-mobile.spec.ts',
+        '**/canvas-mobile.spec.ts',
+      ],
     },
   ],
 });
