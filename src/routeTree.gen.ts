@@ -8,114 +8,54 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkflowsIndexRouteImport } from './routes/workflows/index'
+import { Route as RecordsIndexRouteImport } from './routes/records/index'
+import { Route as WorkflowsApplicationNameRouteImport } from './routes/workflows/$applicationName'
+import { Route as RecordsIdRouteImport } from './routes/records/$id'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
-import { Route as IndexImport } from './routes/index'
-import { Route as WorkflowsIndexImport } from './routes/workflows/index'
-import { Route as RecordsIndexImport } from './routes/records/index'
-import { Route as WorkflowsApplicationNameImport } from './routes/workflows/$applicationName'
-import { Route as RecordsIdImport } from './routes/records/$id'
-
-// Create/Update Routes
-
-const AboutRoute = AboutImport.update({
+const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const WorkflowsIndexRoute = WorkflowsIndexImport.update({
+const WorkflowsIndexRoute = WorkflowsIndexRouteImport.update({
   id: '/workflows/',
   path: '/workflows/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const RecordsIndexRoute = RecordsIndexImport.update({
+const RecordsIndexRoute = RecordsIndexRouteImport.update({
   id: '/records/',
   path: '/records/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const WorkflowsApplicationNameRoute = WorkflowsApplicationNameImport.update({
-  id: '/workflows/$applicationName',
-  path: '/workflows/$applicationName',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const RecordsIdRoute = RecordsIdImport.update({
+const WorkflowsApplicationNameRoute =
+  WorkflowsApplicationNameRouteImport.update({
+    id: '/workflows/$applicationName',
+    path: '/workflows/$applicationName',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RecordsIdRoute = RecordsIdRouteImport.update({
   id: '/records/$id',
   path: '/records/$id',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
-    }
-    '/records/$id': {
-      id: '/records/$id'
-      path: '/records/$id'
-      fullPath: '/records/$id'
-      preLoaderRoute: typeof RecordsIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/workflows/$applicationName': {
-      id: '/workflows/$applicationName'
-      path: '/workflows/$applicationName'
-      fullPath: '/workflows/$applicationName'
-      preLoaderRoute: typeof WorkflowsApplicationNameImport
-      parentRoute: typeof rootRoute
-    }
-    '/records/': {
-      id: '/records/'
-      path: '/records'
-      fullPath: '/records'
-      preLoaderRoute: typeof RecordsIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/workflows/': {
-      id: '/workflows/'
-      path: '/workflows'
-      fullPath: '/workflows'
-      preLoaderRoute: typeof WorkflowsIndexImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/records/$id': typeof RecordsIdRoute
   '/workflows/$applicationName': typeof WorkflowsApplicationNameRoute
-  '/records': typeof RecordsIndexRoute
-  '/workflows': typeof WorkflowsIndexRoute
+  '/records/': typeof RecordsIndexRoute
+  '/workflows/': typeof WorkflowsIndexRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
@@ -124,9 +64,8 @@ export interface FileRoutesByTo {
   '/records': typeof RecordsIndexRoute
   '/workflows': typeof WorkflowsIndexRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/records/$id': typeof RecordsIdRoute
@@ -134,7 +73,6 @@ export interface FileRoutesById {
   '/records/': typeof RecordsIndexRoute
   '/workflows/': typeof WorkflowsIndexRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -142,8 +80,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/records/$id'
     | '/workflows/$applicationName'
-    | '/records'
-    | '/workflows'
+    | '/records/'
+    | '/workflows/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,7 +100,6 @@ export interface FileRouteTypes {
     | '/workflows/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
@@ -170,6 +107,53 @@ export interface RootRouteChildren {
   WorkflowsApplicationNameRoute: typeof WorkflowsApplicationNameRoute
   RecordsIndexRoute: typeof RecordsIndexRoute
   WorkflowsIndexRoute: typeof WorkflowsIndexRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows/': {
+      id: '/workflows/'
+      path: '/workflows'
+      fullPath: '/workflows/'
+      preLoaderRoute: typeof WorkflowsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records/': {
+      id: '/records/'
+      path: '/records'
+      fullPath: '/records/'
+      preLoaderRoute: typeof RecordsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflows/$applicationName': {
+      id: '/workflows/$applicationName'
+      path: '/workflows/$applicationName'
+      fullPath: '/workflows/$applicationName'
+      preLoaderRoute: typeof WorkflowsApplicationNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records/$id': {
+      id: '/records/$id'
+      path: '/records/$id'
+      fullPath: '/records/$id'
+      preLoaderRoute: typeof RecordsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -180,43 +164,6 @@ const rootRouteChildren: RootRouteChildren = {
   RecordsIndexRoute: RecordsIndexRoute,
   WorkflowsIndexRoute: WorkflowsIndexRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/about",
-        "/records/$id",
-        "/workflows/$applicationName",
-        "/records/",
-        "/workflows/"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/about": {
-      "filePath": "about.tsx"
-    },
-    "/records/$id": {
-      "filePath": "records/$id.tsx"
-    },
-    "/workflows/$applicationName": {
-      "filePath": "workflows/$applicationName.tsx"
-    },
-    "/records/": {
-      "filePath": "records/index.tsx"
-    },
-    "/workflows/": {
-      "filePath": "workflows/index.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
