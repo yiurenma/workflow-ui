@@ -41,7 +41,7 @@ const NodeSection: React.FC<NodeSectionProps> = ({
       )}
     </div>
     {subtitle && (
-      <p className="text-xs text-zinc-400 mb-3">{subtitle}</p>
+      <p className="text-xs text-zinc-600 mb-3">{subtitle}</p>
     )}
     {children}
   </div>
