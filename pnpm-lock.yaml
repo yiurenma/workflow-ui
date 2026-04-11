@@ -29,6 +29,9 @@ importers:
       antd:
         specifier: ^5.24.3
         version: 5.29.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.20
       human-id:
         specifier: ^4.1.1
         version: 4.1.3
