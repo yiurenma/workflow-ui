@@ -9,14 +9,13 @@ export const ConsumerPlugin: React.FC<NodeProps<ConsumerPluginProps>> = ({
 }) => {
   return (
     <div
-      className={`
-        relative flex flex-col w-52 rounded-lg bg-white overflow-hidden
-        border transition-all duration-150
-        ${selected
-          ? "border-indigo-300 ring-2 ring-indigo-500 ring-offset-1 shadow-sm"
-          : "border-zinc-200 shadow-sm hover:border-zinc-300 hover:shadow"
-        }
-      `}
+      className="relative flex flex-col w-52 rounded-xl bg-white overflow-hidden border transition-all duration-150"
+      style={{
+        borderColor: selected ? "#A5A5F0" : "var(--ql-border)",
+        boxShadow: selected
+          ? "0 0 0 2px #5B5BD6, 0 2px 8px rgba(91,91,214,0.15)"
+          : "var(--ql-shadow-sm)",
+      }}
     >
       {/* Top accent strip */}
       <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: ACCENT }} />
@@ -32,10 +31,10 @@ export const ConsumerPlugin: React.FC<NodeProps<ConsumerPluginProps>> = ({
           {data.icon}
         </span>
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-[11px] font-semibold text-zinc-800 leading-tight tracking-tight">
+          <span className="text-[11px] font-semibold leading-tight tracking-tight" style={{ color: "var(--ql-text-primary)" }}>
             HTTP Fetch
           </span>
-          <span className="text-[10px] text-zinc-400 truncate leading-tight mt-0.5">
+          <span className="text-[10px] truncate leading-tight mt-0.5" style={{ color: "var(--ql-text-muted)" }}>
             {data.label || "Unconfigured"}
           </span>
         </div>

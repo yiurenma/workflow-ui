@@ -2,7 +2,7 @@
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss" important;
 
-/* 字体声明 */
+/* ─── Inter Font Faces ────────────────────────────────────────── */
 @font-face {
   font-family: Inter;
   src: url("../src/assets/fonts/Inter-Regular.ttf");
@@ -35,6 +35,43 @@
   font-display: swap;
 }
 
+/* ─── Quiet Luxury Design Tokens ─────────────────────────────────
+   Warm off-white palette — moves away from cold zinc/blue-gray
+   toward warmer, more premium tones.
+──────────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --ql-bg:             #F8F7F5;   /* warm off-white canvas         */
+  --ql-bg-card:        #FFFFFF;   /* card / panel surface          */
+  --ql-bg-hover:       #F3F1EE;   /* row / item hover              */
+
+  /* Borders */
+  --ql-border:         #E2DDD9;   /* standard border (warm)        */
+  --ql-border-subtle:  #EDE9E5;   /* hair-line separator           */
+
+  /* Typography */
+  --ql-text-primary:   #1A1918;   /* near-black, warm              */
+  --ql-text-secondary: #6B6560;   /* medium warm gray              */
+  --ql-text-muted:     #9E9893;   /* placeholder / caption         */
+
+  /* Brand accent */
+  --ql-accent:         #5B5BD6;   /* sophisticated indigo-violet   */
+  --ql-accent-hover:   #4F4FC4;
+  --ql-accent-soft:    #EEEEFF;   /* tinted accent bg              */
+
+  /* Champagne gold — luxury highlight */
+  --ql-gold:           #B5985A;
+
+  /* Navigation dark surface */
+  --ql-nav-bg:         #0F0F16;
+  --ql-nav-border:     #1E1E2C;
+
+  /* Elevation shadows (warm, not blue-tinted) */
+  --ql-shadow-xs: 0 1px 2px rgba(26,25,24,0.05);
+  --ql-shadow-sm: 0 1px 3px rgba(26,25,24,0.07), 0 0 0 1px rgba(26,25,24,0.04);
+  --ql-shadow-md: 0 4px 16px rgba(26,25,24,0.09), 0 1px 4px rgba(26,25,24,0.05);
+}
+
 @theme {
   --font-inter: Inter;
   --color-hsbc-red: #e31e22;
@@ -42,6 +79,7 @@
   --color-hsbc-dark-red: #730014;
 }
 
+/* ─── Workflow Handle ─────────────────────────────────────────── */
 .handle-style {
   width: 8px;
   height: 8px;
@@ -49,72 +87,98 @@
   align-items: center;
   justify-content: center;
   background-size: cover;
-  background-color: #94A3B8;
+  background-color: #C4BEB9;
   background-position: center;
   background-image: url("../src/assets/svg/plus.svg");
   border: 1.5px solid #ffffff;
   border-radius: 50%;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .handle-style:hover {
-  background-color: #4F46E5;
-  transform: scale(1.25);
+  background-color: var(--ql-accent);
+  transform: scale(1.3);
   transition: all 0.15s ease;
 }
 
-/* Tighten Ant Design letter-spacing globally */
+/* ─── Base ────────────────────────────────────────────────────── */
 body {
   margin: 0;
   letter-spacing: -0.01em;
+  background-color: var(--ql-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Refine Ant Design table headers */
+/* ─── Ant Design Table ────────────────────────────────────────── */
 .ant-table-thead > tr > th {
-  background: #FAFAFA !important;
-  border-bottom: 1px solid #E4E4E7 !important;
+  background: #FAFAF8 !important;
+  border-bottom: 1px solid var(--ql-border) !important;
 }
 
-/* Refine Ant Design drawer */
+.ant-table-tbody > tr:hover > td {
+  background: var(--ql-bg-hover) !important;
+}
+
+/* ─── Ant Design Drawer ───────────────────────────────────────── */
 .ant-drawer-header {
-  background: #FAFAFA !important;
+  background: #FAFAF8 !important;
+  border-bottom: 1px solid var(--ql-border) !important;
 }
 
-/* React Flow minimap refinement */
+/* ─── React Flow Minimap ──────────────────────────────────────── */
 .react-flow__minimap {
-  border: 1px solid #E4E4E7;
-  border-radius: 6px;
+  border: 1px solid var(--ql-border);
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--ql-shadow-sm);
 }
 
-/* React Flow controls refinement */
+/* ─── React Flow Controls ─────────────────────────────────────── */
 .react-flow__controls {
-  border: 1px solid #E4E4E7 !important;
-  border-radius: 6px !important;
+  border: 1px solid var(--ql-border) !important;
+  border-radius: 8px !important;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: var(--ql-shadow-sm) !important;
 }
 
 .react-flow__controls-button {
-  border-bottom: 1px solid #E4E4E7 !important;
+  border-bottom: 1px solid var(--ql-border-subtle) !important;
   background: #ffffff !important;
+  transition: background 0.12s ease;
 }
 
 .react-flow__controls-button:hover {
-  background: #F4F4F5 !important;
+  background: var(--ql-bg) !important;
 }
 
 .react-flow__controls-button:last-child {
   border-bottom: none !important;
 }
 
+/* ─── Thin warm scrollbars ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ql-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ql-text-muted);
+}
+
+/* ─── Mobile ──────────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  /* React Flow controls — bigger touch targets */
   .react-flow__controls-button {
     width: 36px !important;
     height: 36px !important;
   }
 
-  /* MiniMap — hidden on mobile (also toggled in component) */
   .react-flow__minimap {
     display: none !important;
   }

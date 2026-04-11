@@ -242,7 +242,7 @@ const ApplicationList = () => {
   ];
 
   return (
-    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} bg-zinc-50 h-full overflow-y-auto`}>
+    <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} h-full overflow-y-auto`} style={{ background: "var(--ql-bg)" }}>
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
         <div>
           <Typography.Title level={4} className="!mb-0 !text-zinc-900 !font-semibold tracking-tight">
@@ -322,7 +322,8 @@ const ApplicationList = () => {
             {(data?.content ?? []).map((record: WorkflowEntitySettingRow) => (
               <div
                 key={String(record.id ?? record.applicationName)}
-                className="bg-white rounded-lg border border-zinc-200 shadow-sm px-4 py-3"
+                className="bg-white rounded-xl shadow-sm px-4 py-3"
+                style={{ border: "1px solid var(--ql-border)" }}
               >
                 <div className="flex items-center justify-between">
                   {/* Navigation zone — only tapping the info area navigates */}
@@ -410,10 +411,10 @@ const ApplicationList = () => {
                 dataSource={data?.content ?? []}
                 size="middle"
                 pagination={false}
-                className="bg-white rounded-lg shadow-sm border border-zinc-200"
-                style={{ minWidth: 700 }}
+                className="bg-white rounded-xl shadow-sm"
+                style={{ minWidth: 700, border: "1px solid var(--ql-border)" }}
                 rowClassName={(_: WorkflowEntitySettingRow, index: number) =>
-                  index % 2 === 1 ? "bg-zinc-50" : ""
+                  index % 2 === 1 ? "bg-[#F3F1EE]" : ""
                 }
               />
             </div>
@@ -441,8 +442,10 @@ const ApplicationList = () => {
           onPointerDown={onFabPointerDown}
           onPointerMove={onFabPointerMove}
           onPointerUp={onFabPointerUp}
-          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x }}
-          className="z-50 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center text-2xl hover:bg-indigo-700 touch-none select-none"
+          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x, background: "var(--ql-accent)" }}
+          className="z-50 w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl touch-none select-none"
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--ql-accent-hover)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--ql-accent)"; }}
           aria-label="New application"
         >
           <PlusOutlined />

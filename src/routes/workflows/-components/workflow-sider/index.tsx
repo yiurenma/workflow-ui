@@ -31,8 +31,8 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
       collapsedWidth={44}
       theme="light"
       onCollapse={(value: boolean) => setCollapsed(value)}
-      className="overflow-y-auto border-r border-zinc-200 bg-white"
-      style={{ background: "#FFFFFF" }}
+      className="overflow-y-auto"
+      style={{ background: "#FFFFFF", borderRight: "1px solid var(--ql-border)" }}
     >
       <div className="flex flex-col h-full">
         {/* Collapse toggle */}
@@ -42,7 +42,7 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
             size="small"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
+            style={{ color: "var(--ql-text-muted)" }}
           />
         </div>
 
@@ -50,13 +50,18 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
           <React.Fragment key={group.key}>
             {!collapsed && (
               <div className="px-3 pt-3 pb-1">
-                <span className="text-[9px] font-semibold text-zinc-400 uppercase tracking-widest">
+                <span
+                  className="text-[9px] font-semibold uppercase tracking-widest"
+                  style={{ color: "var(--ql-text-muted)" }}
+                >
                   {group.label}
                 </span>
               </div>
             )}
 
-            {collapsed && <Divider className="my-1 border-zinc-100" />}
+            {collapsed && (
+              <Divider className="my-1" style={{ borderColor: "var(--ql-border-subtle)" }} />
+            )}
 
             <div className="flex flex-col gap-0.5 px-1.5">
               {group.children.map((child) => {
@@ -72,8 +77,10 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
                     <div
                       draggable
                       onDragStart={(event) => onDragStart(event, child.key)}
-                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-md cursor-grab
-                        hover:bg-zinc-50 transition-colors duration-100 group"
+                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-md cursor-grab transition-colors duration-100 group"
+                      style={{}}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--ql-bg-hover)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = ""; }}
                     >
                       {/* Colored icon badge */}
                       <span
@@ -83,7 +90,10 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
                         {child.icon}
                       </span>
                       {!collapsed && (
-                        <span className="text-[11px] font-medium text-zinc-600 group-hover:text-zinc-900 leading-none truncate">
+                        <span
+                          className="text-[11px] font-medium leading-none truncate"
+                          style={{ color: "var(--ql-text-secondary)" }}
+                        >
                           {displayName}
                         </span>
                       )}

@@ -525,8 +525,8 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         align="center"
         justify={"space-between"}
         gap={"middle"}
-        className="py-2 px-4 border-b border-zinc-200 bg-white"
-        style={{ minHeight: 44 }}
+        className="py-2 px-4 bg-white"
+        style={{ minHeight: 44, borderBottom: "1px solid var(--ql-border)" }}
       >
         <Space size={"middle"}>
           <Link to={`/workflows`}>
@@ -597,7 +597,8 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 size="small"
                 onClick={() => onStraighten?.()}
                 disabled={isLoading}
-                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
+                className="text-xs font-medium"
+                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}
               >
                 Straighten
               </Button>
@@ -614,19 +615,22 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 size="small"
                 icon={<RobotOutlined />}
                 onClick={() => setGeneratorOpen(true)}
-                className="text-xs font-medium text-indigo-600 border-indigo-300 hover:border-indigo-400 hover:text-indigo-700"
+                className="text-xs font-medium"
+                style={{ color: "var(--ql-accent)", borderColor: "#A5A5F0" }}
               >
                 Generate
               </Button>
               <Button
                 size="small"
                 onClick={() => setJsonPathOpen(true)}
-                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800"
+                className="text-xs font-medium"
+                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}
               >
                 JsonPath
               </Button>
               <Button size="small" onClick={() => runFlow()} disabled={isLoading}
-                className="text-xs font-medium text-zinc-600 border-zinc-300 hover:border-zinc-400 hover:text-zinc-800">
+                className="text-xs font-medium"
+                style={{ color: "var(--ql-text-secondary)", borderColor: "var(--ql-border)" }}>
                 Run
               </Button>
               <Button
