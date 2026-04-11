@@ -42,35 +42,38 @@ export const Route = createRootRoute({
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#5B5BD6",
+            colorPrimary: "#7C4A3A",
+            colorPrimaryHover: "#9A5C49",
             borderRadius: 8,
-            fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            fontFamily: "'DM Sans', system-ui, sans-serif",
             colorBgContainer: "#FFFFFF",
-            colorBorder: "#E2DDD9",
-            colorBorderSecondary: "#EDE9E5",
-            colorText: "#1A1918",
+            colorBorder: "#DDD8D0",
+            colorBorderSecondary: "#EAE6DF",
+            colorText: "#2A2520",
             colorTextSecondary: "#6B6560",
+            colorBgLayout: "#F9F7F4",
           },
           components: {
             Layout: {
-              headerBg: "#0F0F16",
-              bodyBg: "#F8F7F5",
+              headerBg: "#2A2520",
+              bodyBg: "#F9F7F4",
             },
             Menu: {
-              darkItemBg: "#0F0F16",
-              darkItemSelectedBg: "#1E1E2C",
-              darkItemHoverBg: "#1E1E2C",
-              darkItemColor: "#9A9AAA",
-              darkItemSelectedColor: "#EEEEF8",
-              darkItemHoverColor: "#EEEEF8",
-              horizontalItemSelectedColor: "#A5A5F0",
+              darkItemBg: "#2A2520",
+              darkItemSelectedBg: "#3D3530",
+              darkItemHoverBg: "#3D3530",
+              darkItemColor: "#C9A87C",
+              darkItemSelectedColor: "#E8E0D5",
+              darkItemHoverColor: "#E8E0D5",
+              horizontalItemSelectedColor: "#C9A87C",
             },
             Button: {
               borderRadius: 8,
               fontWeight: 500,
             },
             Table: {
-              headerBg: "#FAFAF8",
+              headerBg: "#F3F0EB",
+              rowHoverBg: "#EEF5F0",
             },
             Modal: {
               borderRadiusLG: 14,
@@ -81,28 +84,20 @@ export const Route = createRootRoute({
           },
         }}
       >
-        <Layout className="h-dvh" style={{ background: "#F8F7F5" }}>
+        <Layout className="h-dvh" style={{ background: "#F9F7F4" }}>
           <Header
-            className="flex items-center justify-between px-3 md:px-8 leading-none"
-            style={{ height: 52, background: "#0F0F16", borderBottom: "1px solid #1E1E2C" }}
+            className="flex items-center justify-between px-3 md:px-8 leading-none border-b"
+            style={{ height: 52, background: "#2A2520", borderColor: "#3D3530" }}
           >
             <div className="flex items-center gap-2.5 min-w-0 shrink-0">
-              <div
-                className="flex items-center justify-center w-[26px] h-[26px] rounded-md shrink-0"
-                style={{
-                  background: "rgba(165,165,240,0.10)",
-                  border: "1px solid rgba(165,165,240,0.18)",
-                }}
-              >
-                <AppstoreOutlined className="text-[12px]" style={{ color: "#A5A5F0" }} />
-              </div>
+              <AppstoreOutlined className="text-base shrink-0" style={{ color: "#C9A87C" }} />
               <span
-                className="font-semibold text-[13px] truncate hidden sm:inline"
-                style={{ color: "#EAEAF6", letterSpacing: "-0.025em" }}
+                className="font-semibold truncate hidden sm:inline"
+                style={{ fontFamily: "'Lora', Georgia, serif", color: "#E8E0D5", fontSize: 15, letterSpacing: "0.02em" }}
               >
                 Workflow Studio
               </span>
-              <span className="text-xs mx-1 shrink-0 hidden sm:inline" style={{ color: "#2A2A3A" }}>
+              <span className="text-xs mx-1 shrink-0 hidden sm:inline" style={{ color: "#3D3530" }}>
                 |
               </span>
             </div>
@@ -112,7 +107,7 @@ export const Route = createRootRoute({
               selectable={false}
               items={menuItems}
               className="border-none flex-1 justify-end min-w-0 [&_.ant-menu-item]:px-2 md:[&_.ant-menu-item]:px-4"
-              style={{ background: "#0F0F16" }}
+              style={{ background: "#2A2520" }}
             />
           </Header>
           <Content className="flex-1 overflow-hidden">

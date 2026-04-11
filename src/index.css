@@ -1,82 +1,53 @@
 @layer theme, base, antd, components, utilities;
+
+/* Quiet Luxury — Google Fonts (must precede @layer) */
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss" important;
 
-/* ─── Inter Font Faces ────────────────────────────────────────── */
-@font-face {
-  font-family: Inter;
-  src: url("../src/assets/fonts/Inter-Regular.ttf");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Inter;
-  src: url("../src/assets/fonts/Inter-Medium.ttf");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Inter;
-  src: url("../src/assets/fonts/Inter-SemiBold.ttf");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: Inter;
-  src: url("../src/assets/fonts/Inter-Bold.ttf");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ─── Quiet Luxury Design Tokens ─────────────────────────────────
-   Warm off-white palette — moves away from cold zinc/blue-gray
-   toward warmer, more premium tones.
+   Approved palette from arch-doc-v27.0.md
 ──────────────────────────────────────────────────────────────── */
 :root {
   /* Surfaces */
-  --ql-bg:             #F8F7F5;   /* warm off-white canvas         */
+  --ql-bg:             #F9F7F4;   /* warm cream canvas             */
   --ql-bg-card:        #FFFFFF;   /* card / panel surface          */
-  --ql-bg-hover:       #F3F1EE;   /* row / item hover              */
+  --ql-bg-hover:       #EEF5F0;   /* row / item hover (mint tint)  */
 
   /* Borders */
-  --ql-border:         #E2DDD9;   /* standard border (warm)        */
-  --ql-border-subtle:  #EDE9E5;   /* hair-line separator           */
+  --ql-border:         #DDD8D0;   /* standard border (warm)        */
+  --ql-border-subtle:  #EAE6DF;   /* hair-line separator           */
 
   /* Typography */
-  --ql-text-primary:   #1A1918;   /* near-black, warm              */
-  --ql-text-secondary: #6B6560;   /* medium warm gray              */
-  --ql-text-muted:     #9E9893;   /* placeholder / caption         */
+  --ql-text-primary:   #2A2520;   /* warm charcoal                 */
+  --ql-text-secondary: #6B6560;   /* warm stone                    */
+  --ql-text-muted:     #9C9690;   /* placeholder / caption         */
 
-  /* Brand accent */
-  --ql-accent:         #5B5BD6;   /* sophisticated indigo-violet   */
-  --ql-accent-hover:   #4F4FC4;
-  --ql-accent-soft:    #EEEEFF;   /* tinted accent bg              */
+  /* Brand accent — deep terracotta */
+  --ql-accent:         #7C4A3A;
+  --ql-accent-hover:   #9A5C49;
+  --ql-accent-soft:    #F5EDE9;   /* tinted accent bg              */
 
   /* Champagne gold — luxury highlight */
-  --ql-gold:           #B5985A;
+  --ql-gold:           #C9A87C;
 
   /* Navigation dark surface */
-  --ql-nav-bg:         #0F0F16;
-  --ql-nav-border:     #1E1E2C;
+  --ql-nav-bg:         #2A2520;
+  --ql-nav-border:     #3D3530;
 
   /* Elevation shadows (warm, not blue-tinted) */
-  --ql-shadow-xs: 0 1px 2px rgba(26,25,24,0.05);
-  --ql-shadow-sm: 0 1px 3px rgba(26,25,24,0.07), 0 0 0 1px rgba(26,25,24,0.04);
-  --ql-shadow-md: 0 4px 16px rgba(26,25,24,0.09), 0 1px 4px rgba(26,25,24,0.05);
+  --ql-shadow-xs: 0 1px 2px rgba(42,37,32,0.05);
+  --ql-shadow-sm: 0 1px 3px rgba(42,37,32,0.08), 0 0 0 1px rgba(42,37,32,0.04);
+  --ql-shadow-md: 0 4px 16px rgba(42,37,32,0.10), 0 1px 4px rgba(42,37,32,0.05);
 }
 
 @theme {
-  --font-inter: Inter;
-  --color-hsbc-red: #e31e22;
+  --font-display: "Lora", Georgia, serif;
+  --font-body:    "DM Sans", system-ui, sans-serif;
+  --color-hsbc-red:        #e31e22;
   --color-hsbc-medium-red: #ba1110;
-  --color-hsbc-dark-red: #730014;
+  --color-hsbc-dark-red:   #730014;
 }
 
 /* ─── Workflow Handle ─────────────────────────────────────────── */
