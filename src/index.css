@@ -83,7 +83,7 @@ body {
 
 /* ─── Ant Design Table ────────────────────────────────────────── */
 .ant-table-thead > tr > th {
-  background: #FAFAF8 !important;
+  background: #F3F0EB !important;
   border-bottom: 1px solid var(--ql-border) !important;
 }
 
@@ -93,7 +93,7 @@ body {
 
 /* ─── Ant Design Drawer ───────────────────────────────────────── */
 .ant-drawer-header {
-  background: #FAFAF8 !important;
+  background: #F3F0EB !important;
   border-bottom: 1px solid var(--ql-border) !important;
 }
 

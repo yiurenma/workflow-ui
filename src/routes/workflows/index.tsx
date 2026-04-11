@@ -185,9 +185,9 @@ const ApplicationList = () => {
       width: 90,
       render: (v: boolean) =>
         v ? (
-          <Tag color="green" className="text-[10px] font-medium">Active</Tag>
+          <Tag style={{ backgroundColor: "#EAF3EE", color: "#2A6B4A", borderColor: "#A8CCBA", fontSize: 11, fontWeight: 500, borderRadius: 6 }}>Active</Tag>
         ) : (
-          <Tag className="text-[10px] font-medium text-zinc-400">Inactive</Tag>
+          <Tag style={{ backgroundColor: "#F3F0EB", color: "#9C9690", borderColor: "#DDD8D0", fontSize: 11, fontWeight: 500, borderRadius: 6 }}>Inactive</Tag>
         ),
     },
     {
@@ -337,19 +337,19 @@ const ApplicationList = () => {
                     }
                   >
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-zinc-800 text-sm truncate">
+                      <span className="font-semibold text-sm truncate" style={{ color: "#2A2520" }}>
                         {record.applicationName}
                       </span>
                       {record.enabled ? (
-                        <Tag color="green" className="text-[10px] font-medium shrink-0">Active</Tag>
+                        <Tag style={{ backgroundColor: "#EAF3EE", color: "#2A6B4A", borderColor: "#A8CCBA", fontSize: 11, fontWeight: 500, borderRadius: 6 }} className="shrink-0">Active</Tag>
                       ) : (
-                        <Tag className="text-[10px] font-medium text-zinc-400 shrink-0">Inactive</Tag>
+                        <Tag style={{ backgroundColor: "#F3F0EB", color: "#9C9690", borderColor: "#DDD8D0", fontSize: 11, fontWeight: 500, borderRadius: 6 }} className="shrink-0">Inactive</Tag>
                       )}
                     </div>
-                    <span className="text-zinc-500 text-xs mt-0.5 block truncate">
+                    <span className="text-xs mt-0.5 block truncate" style={{ color: "#6B6560" }}>
                       {record.description ?? record.eimId ?? record.defaultServiceAccount ?? record.region ?? "—"}
                     </span>
-                    <span className="text-zinc-400 text-xs mt-0.5 block">
+                    <span className="text-xs mt-0.5 block" style={{ color: "#9C9690" }}>
                       {record.lastModifiedDateTime ?? ""}
                     </span>
                   </div>
