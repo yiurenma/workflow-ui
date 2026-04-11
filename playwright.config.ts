@@ -22,6 +22,7 @@ export default defineConfig({
         '**/node-editor.spec.ts',
         '**/node-editor-enhanced.spec.ts',
         '**/explain.spec.ts',
+        '**/carbon-design-desktop.spec.ts',
       ],
     },
     {
@@ -37,6 +38,7 @@ export default defineConfig({
         '**/records.spec.ts',
         '**/applications-mobile.spec.ts',
         '**/canvas-mobile.spec.ts',
+        '**/carbon-design-mobile.spec.ts',
       ],
     },
   ],

@@ -40,31 +40,32 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   });
 
   test('TC-APP-MOB-05 ellipsis menu → History opens drawer (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('.bg-white .anticon-ellipsis').first();
+    // Carbon refactor: ellipsis button is an Ant Design text button with EllipsisOutlined icon
+    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
     await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
     await ellipsisBtn.scrollIntoViewIfNeeded();
     const urlBefore = page.url();
-    await ellipsisBtn.click({ force: true });
+    await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'History' }).click();
     await expect(page.locator('.ant-drawer')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
   test('TC-APP-MOB-06 ellipsis menu → Copy opens modal (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('.bg-white .anticon-ellipsis').first();
+    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
     await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
-    await ellipsisBtn.click({ force: true });
+    await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Copy' }).click();
     await expect(page.locator('.ant-modal')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
   test('TC-APP-MOB-07 ellipsis menu → Delete shows confirm (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('.bg-white .anticon-ellipsis').first();
+    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
     await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
-    await ellipsisBtn.click({ force: true });
+    await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Delete' }).click();
     await expect(page.locator('.ant-modal-confirm')).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
