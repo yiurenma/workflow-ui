@@ -41,6 +41,10 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     // Wait for drawer animation to complete (P2 fix)
     await page.waitForTimeout(300);
 
+    // v31.0 read-first mode: click Edit to enter form mode
+    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.waitForTimeout(300);
+
     // Layer 2: Size sufficiency (desktop drawer should be >200px height)
     const box = await drawer.boundingBox();
     expect(box).not.toBeNull();
@@ -148,6 +152,10 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
 
     const drawer = page.locator('.ant-drawer');
     await expect(drawer).toBeVisible();
+
+    // v31.0 read-first mode: click Edit to enter form mode
+    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.waitForTimeout(300);
 
     // Find Rules section textarea
     const rulesSection = drawer.locator('textarea').nth(1); // Assuming Rules is second textarea

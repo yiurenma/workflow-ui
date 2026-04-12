@@ -20,11 +20,11 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     // Wait for any FAB positioning animations to complete
     await page.waitForTimeout(300);
 
-    // Layer 2: Size - FAB must be ≥56×56px (Material Design spec)
+    // Layer 2: Size - FAB must be ≥48×48px (Carbon Design System standard)
     const box = await fab.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThanOrEqual(56);
-    expect(box!.height).toBeGreaterThanOrEqual(56);
+    expect(box!.width).toBeGreaterThanOrEqual(48);
+    expect(box!.height).toBeGreaterThanOrEqual(48);
 
     // Layer 3: Viewport - FAB must be in viewport
     await expect(fab).toBeInViewport();

@@ -69,6 +69,7 @@ test.describe('Carbon Design — Desktop (TC-CARBON-DESK)', () => {
   // Layer 3 — Viewport
   test('TC-CARBON-DESK-06 table is in viewport (not clipped)', async ({ page }) => {
     const table = page.locator('table').first();
+    await table.scrollIntoViewIfNeeded();
     await expect(table).toBeInViewport({ ratio: 0.5 });
   });
 

@@ -159,6 +159,10 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
 
     await openDrawer(page);
 
+    // v31.0 read-first mode: click Edit to enter form mode
+    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.waitForTimeout(300);
+
     const wrapper = page.locator('.ant-drawer-content-wrapper');
     const initialBox = await wrapper.boundingBox();
     expect(initialBox).not.toBeNull();
@@ -219,6 +223,10 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
     }
 
     await openDrawer(page);
+
+    // v31.0 read-first mode: click Edit to enter form mode
+    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.waitForTimeout(300);
 
     // Find the description input in the drawer
     const descInput = page.locator('.ant-drawer input, .ant-drawer textarea').first();
