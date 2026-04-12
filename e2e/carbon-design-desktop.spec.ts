@@ -26,7 +26,9 @@ test.describe('Carbon Design — Desktop (TC-CARBON-DESK)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
+    // Wait for content to render
+    await page.waitForSelector('table, .ant-flex', { timeout: 15000 });
   });
 
   // Layer 1 — Exist

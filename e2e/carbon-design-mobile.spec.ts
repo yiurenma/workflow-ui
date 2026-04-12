@@ -33,8 +33,9 @@ test.describe('Carbon Design — Mobile (TC-CARBON-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
-    await page.waitForLoadState('load');
-    await page.waitForSelector(CARD_SELECTOR, { timeout: 10_000 }).catch(() => {});
+    await page.waitForLoadState('networkidle');
+    // Wait for content to render
+    await page.waitForSelector(CARD_SELECTOR, { timeout: 15000 }).catch(() => {});
   });
 
   // Layer 1 — Exist
