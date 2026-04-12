@@ -49,31 +49,38 @@ export const PluginMetadataMap: Record<
     icon: React.ReactNode;
     color?: string;
     backgroundColor?: string;
+    description: string;
   }
 > = {
   [Plugin.CONSUMER]: {
     icon: <CloudDownloadOutlined />,
     color: "#3B82F6",
+    description: "Fetch data from external APIs",
   },
   [Plugin.MESSAGE]: {
     icon: <SendOutlined />,
     color: "#7C3AED",
+    description: "Send messages to channels",
   },
   [Plugin.IF_ELSE]: {
     icon: <BranchesOutlined />,
     color: "#D97706",
+    description: "Branch based on conditions",
   },
   [Plugin.FUNCTION]: {
     icon: <CodeOutlined />,
     color: "#059669",
+    description: "Transform data with logic",
   },
   [Plugin.CONSUMER_WITHOUT_ERROR]: {
     icon: <SafetyCertificateOutlined />,
     color: "#0D9488",
+    description: "Safe fetch without errors",
   },
   [Plugin.FUNCTION_V3]: {
     icon: <ThunderboltOutlined />,
     color: "#0891B2",
+    description: "Advanced data transform",
   },
 };
 

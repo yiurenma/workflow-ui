@@ -68,33 +68,45 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
                 const meta = PluginMetadataMap[child.key];
                 const accent = meta.color ?? "#525252";
                 const displayName = PluginDisplayName[child.key];
+                const description = meta.description;
                 return (
                   <Tooltip
-                    title={collapsed ? displayName : undefined}
+                    title={collapsed ? `${displayName}: ${description}` : undefined}
                     key={child.key}
                     placement="right"
                   >
                     <div
                       draggable
                       onDragStart={(event) => onDragStart(event, child.key)}
-                      className="flex items-center gap-2.5 px-2 py-1.5 cursor-grab transition-colors duration-100"
+                      className="flex flex-col gap-1 px-2 py-2 cursor-grab transition-colors duration-100"
                       style={{ borderRadius: 0 }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--cds-layer-01)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = ""; }}
                     >
                       {/* Colored icon badge */}
-                      <span
-                        className="flex items-center justify-center w-[22px] h-[22px] text-[12px] shrink-0"
-                        style={{ backgroundColor: `${accent}18`, color: accent, borderRadius: 0 }}
-                      >
-                        {child.icon}
-                      </span>
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className="flex items-center justify-center w-[22px] h-[22px] text-[12px] shrink-0"
+                          style={{ backgroundColor: `${accent}18`, color: accent, borderRadius: 0 }}
+                        >
+                          {child.icon}
+                        </span>
+                        {!collapsed && (
+                          <span
+                            className="text-[11px] font-medium leading-none truncate"
+                            style={{ color: "#525252", letterSpacing: "0.16px" }}
+                          >
+                            {displayName}
+                          </span>
+                        )}
+                      </div>
+                      {/* Description - only show when not collapsed */}
                       {!collapsed && (
                         <span
-                          className="text-[11px] font-medium leading-none truncate"
-                          style={{ color: "#525252", letterSpacing: "0.16px" }}
+                          className="text-[10px] leading-tight"
+                          style={{ color: "#525252", paddingLeft: "30px" }}
                         >
-                          {displayName}
+                          {description}
                         </span>
                       )}
                     </div>
