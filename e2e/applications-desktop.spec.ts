@@ -4,7 +4,7 @@ import { setupMocks } from './mocks';
 // Desktop table tests — testMatch in playwright.config.ts ensures this only runs on Desktop Chrome
 test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test.beforeEach(async ({ page }) => {
-    await setupMocks(page);
+    // Don't use mocks - run against real UAT backend
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
     // Wait for React to render - either table or loading spinner
     await page.waitForSelector('table, .ant-spin-container, .ant-flex', { timeout: 15000 });
