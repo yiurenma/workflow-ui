@@ -12,13 +12,46 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
 
   test('TC-CANVAS-MOB-01 FAB visible on mobile canvas', async ({ page }) => {
     const fab = page.getByRole('button', { name: 'Add node' });
+
+    // Layer 1: Exist
     await expect(fab).toBeVisible({ timeout: 5000 });
+
+    // Layer 2: Size - FAB must be ≥56×56px (Material Design spec)
+    const box = await fab.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeGreaterThanOrEqual(56);
+    expect(box!.height).toBeGreaterThanOrEqual(56);
+
+    // Layer 3: Viewport - FAB must be in viewport
+    await expect(fab).toBeInViewport();
+
+    // Layer 5: Effect - FAB background color matches Carbon Blue 60 (#0f62fe)
+    const bgColor = await fab.evaluate(el =>
+      window.getComputedStyle(el).backgroundColor
+    );
+    expect(bgColor).toBe('rgb(15, 98, 254)'); // #0f62fe
   });
 
   test('TC-CANVAS-MOB-02 tap FAB opens Add Node sheet', async ({ page }) => {
     const fab = page.getByRole('button', { name: 'Add node' });
+
+    // Layer 4: Interact - tap opens sheet
     await fab.tap();
-    await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5000 });
+
+    const drawer = page.locator('.ant-drawer');
+
+    // Layer 1: Exist
+    await expect(drawer).toBeVisible({ timeout: 5000 });
+
+    // Layer 2: Size - Sheet height >40% viewport
+    const box = await drawer.boundingBox();
+    const viewportHeight = page.viewportSize()!.height;
+    expect(box).not.toBeNull();
+    expect(box!.height).toBeGreaterThan(viewportHeight * 0.40);
+
+    // Layer 3: Viewport - Sheet header in viewport
+    const drawerHeader = drawer.locator('.ant-drawer-header').first();
+    await expect(drawerHeader).toBeInViewport();
   });
 
   test('TC-CANVAS-MOB-03 drag FAB does not open sheet', async ({ page }) => {
@@ -68,10 +101,23 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   });
 
   test('TC-CANVAS-MOB-09 node drawer opens from bottom on mobile', async ({ page }) => {
-    // Click first canvas node to open the drawer
+    // Layer 4: Interact - Click first canvas node to open the drawer
     const node = page.locator('.react-flow__node').first();
     await node.click({ timeout: 10_000 });
+
     const drawer = page.locator('.ant-drawer-bottom');
+
+    // Layer 1: Exist
     await expect(drawer).toBeVisible({ timeout: 5000 });
+
+    // Layer 2: Size - Drawer height >35% viewport (per spec)
+    const box = await drawer.boundingBox();
+    const viewportHeight = page.viewportSize()!.height;
+    expect(box).not.toBeNull();
+    expect(box!.height).toBeGreaterThan(viewportHeight * 0.35);
+
+    // Layer 3: Viewport - Drawer header in viewport
+    const drawerContent = drawer.locator('.ant-drawer-content').first();
+    await expect(drawerContent).toBeInViewport();
   });
 });
