@@ -17,10 +17,10 @@ import {
   Spin,
   Table,
   Typography,
-  Modal,
   message,
   Tag,
 } from "antd";
+import { carbonConfirm } from "@/components/CarbonModal";
 import type { ColumnsType } from "antd/es/table";
 import type { WorkflowEntitySettingRow } from "@/api/types";
 import React, { useMemo, useRef, useState } from "react";
@@ -119,7 +119,7 @@ const ApplicationList = () => {
   };
 
   const confirmDelete = (record: WorkflowEntitySettingRow) => {
-    Modal.confirm({
+    carbonConfirm({
       title: "Delete application",
       content: `Delete workflow for "${record.applicationName}"?`,
       okText: "Delete",

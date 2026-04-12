@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Drawer, Table, Typography, Modal, message, Spin, Button } from "antd";
+import { Drawer, Table, Typography, message, Spin, Button } from "antd";
+import { carbonConfirm } from "@/components/CarbonModal";
 import type { ColumnsType } from "antd/es/table";
 import { useEntitySettingHistory } from "@/api/hooks/workflow";
 import { operationApi } from "@/api/services/operation";
@@ -19,7 +20,7 @@ const HistoryDrawer: React.FC<HistoryDrawerProps> = ({ open, applicationName, on
   const { data, isLoading } = useEntitySettingHistory(applicationName ?? "", page);
 
   const handleRollback = (revision: HistoryRevision) => {
-    Modal.confirm({
+    carbonConfirm({
       title: "Rollback to this version?",
       content: `This will restore the workflow definition to revision #${revision.revisionNumber}. Entity settings (asyncMode, retry, etc.) are not affected.`,
       okText: "Rollback",
