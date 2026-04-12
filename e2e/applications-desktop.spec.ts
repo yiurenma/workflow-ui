@@ -5,15 +5,19 @@ import { setupMocks } from './mocks';
 test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
-    await page.goto('/workflows/');
-    await page.waitForLoadState('networkidle');
-    // Wait for either table (desktop) or card container (mobile fallback) to load
-    await page.waitForSelector('table, .ant-flex, .ant-spin-container', { timeout: 10000 });
+    await page.goto('/workflows/', { waitUntil: 'networkidle' });
+    // Wait for table to be fully rendered with content
+    await page.waitForSelector('table tbody tr', { timeout: 15000 });
+    // Additional wait for any pending renders
+    await page.waitForTimeout(500);
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {
     const table = page.locator('table').first();
-    await expect(table).toBeVisible();
+    await expect(table).toBeVisible({ timeout: 10000 });
+    // Verify table has actual content rows
+    const rows = page.locator('table tbody tr');
+    await expect(rows).toHaveCount(8, { timeout: 5000 });
   });
 
   test('TC-APP-DESK-02 pagination visible below table', async ({ page }) => {
@@ -30,18 +34,22 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test-app-01');
     await searchInput.press('Enter');
-    await page.waitForLoadState('load');
-    await expect(page.locator('body')).not.toBeEmpty();
+    await page.waitForLoadState('networkidle');
+    // Wait for filtered results to render
+    await page.waitForTimeout(1000);
+    const rows = page.locator('table tbody tr');
+    await expect(rows.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-APP-DESK-05 Open button navigates to canvas', async ({ page }) => {
     // Verify Open button is present and visible in the table
     const openBtn = page.getByRole('button', { name: 'Open' }).first();
     await expect(openBtn).toBeVisible({ timeout: 10_000 });
-    // Simulate the navigation that Open triggers (TanStack Router pushState is
-    // not reliably captured by waitForURL in this env; verify canvas loads)
-    await page.goto('/workflows/test-app-01');
-    await expect(page).toHaveURL(/\/workflows\/.+/);
+    // Click and wait for navigation
+    await openBtn.click();
+    await page.waitForURL(/\/workflows\/.+/, { timeout: 10000 });
+    // Verify canvas loaded
+    await page.waitForSelector('.react-flow', { timeout: 10000 });
   });
 
   test('TC-APP-DESK-06 Settings button opens modal (no navigation)', async ({ page }) => {
