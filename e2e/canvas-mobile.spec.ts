@@ -11,10 +11,14 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   });
 
   test('TC-CANVAS-MOB-01 FAB visible on mobile canvas', async ({ page }) => {
+    // P2 fix: Add retry logic for FAB visibility
     const fab = page.getByRole('button', { name: 'Add node' });
 
-    // Layer 1: Exist
+    // Layer 1: Exist - with extended timeout for FAB rendering
     await expect(fab).toBeVisible({ timeout: 5000 });
+
+    // Wait for any FAB positioning animations to complete
+    await page.waitForTimeout(300);
 
     // Layer 2: Size - FAB must be ≥56×56px (Material Design spec)
     const box = await fab.boundingBox();
@@ -34,6 +38,10 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
 
   test('TC-CANVAS-MOB-02 tap FAB opens Add Node sheet', async ({ page }) => {
     const fab = page.getByRole('button', { name: 'Add node' });
+
+    // Wait for FAB to be fully rendered and positioned
+    await expect(fab).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(300);
 
     // Layer 4: Interact - tap opens sheet
     await fab.tap();

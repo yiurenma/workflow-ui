@@ -38,6 +38,9 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
 
+    // Wait for drawer animation to complete (P2 fix)
+    await page.waitForTimeout(300);
+
     // Layer 2: Size sufficiency (desktop drawer should be >200px height)
     const box = await drawer.boundingBox();
     expect(box).not.toBeNull();
@@ -86,6 +89,9 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
 
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
+
+    // Wait for drawer animation to complete (P2 fix)
+    await page.waitForTimeout(300);
 
     // Layer 2: Size sufficiency (mobile drawer >35% viewport height)
     const box = await drawer.boundingBox();
