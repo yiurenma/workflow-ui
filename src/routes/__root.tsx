@@ -73,7 +73,8 @@ export const Route = createRootRoute({
             Button: {
               borderRadius: 0,
               fontWeight: 400,
-              controlHeight: 40,
+              controlHeight: 48,
+              controlHeightLG: 48,
             },
             Table: {
               headerBg: "#f4f4f4",

@@ -23,7 +23,9 @@
 .ant-btn {
   border-radius: 0 !important;
   font-family: 'IBM Plex Sans', sans-serif !important;
+  min-height: 40px;
   height: 48px;
+  min-width: 44px;
   padding: 0 16px;
 }
 
