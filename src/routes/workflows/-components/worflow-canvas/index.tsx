@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -29,6 +29,7 @@ import { ConsumerWithoutErrorPlugin } from "./convas/plugins/consumer-without-er
 import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { MobileAddNodeSheet } from "./MobileAddNodeSheet";
+import { NodeContextMenu } from "@/components/NodeContextMenu";
 
 const X_COLUMN = 300;
 const Y_STEP = 120;
@@ -129,6 +130,50 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     onNodeFormChange,
   } = useWorkflowForm({ setNodes });
 
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    node: Node;
+    position: { x: number; y: number };
+  } | null>(null);
+
+  // Handle right-click on node
+  const onNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
+    event.preventDefault();
+    setContextMenu({
+      node,
+      position: { x: event.clientX, y: event.clientY },
+    });
+  }, []);
+
+  // Handle duplicate node
+  const handleDuplicate = useCallback((nodeId: string) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    const newNode: Node = {
+      ...node,
+      id: `node_${Date.now()}`,
+      position: {
+        x: node.position.x + 50,
+        y: node.position.y + 50,
+      },
+      data: { ...node.data },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+  }, [nodes, setNodes]);
+
+  // Handle delete node
+  const handleDelete = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+  }, [setNodes, setEdges]);
+
+  // Get connected edges for a node
+  const getConnectedEdges = useCallback((nodeId: string) => {
+    return edges.filter((e) => e.source === nodeId || e.target === nodeId);
+  }, [edges]);
+
   return (
     <>
       <ReactFlow
@@ -140,7 +185,11 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodeClick={onNodeClick}
-        onPaneClick={onDrawerClose}
+        onNodeContextMenu={onNodeContextMenu}
+        onPaneClick={(e) => {
+          onDrawerClose();
+          setContextMenu(null);
+        }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
@@ -168,6 +217,16 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         selectedNode={selectedNode}
         onFormChange={onNodeFormChange}
       />
+      {contextMenu && (
+        <NodeContextMenu
+          node={contextMenu.node}
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+          getConnectedEdges={getConnectedEdges}
+        />
+      )}
     </>
   );
 };
