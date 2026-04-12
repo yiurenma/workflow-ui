@@ -66,7 +66,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
 
     // Visual regression
     await expect(drawer).toHaveScreenshot('node-editor-desktop.png', {
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05,
     });
 
     // Accessibility

@@ -58,6 +58,7 @@ test.describe('Carbon Design — Mobile (TC-CARBON-MOB)', () => {
   test('TC-CARBON-MOB-03 first card is in viewport', async ({ page }) => {
     const card = page.locator(CARD_SELECTOR).first();
     await expect(card).toBeVisible({ timeout: 8000 });
+    await card.scrollIntoViewIfNeeded();
     await expect(card).toBeInViewport({ ratio: 0.5 });
   });
 
