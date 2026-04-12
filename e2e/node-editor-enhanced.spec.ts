@@ -161,31 +161,25 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.ant-drawer');
-    await expect(drawer).toBeVisible({ timeout: 5000 });
+    // Wait for content wrapper to be visible (outer .ant-drawer stays in DOM always)
+    const contentWrapper = page.locator('.ant-drawer-content-wrapper');
+    await expect(contentWrapper).toBeVisible({ timeout: 5000 });
 
-    // Try close button first; if drawer stays open, click the mask overlay
-    const closeBtn = drawer.locator('.ant-drawer-close').first();
-    const closeBtnVisible = await closeBtn.isVisible().catch(() => false);
-    if (closeBtnVisible) {
-      await closeBtn.click();
+    // Use custom close button (aria-label="Close") — Ant Design internal .ant-drawer-close
+    // is hidden via closable={false} in v29.0
+    const customCloseBtn = page.locator('.ant-drawer [aria-label="Close"]');
+    const customCloseBtnVisible = await customCloseBtn.isVisible().catch(() => false);
+    if (customCloseBtnVisible) {
+      await customCloseBtn.click();
+    } else {
+      // Fallback: canvas pane click
+      const vw = page.viewportSize()!.width;
+      const vh = page.viewportSize()!.height;
+      await page.mouse.click(vw * 0.3, vh * 0.5);
     }
 
-    // If drawer is still visible after close button, click the mask
-    const stillVisible = await drawer.isVisible().catch(() => false);
-    if (stillVisible) {
-      const mask = page.locator('.ant-drawer-mask').first();
-      const maskVisible = await mask.isVisible().catch(() => false);
-      if (maskVisible) {
-        await mask.click();
-      } else {
-        // Last resort: Escape key
-        await page.keyboard.press('Escape');
-      }
-    }
-
-    // Layer 5: Drawer closes — allow animation time
-    await expect(drawer).not.toBeVisible({ timeout: 8000 });
+    // Layer 5: Drawer content wrapper closes — allow animation time
+    await expect(contentWrapper).not.toBeVisible({ timeout: 8000 });
 
     // Canvas still visible
     const canvas = page.locator('.react-flow, [data-testid="rf__wrapper"]').first();

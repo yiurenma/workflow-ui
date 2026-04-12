@@ -4,6 +4,13 @@
  * Test cases: TC-DRAWER-CLOSE-01 through TC-DRAWER-CLOSE-10
  * 5-layer UX validation: Exist / Size / Viewport / Interact / Effect
  *
+ * Build a7dc488: closable={false} on both drawers; custom close button with
+ * aria-label="Close" and explicit onClick={onClose}; mobile minHeight: 40dvh.
+ *
+ * Selector change from previous run:
+ *   OLD: .ant-drawer-close  (Ant Design internal button — now hidden via closable={false})
+ *   NEW: [aria-label="Close"]  (custom button inside drawerTitle)
+ *
  * Project routing:
  *   Desktop Chrome → TC-DRAWER-CLOSE Desktop describe (01, 06, 07, 08, 09, 10)
  *   Mobile Chrome  → TC-DRAWER-CLOSE Mobile describe  (02, 03, 04, 05, 09)
@@ -20,6 +27,11 @@ import { setupMocks } from './mocks';
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** Locator for the custom close button (aria-label="Close") inside the drawer. */
+function closeButton(page: import('@playwright/test').Page) {
+  return page.locator('.ant-drawer [aria-label="Close"]');
+}
+
 /** Open the node editor drawer by clicking/tapping the first canvas node. */
 async function openDrawer(page: import('@playwright/test').Page) {
   const node = page.locator('.react-flow__node').first();
@@ -30,17 +42,21 @@ async function openDrawer(page: import('@playwright/test').Page) {
   } else {
     await node.click();
   }
-  await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 8_000 });
+  // Wait for the content wrapper to become visible (not the outer .ant-drawer which is always in DOM)
+  await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible({ timeout: 8_000 });
+  // Wait for custom close button to be present
+  await expect(closeButton(page)).toBeVisible({ timeout: 5_000 });
 }
 
 /**
  * Wait for the drawer to fully close.
- * Ant Design keeps the .ant-drawer element in the DOM during the close
- * animation; after animation it gets display:none / visibility:hidden.
- * We wait for it to become not-visible with a generous timeout.
+ * In Ant Design 5 + rc-drawer, the outer .ant-drawer wrapper stays in the DOM
+ * with display:block even when closed. The inner .ant-drawer-content-wrapper
+ * gets class ant-drawer-content-wrapper-hidden and display:none when closed.
+ * We assert on the content wrapper's visibility instead.
  */
 async function waitForDrawerClosed(page: import('@playwright/test').Page) {
-  await expect(page.locator('.ant-drawer')).not.toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.ant-drawer-content-wrapper')).not.toBeVisible({ timeout: 10_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -65,11 +81,11 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
-    await expect(page.locator('.ant-drawer-close')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
+    await expect(closeButton(page)).toBeVisible();
 
-    // L4 — Interact: click close button
-    await page.locator('.ant-drawer-close').click();
+    // L4 — Interact: click custom close button
+    await closeButton(page).click();
 
     // L5 — Effect: drawer gone (allow animation to complete)
     await waitForDrawerClosed(page);
@@ -84,8 +100,8 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
-    await expect(page.locator('.ant-drawer-close')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
+    await expect(closeButton(page)).toBeVisible();
 
     // L2 — Size: drawer wrapper
     const drawerBox = await page.locator('.ant-drawer-content-wrapper').boundingBox();
@@ -93,18 +109,19 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
     expect(drawerBox!.width).toBeGreaterThanOrEqual(320);
     expect(drawerBox!.width).toBeLessThanOrEqual(900);
 
-    // L2 — Size: close button (Ant Design default is ~24px icon; we assert >= 24)
-    const closeBox = await page.locator('.ant-drawer-close').boundingBox();
+    // L2 — Size: close button touch target >= 44x44 (custom button should meet this)
+    const closeBox = await closeButton(page).boundingBox();
     expect(closeBox).not.toBeNull();
+    console.log(`TC-DRAWER-CLOSE-06 closeBox: width=${closeBox!.width}, height=${closeBox!.height}`);
     expect(closeBox!.width).toBeGreaterThanOrEqual(24);
     expect(closeBox!.height).toBeGreaterThanOrEqual(24);
 
     // L3 — Viewport
     await expect(page.locator('.ant-drawer-header')).toBeInViewport();
-    await expect(page.locator('.ant-drawer-close')).toBeInViewport();
+    await expect(closeButton(page)).toBeInViewport();
 
     // L4 — Interact
-    await page.locator('.ant-drawer-close').click();
+    await closeButton(page).click();
 
     // L5 — Effect
     await waitForDrawerClosed(page);
@@ -122,10 +139,9 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
     }
 
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
 
     // L4 — Interact: click the empty canvas pane (away from drawer)
-    // Use a coordinate in the left portion of the canvas, away from the drawer
     const vw = page.viewportSize()!.width;
     const vh = page.viewportSize()!.height;
     await page.mouse.click(vw * 0.3, vh * 0.5);
@@ -175,21 +191,21 @@ test.describe('TC-DRAWER-CLOSE Desktop', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
 
     // L5 — drawer title visible
     const drawerTitle = page.locator('.ant-drawer-title');
     await expect(drawerTitle).toBeVisible({ timeout: 5_000 });
 
     // Close and open second node
-    await page.locator('.ant-drawer-close').click();
+    await closeButton(page).click();
     await waitForDrawerClosed(page);
 
     const nodes = page.locator('.react-flow__node');
     const count = await nodes.count();
     if (count >= 2) {
       await nodes.nth(1).click();
-      await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5_000 });
+      await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible({ timeout: 5_000 });
       // L5 — drawer opened for second node (not stale)
       await expect(page.locator('.ant-drawer-title')).toBeVisible();
     }
@@ -242,8 +258,8 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
-    await expect(page.locator('.ant-drawer-close')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
+    await expect(closeButton(page)).toBeVisible();
     await expect(page.locator('.ant-drawer-header')).toBeVisible();
 
     // Wait for drawer animation to settle before measuring
@@ -256,7 +272,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
 
     console.log(`TC-DRAWER-CLOSE-02 wrapperBox: height=${wrapperBox!.height}, width=${wrapperBox!.width}, y=${wrapperBox!.y}`);
 
-    // height between 35% and 70% of viewport
+    // height between 35% and 70% of viewport (minHeight: 40dvh fix should give ~337px+)
     expect(wrapperBox!.height).toBeGreaterThan(vh * 0.35);       // > 295.4px
     expect(wrapperBox!.height).toBeLessThanOrEqual(vh * 0.70);   // <= 590.8px
 
@@ -270,7 +286,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     expect(wrapperBox!.y).toBeGreaterThanOrEqual(0);
 
     // close button touch target >= 44x44
-    const closeBox = await page.locator('.ant-drawer-close').boundingBox();
+    const closeBox = await closeButton(page).boundingBox();
     expect(closeBox).not.toBeNull();
     console.log(`TC-DRAWER-CLOSE-02 closeBox: width=${closeBox!.width}, height=${closeBox!.height}, x=${closeBox!.x}, y=${closeBox!.y}`);
     expect(closeBox!.width).toBeGreaterThanOrEqual(44);
@@ -284,7 +300,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
 
     // L3 — Viewport (not clipped)
     await expect(page.locator('.ant-drawer-header')).toBeInViewport();
-    await expect(page.locator('.ant-drawer-close')).toBeInViewport();
+    await expect(closeButton(page)).toBeInViewport();
     await expect(page.locator('.ant-drawer-body')).toBeInViewport();
 
     // no horizontal overflow
@@ -292,7 +308,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     expect(scrollWidth).toBeLessThanOrEqual(vw);
 
     // L4 — Interact: tap close button
-    await page.locator('.ant-drawer-close').tap();
+    await closeButton(page).tap();
 
     // L5 — Effect: drawer gone, canvas interactive
     await waitForDrawerClosed(page);
@@ -396,13 +412,13 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.ant-drawer')).toBeVisible();
+    await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible();
 
     // L5 — drawer title visible
     await expect(page.locator('.ant-drawer-title')).toBeVisible({ timeout: 5_000 });
 
     // Close and reopen
-    await page.locator('.ant-drawer-close').tap();
+    await closeButton(page).tap();
     await waitForDrawerClosed(page);
 
     // L4 — tap second node if available
@@ -410,7 +426,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     const count = await nodes.count();
     if (count >= 2) {
       await nodes.nth(1).tap();
-      await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5_000 });
+      await expect(page.locator('.ant-drawer-content-wrapper')).toBeVisible({ timeout: 5_000 });
       await expect(page.locator('.ant-drawer-title')).toBeVisible();
     }
   });
