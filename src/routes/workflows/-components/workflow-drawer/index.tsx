@@ -77,13 +77,36 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
   };
 
   const drawerTitle = (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
-        Node Configuration
-      </span>
-      <span className="text-sm font-semibold leading-tight" style={{ color: "#161616" }}>
-        {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
-      </span>
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
+          Node Configuration
+        </span>
+        <span className="text-sm font-semibold leading-tight truncate" style={{ color: "#161616" }}>
+          {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
+        </span>
+      </div>
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "8px",
+          color: "#525252",
+          fontSize: 16,
+          lineHeight: 1,
+          flexShrink: 0,
+          minWidth: 44,
+          minHeight: 44,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        ✕
+      </button>
     </div>
   );
 
@@ -97,9 +120,11 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         onClose={onClose}
         open={open}
         mask={false}
+        closable={false}
         aria-label="Node Configuration"
         styles={{
           wrapper: {
+            minHeight: "40dvh",
             maxHeight: "70dvh",
             boxShadow: "0 -2px 6px rgba(0,0,0,0.3)",
             borderTopLeftRadius: 0,
@@ -109,6 +134,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
           content: {
             display: "flex",
             flexDirection: "column",
+            minHeight: "40dvh",
             maxHeight: "70dvh",
           },
           header: {
@@ -140,6 +166,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       onClose={onClose}
       open={open}
       width={drawerWidth}
+      closable={false}
       aria-label="Node Configuration"
       styles={{
         header: { borderBottom: "1px solid #c6c6c6", padding: "12px 16px", background: "#f4f4f4" },
