@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
-import { Drawer, Empty } from "antd";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Drawer, Empty, Button, Space } from "antd";
 import { Node } from "@xyflow/react";
 import { Plugin } from "@/types/plugins";
 import HttpCallForm from "./forms/HttpCallForm";
 import LogicForm from "./forms/LogicForm";
+import NodeView from "./NodeView";
 import { type PluginFormData } from "@/routes/workflows/-components/worflow-canvas/hooks/useWorkflowForm";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
@@ -26,7 +27,17 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [drawerWidth, setDrawerWidth] = useState(DEFAULT_WIDTH);
+  const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [editingData, setEditingData] = useState<PluginFormData | null>(null);
   const resizeState = useRef({ active: false, startX: 0, startWidth: DEFAULT_WIDTH });
+
+  // Reset to view mode when drawer opens with a new node
+  useEffect(() => {
+    if (open && selectedNode) {
+      setMode('view');
+      setEditingData(null);
+    }
+  }, [open, selectedNode?.id]);
 
   const onResizePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -51,14 +62,41 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
     [drawerWidth]
   );
 
-  const renderForm = () => {
+  const handleEdit = () => {
+    setMode('edit');
+  };
+
+  const handleDone = () => {
+    // Save changes if any
+    if (editingData && selectedNode) {
+      onFormChange?.(selectedNode.id, editingData);
+    }
+    setMode('view');
+    setEditingData(null);
+  };
+
+  const handleCancel = () => {
+    // Discard changes
+    setMode('view');
+    setEditingData(null);
+  };
+
+  const handleFormChange = (formData: PluginFormData) => {
+    setEditingData(formData);
+  };
+
+  const renderContent = () => {
     if (!selectedNode) {
       return <Empty description="Please select a node" />;
     }
 
+    if (mode === 'view') {
+      return <NodeView selectedNode={selectedNode} />;
+    }
+
+    // Edit mode - render form
     const nodeType = selectedNode.type as Plugin;
-    const onValuesChange = (formData: PluginFormData) =>
-      onFormChange?.(selectedNode.id, formData);
+    const onValuesChange = handleFormChange;
 
     switch (nodeType) {
       case Plugin.CONSUMER:
@@ -86,30 +124,76 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
           {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
         </span>
       </div>
-      <button
-        onClick={onClose}
-        aria-label="Close"
-        className="ant-drawer-close"
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "8px",
-          color: "#525252",
-          fontSize: 16,
-          lineHeight: 1,
-          flexShrink: 0,
-          minWidth: 44,
-          minHeight: 44,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        ✕
-      </button>
+      <div className="flex items-center gap-2">
+        {mode === 'view' ? (
+          <Button
+            type="primary"
+            size="small"
+            onClick={handleEdit}
+            style={{
+              background: "#0f62fe",
+              borderColor: "#0f62fe",
+              borderRadius: 0,
+              minWidth: 60,
+              minHeight: 32,
+            }}
+          >
+            Edit
+          </Button>
+        ) : (
+          <Space size="small">
+            <Button
+              size="small"
+              onClick={handleCancel}
+              style={{
+                borderRadius: 0,
+                minWidth: 60,
+                minHeight: 32,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={handleDone}
+              style={{
+                background: "#0f62fe",
+                borderColor: "#0f62fe",
+                borderRadius: 0,
+                minWidth: 60,
+                minHeight: 32,
+              }}
+            >
+              Done
+            </Button>
+          </Space>
+        )}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="ant-drawer-close"
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "8px",
+            color: "#525252",
+            fontSize: 16,
+            lineHeight: 1,
+            flexShrink: 0,
+            minWidth: 44,
+            minHeight: 44,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          ✕
+        </button>
+      </div>
     </div>
   );
 
@@ -158,7 +242,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
           },
         }}
       >
-        {renderForm()}
+        {renderContent()}
       </Drawer>
     );
   }
@@ -204,7 +288,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         }
         title="Drag to resize panel"
       />
-      {renderForm()}
+      {renderContent()}
     </Drawer>
   );
 };
