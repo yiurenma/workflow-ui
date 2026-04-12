@@ -30,7 +30,6 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 
   const onResizePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      e.preventDefault();
       const s = resizeState.current;
       s.active = true;
       s.startX = e.clientX;
@@ -160,6 +159,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
           zIndex: 10,
           background: "transparent",
           transition: "background 0.15s",
+          userSelect: "none",
         }}
         onMouseEnter={(e) =>
           ((e.currentTarget as HTMLDivElement).style.background =

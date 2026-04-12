@@ -140,6 +140,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodeClick={onNodeClick}
+        onPaneClick={onDrawerClose}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
