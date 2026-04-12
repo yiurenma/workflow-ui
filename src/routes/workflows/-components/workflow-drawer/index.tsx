@@ -87,7 +87,10 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         </span>
       </div>
       <button
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         aria-label="Close"
         style={{
           background: "none",
@@ -103,6 +106,8 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         ✕
@@ -120,6 +125,8 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         onClose={onClose}
         open={open}
         mask={false}
+        maskClosable={true}
+        keyboard={false}
         closable={false}
         aria-label="Node Configuration"
         styles={{
@@ -167,6 +174,8 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
       open={open}
       width={drawerWidth}
       closable={false}
+      maskClosable={true}
+      keyboard={true}
       aria-label="Node Configuration"
       styles={{
         header: { borderBottom: "1px solid #c6c6c6", padding: "12px 16px", background: "#f4f4f4" },
