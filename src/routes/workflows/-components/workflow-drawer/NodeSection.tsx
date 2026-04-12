@@ -40,7 +40,7 @@ const NodeSection: React.FC<NodeSectionProps> = ({
         {title}
       </p>
       {headingTooltip && (
-        <Tooltip title={headingTooltip}>
+        <Tooltip title={headingTooltip} overlayClassName="carbon-tooltip">
           <InfoCircleOutlined className="text-[10px] cursor-help" style={{ color: "#8d8d8d" }} />
         </Tooltip>
       )}

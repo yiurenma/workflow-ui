@@ -543,6 +543,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             <>
               <Dropdown
                 trigger={["click"]}
+                overlayClassName="carbon-dropdown"
                 menu={{
                   items: [
                     {

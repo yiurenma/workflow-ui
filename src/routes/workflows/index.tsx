@@ -369,7 +369,12 @@ const ApplicationList = () => {
                     >
                       Settings
                     </Button>
-                    <Dropdown menu={cardMenu(record)} trigger={["click"]} placement="bottomRight">
+                    <Dropdown
+                      menu={cardMenu(record)}
+                      trigger={["click"]}
+                      placement="bottomRight"
+                      overlayClassName="carbon-dropdown"
+                    >
                       <Button
                         type="text"
                         size="small"

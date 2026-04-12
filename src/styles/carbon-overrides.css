@@ -63,6 +63,37 @@
   border-radius: 0 !important;
   background: #ffffff !important;
   border: 1px solid #c6c6c6 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+.ant-dropdown-menu-item {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-size: 14px !important;
+  color: #161616 !important;
+  border-radius: 0 !important;
+}
+
+.ant-dropdown-menu-item:hover {
+  background: #e8e8e8 !important;
+}
+
+/* Carbon-specific dropdown class */
+.carbon-dropdown .ant-dropdown-menu {
+  background: #f4f4f4 !important;
+  border: 1px solid #c6c6c6 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+.carbon-dropdown .ant-dropdown-menu-item {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-size: 14px !important;
+  color: #161616 !important;
+  border-radius: 0 !important;
+}
+
+.carbon-dropdown .ant-dropdown-menu-item:hover {
+  background: #e8e8e8 !important;
 }
 
 /* Tooltips */
@@ -70,10 +101,28 @@
   background: #161616 !important;
   color: #ffffff !important;
   border-radius: 0 !important;
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-size: 14px !important;
 }
 
 .ant-tooltip-arrow-content {
   background: #161616 !important;
+}
+
+/* Carbon-specific tooltip class */
+.carbon-tooltip .ant-tooltip-inner {
+  background: #f4f4f4 !important;
+  color: #161616 !important;
+  border: 1px solid #c6c6c6 !important;
+  border-radius: 0 !important;
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-size: 14px !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+.carbon-tooltip .ant-tooltip-arrow::before {
+  background: #f4f4f4 !important;
+  border: 1px solid #c6c6c6 !important;
 }
 
 /* Drawers */

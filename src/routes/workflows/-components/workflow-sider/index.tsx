@@ -74,6 +74,7 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
                     title={collapsed ? `${displayName}: ${description}` : undefined}
                     key={child.key}
                     placement="right"
+                    overlayClassName="carbon-tooltip"
                   >
                     <div
                       draggable
