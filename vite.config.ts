@@ -14,9 +14,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
       react(),
       tailwindcss(),
-      TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
       tsconfigPaths(),
       useMock && mockServer()
     ].filter(Boolean),
