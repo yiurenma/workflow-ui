@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Select, Button, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
 import NodeSection from "../NodeSection";
 import { tryFormatJson, useJsonFormat } from "../useJsonFormat";
+import { validateRuleKey } from "@/utils/validateRuleKey";
 
 export type HttpCallFormValues = {
   description?: string;
@@ -28,6 +29,7 @@ type HttpCallFormProps = {
 const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChange }) => {
   const [form] = Form.useForm<HttpCallFormValues>();
   const formatOnBlur = useJsonFormat(form, onValuesChange);
+  const [ruleKeyErrors, setRuleKeyErrors] = useState<Record<number, string>>({});
 
   useEffect(() => {
     if (selectedNode?.data) {
@@ -81,23 +83,38 @@ const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChang
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...rest }) => (
-                <Space key={key} align="baseline" className="flex mb-2">
-                  <Form.Item
-                    {...rest}
-                    name={[name, "key"]}
-                    className="!mb-0"
-                    tooltip='e.g. $.messageInformation[?(@.customerId =~ /.+?/)] — evaluates to true when the path returns a result'
-                  >
-                    <Input
-                      placeholder='$.messageInformation[?(@.field == "value")]'
-                      style={{ width: 200 }}
-                    />
-                  </Form.Item>
-                  <Form.Item {...rest} name={[name, "remark"]} className="!mb-0">
-                    <Input placeholder="Human-readable explanation" style={{ width: 120 }} />
-                  </Form.Item>
-                  <MinusCircleOutlined onClick={() => remove(name)} />
-                </Space>
+                <div key={key} className="mb-2">
+                  <Space align="baseline" className="flex">
+                    <Form.Item
+                      {...rest}
+                      name={[name, "key"]}
+                      className="!mb-0"
+                      tooltip='e.g. $.messageInformation[?(@.customerId =~ /.+?/)] — evaluates to true when the path returns a result'
+                      validateStatus={ruleKeyErrors[name] ? 'error' : undefined}
+                    >
+                      <Input
+                        placeholder='$.messageInformation[?(@.field == "value")]'
+                        style={{ width: 200 }}
+                        onBlur={(e) => {
+                          const result = validateRuleKey(e.target.value);
+                          if (!result.valid) {
+                            setRuleKeyErrors({ ...ruleKeyErrors, [name]: result.error! });
+                          } else {
+                            const { [name]: _, ...rest } = ruleKeyErrors;
+                            setRuleKeyErrors(rest);
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                    <Form.Item {...rest} name={[name, "remark"]} className="!mb-0">
+                      <Input placeholder="Human-readable explanation" style={{ width: 120 }} />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                  {ruleKeyErrors[name] && (
+                    <div className="text-red-600 text-xs mt-1">{ruleKeyErrors[name]}</div>
+                  )}
+                </div>
               ))}
               <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} block>
                 Add rule
