@@ -6,7 +6,9 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
+    // Wait for either table (desktop) or card container (mobile fallback) to load
+    await page.waitForSelector('table, .ant-flex, .ant-spin-container', { timeout: 10000 });
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {

@@ -6,7 +6,9 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/');
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
+    // Wait for card container to load on mobile
+    await page.waitForSelector('.ant-flex, .ant-spin-container, .mobile-app-card', { timeout: 10000 });
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {
