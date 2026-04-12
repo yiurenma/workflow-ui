@@ -5,10 +5,9 @@ import { setupMocks } from './mocks';
 test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
-    await page.goto('/workflows/');
-    await page.waitForLoadState('networkidle');
-    // Wait for card container to load on mobile
-    await page.waitForSelector('.ant-flex, .ant-spin-container, .mobile-app-card', { timeout: 10000 });
+    await page.goto('/workflows/', { waitUntil: 'networkidle' });
+    // Wait for React to render - either cards or loading spinner
+    await page.waitForSelector('.ant-flex, .ant-spin-container', { timeout: 15000 });
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {

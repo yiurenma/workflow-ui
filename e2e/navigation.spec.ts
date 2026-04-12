@@ -13,8 +13,8 @@ test.describe('Navigation — TC-NAV', () => {
   });
 
   test('TC-NAV-02 applications list route resolves', async ({ page }) => {
-    await page.goto('/workflows/');
-    await page.waitForLoadState('load');
+    await page.goto('/workflows/', { waitUntil: 'networkidle' });
+    await page.waitForSelector('table, .ant-flex, .ant-spin-container', { timeout: 15000 });
     await expect(page.getByText('Applications').first()).toBeVisible();
   });
 
