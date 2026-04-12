@@ -12,6 +12,7 @@ import {
   Dropdown,
   Flex,
   Input,
+  Modal,
   Pagination,
   Space,
   Spin,
