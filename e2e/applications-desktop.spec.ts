@@ -7,7 +7,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await setupMocks(page);
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
     // Wait for React to render - either table or loading spinner
-    await page.waitForSelector('table, .ant-spin-container', { timeout: 15000 });
+    await page.waitForSelector('table, .ant-spin-container, .ant-flex', { timeout: 15000 });
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {
