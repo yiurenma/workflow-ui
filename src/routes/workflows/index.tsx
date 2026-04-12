@@ -25,6 +25,7 @@ import type { ColumnsType } from "antd/es/table";
 import type { WorkflowEntitySettingRow } from "@/api/types";
 import React, { useMemo, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { WorkflowStudioIntro } from "@/components/WorkflowStudioIntro";
 
 export const Route = createFileRoute("/workflows/")({
   component: RouteComponent,
@@ -243,6 +244,9 @@ const ApplicationList = () => {
 
   return (
     <Flex vertical gap="large" className={`${isMobile ? "p-4" : "p-8"} h-full overflow-y-auto`} style={{ background: "#ffffff" }}>
+      {/* Workflow Studio Introduction */}
+      <WorkflowStudioIntro />
+
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
         <div>
           <Typography.Title level={4} className="!mb-0 !font-semibold" style={{ color: "#161616", letterSpacing: 0 }}>
