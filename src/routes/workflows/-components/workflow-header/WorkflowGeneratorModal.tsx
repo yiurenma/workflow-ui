@@ -32,11 +32,29 @@ Schema:
   ]
 }
 
+Node Types and Their Purposes:
+- HTTP (Consumer): Fetch data from external APIs - use for GET/POST requests to external services
+- MESSAGE (Dispatch): Send messages to channels - use for notifications, webhooks, message queuing
+- IF_ELSE (Condition): Branch based on conditions - use for conditional logic and routing
+- FUNCTION (Transform): Transform data with logic - use for data manipulation, enrichment, calculations
+
+Edge Connection Semantics:
+- Each edge in uiMapList connects two nodes using their uiMap.id values
+- source: the uiMap.id of the node where the flow starts
+- target: the uiMap.id of the node where the flow goes next
+- Edges define execution order: source node runs first, then target node
+- First node should have no incoming edges (no other node points to it)
+- All other nodes should have at least one incoming edge
+
+Layout Guidance:
+- Positions should be laid out top-to-bottom for readability: x=300, y = (index * 150)
+- This creates a vertical flow that is easy to understand
+- First node at y=0, second at y=150, third at y=300, etc.
+
 Rules:
 - Each plugin in pluginList must have a unique numeric id (starting at 1).
 - linkingIdOfRuleListAndAction must match uiMap.id.
 - uiMapList entries connect pluginList nodes using their uiMap.id values as source/target.
-- Positions should be laid out top-to-bottom: x=300, y = (index * 150).
 - ruleList should use realistic JSONPath expressions (e.g. $.customer.status).
 - All string values must be non-empty.
 - Output ONLY valid RFC 8259 JSON. All property names MUST be double-quoted strings. No single quotes, no unquoted keys, no trailing commas, no comments.
