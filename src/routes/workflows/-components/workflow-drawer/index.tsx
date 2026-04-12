@@ -87,11 +87,9 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
         </span>
       </div>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
+        onClick={onClose}
         aria-label="Close"
+        className="ant-drawer-close"
         style={{
           background: "none",
           border: "none",
