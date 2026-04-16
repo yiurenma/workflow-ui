@@ -28,3 +28,7 @@ dist-ssr
 playwright-report/
 test-results/
 test-output.log
+
+# Fresh UAT demo captures (large binaries; regenerate locally or in CI)
+e2e/uat-demo-media/
+e2e/uat-demo-capture-output/

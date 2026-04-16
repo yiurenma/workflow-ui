@@ -11,6 +11,21 @@ export default defineConfig({
     screenshot: 'on',
   },
   projects: [
+    /** Live UAT screenshots + screen recording for product demo (no CI gate). */
+    {
+      name: 'UAT Demo Capture',
+      retries: 0,
+      timeout: 120_000,
+      outputDir: 'e2e/uat-demo-capture-output',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        video: { mode: 'on', size: { width: 1920, height: 1080 } },
+        trace: 'off',
+        screenshot: 'off',
+      },
+      testMatch: ['**/uat-demo-capture.spec.ts'],
+    },
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
