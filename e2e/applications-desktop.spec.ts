@@ -66,7 +66,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(historyBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await historyBtn.click();
-    await expect(page.locator('.drawer-panel, .drawer-header')).toBeVisible();
+    await expect(page.locator('.drawer-panel').first()).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
@@ -95,7 +95,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     const modal = page.locator('.modal-box');
     await expect(modal).toBeVisible({ timeout: 5000 });
     // The rename input must be present and pre-filled with current application name
-    const nameInput = modal.getByLabel(/application name/i);
+    const nameInput = modal.getByLabel(/application name.*rename/i);
     await expect(nameInput).toBeVisible({ timeout: 3000 });
     await expect(nameInput).not.toHaveValue('');
   });
