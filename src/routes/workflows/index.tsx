@@ -45,7 +45,7 @@ function loadFabPos(): { x: number; y: number } {
     const s = localStorage.getItem(FAB_POS_KEY);
     if (s) return JSON.parse(s);
   } catch {}
-  return { x: 24, y: 24 };
+  return { x: 24, y: 84 }; // 60px mobile tab bar + 24px margin
 }
 
 const ApplicationList = () => {
@@ -452,8 +452,8 @@ const ApplicationList = () => {
           onPointerDown={onFabPointerDown}
           onPointerMove={onFabPointerMove}
           onPointerUp={onFabPointerUp}
-          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x, background: "#0f62fe" }}
-          className="z-50 w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl touch-none select-none"
+          style={{ position: "fixed", bottom: fabPos.y, right: fabPos.x, background: "#0f62fe", zIndex: 250 }}
+          className="w-14 h-14 rounded-full text-white flex items-center justify-center text-2xl touch-none select-none"
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#0353e9"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#0f62fe"; }}
           aria-label="New application"
