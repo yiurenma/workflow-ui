@@ -39,6 +39,7 @@ export default defineConfig({
         '**/explain.spec.ts',
         '**/carbon-design-desktop.spec.ts',
         '**/drawer-close-v29.spec.ts',
+        '**/refactor-regression.spec.ts',
       ],
     },
     {

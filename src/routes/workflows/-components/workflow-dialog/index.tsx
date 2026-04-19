@@ -37,8 +37,8 @@ export const WorkflowDialog: React.FC<WorkflowDialogProps> = ({
     try {
       const values = await form.validateFields();
       onSubmit(values);
-    } catch (error) {
-      console.error("Validation failed:", error);
+    } catch {
+      // Validation errors are shown by the form
     }
   };
 

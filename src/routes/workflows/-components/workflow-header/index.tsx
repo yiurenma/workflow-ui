@@ -5,11 +5,13 @@ import type { WorkFlow } from "@/api/types";
 import { useSaveWorkflow } from "@/api/hooks/workflow";
 import { onlineApi } from "@/api/services/online";
 import React, { useState } from "react";
-import { useGitHubDeviceFlow } from "./useGitHubDeviceFlow";
 import { SimpleMarkdown } from "./SimpleMarkdown";
 import { JsonPathModal } from "./JsonPathModal";
 import { WorkflowGeneratorModal } from "./WorkflowGeneratorModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useAIExplain } from "./useAIExplain";
+import { isValidToken, getStoredToken } from "@/utils/tokenStorage";
+import { callAIForGenerator } from "@/services/aiGeneratorService";
 
 const { TextArea } = Input;
 
@@ -23,157 +25,6 @@ type WorkflowHeaderProps = {
 };
 
 const defaultRunBody = `{\n  "messageInformation": {}\n}`;
-
-const AI_TOKEN_KEY = "ai_explain_token";
-
-function isValidToken(token: string | null): boolean {
-  if (!token) return false;
-  return (
-    token.startsWith("sk-ant-") ||
-    token.startsWith("ghp_") ||
-    token.startsWith("github_pat_") ||
-    token.startsWith("gho_") ||
-    token.startsWith("ghu_") ||
-    token.startsWith("ghs_")
-  );
-}
-
-function truncate(value: unknown, maxLen = 500): string {
-  if (value === undefined || value === null) return "(none)";
-  const s = typeof value === "string" ? value : JSON.stringify(value, null, 2);
-  return s.length > maxLen ? s.slice(0, maxLen) + " …[truncated]" : s;
-}
-
-function buildExplainPrompt(applicationName: string, workFlow: WorkFlow): string {
-  const steps = (workFlow.pluginList ?? []).map((plugin, i) => {
-    const action = plugin.action;
-    const type = action?.type ?? "UNKNOWN";
-    const desc = plugin.description ?? `Step ${i + 1}`;
-    const provider = action?.provider ?? "(none)";
-    const method = action?.httpRequestMethod ?? "";
-    const url = action?.httpRequestUrlWithQueryParameter
-      ? truncate(action.httpRequestUrlWithQueryParameter, 300)
-      : "";
-    const body = action?.httpRequestBody ? truncate(action.httpRequestBody) : "";
-    const elseLogic = action?.elseLogic ? truncate(action.elseLogic) : "";
-
-    const rulesBlock =
-      (plugin.ruleList ?? []).length === 0
-        ? "    (no rules — always executes)"
-        : (plugin.ruleList ?? [])
-            .map(
-              (r, ri) =>
-                `    ${ri + 1}. JSONPath: ${r.key ?? "(empty)"}${r.remark ? `\n       Meaning: ${r.remark}` : ""}`
-            )
-            .join("\n");
-
-    const actionBlock = [
-      `    type: ${type}`,
-      `    provider: ${provider}`,
-      method ? `    method: ${method}` : "",
-      url ? `    url: ${url}` : "",
-      body ? `    request body: ${body}` : "",
-      elseLogic ? `    logic/payload: ${elseLogic}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    return `### Step ${i + 1} — ${desc}
-
-  Rules (all must match for this step to execute):
-${rulesBlock}
-
-  Action:
-${actionBlock}`;
-  });
-
-  return `You are an expert software architect. Explain the following workflow pipeline to a developer or business analyst.
-
-Application: "${applicationName}"
-Total steps: ${steps.length}
-
-${steps.join("\n\n") || "  (no steps configured yet)"}
-
----
-
-Please provide the following, formatted in Markdown with ## headings and bullet lists:
-
-## Summary
-One sentence describing what this workflow does end-to-end.
-
-## Step-by-Step Explanation
-For each step:
-- Explain what it does in plain English
-- Explain what each **rule** means — what condition must be true for this step to run
-- Explain what the **action** does — what system it calls, what data it sends or transforms, what the payload/logic achieves
-
-## Data Flow
-How data flows through the steps — what gets enriched, transformed, or routed.
-
-## Observations
-Any notable patterns, potential concerns, or suggestions you notice.
-
-Use plain language. Avoid jargon. Format each step as a ## heading.`;
-}
-
-async function callAI(token: string, prompt: string, maxTokens = 1024): Promise<string> {
-  // Detect token type by prefix
-  const isAnthropic = token.startsWith("sk-ant-");
-  const isGitHub =
-    token.startsWith("ghp_") ||
-    token.startsWith("github_pat_") ||
-    token.startsWith("gho_") ||
-    token.startsWith("ghu_") ||
-    token.startsWith("ghs_");
-
-  if (isAnthropic) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": token,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: maxTokens,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Anthropic API error ${res.status}: ${err}`);
-    }
-    const data = await res.json();
-    return data.content?.[0]?.text ?? "(no response)";
-  }
-
-  if (isGitHub) {
-    const res = await fetch("https://models.inference.ai.azure.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: maxTokens,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`GitHub Models API error ${res.status}: ${err}`);
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "(no response)";
-  }
-
-  throw new Error(
-    "Unrecognised token format. Use an Anthropic key (sk-ant-…) or a GitHub token (ghp_…, github_pat_…, gho_ from device login, ghu_…).",
-  );
-}
 
 const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   applicationName,
@@ -190,28 +41,10 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [confirmationNumber, setConfirmationNumber] = useState("test-confirmation");
   const [runResult, setRunResult] = useState<string | null>(null);
   const [runLoading, setRunLoading] = useState(false);
-
-  // Explain state
-  const [explainOpen, setExplainOpen] = useState(false);
-  const [explainLoading, setExplainLoading] = useState(false);
-  const [explainResult, setExplainResult] = useState<string | null>(null);
-
-  // Manual token entry modal (fallback)
-  const [tokenInput, setTokenInput] = useState("");
-  const [tokenPromptOpen, setTokenPromptOpen] = useState(false);
-
-  // GitHub OAuth Device Flow modal
-  const [deviceFlowOpen, setDeviceFlowOpen] = useState(false);
   const [jsonPathOpen, setJsonPathOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
 
-  const handleOAuthSuccess = (token: string) => {
-    localStorage.setItem(AI_TOKEN_KEY, token);
-    setDeviceFlowOpen(false);
-    runExplain(token);
-  };
-
-  const deviceFlow = useGitHubDeviceFlow(handleOAuthSuccess);
+  const aiExplain = useAIExplain();
 
   const saveFlow = async () => {
     if (!workFlow) {
@@ -228,7 +61,6 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
       });
       message.success("Workflow saved successfully");
     } catch (error) {
-      console.error("Failed to save workflow:", error);
       message.error("Failed to save workflow");
     }
   };
@@ -259,186 +91,23 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
     }
   };
 
-  const explainFlow = () => {
-    const token = localStorage.getItem(AI_TOKEN_KEY);
-    if (!isValidToken(token)) {
-      // No valid token — start GitHub OAuth Device Flow
-      setDeviceFlowOpen(true);
-      deviceFlow.start();
-      return;
-    }
-    runExplain(token!);
-  };
-
-  const openManualTokenModal = () => {
-    // Cancel Device Flow and switch to manual entry
-    deviceFlow.cancel();
-    setDeviceFlowOpen(false);
-    setTokenInput("");
-    setTokenPromptOpen(true);
-  };
-
-  const saveTokenAndExplain = () => {
-    const t = tokenInput.trim();
-    if (!t) {
-      message.error("Please enter a token");
-      return;
-    }
-    localStorage.setItem(AI_TOKEN_KEY, t);
-    setTokenPromptOpen(false);
-    runExplain(t);
-  };
-
-  const runExplain = async (token: string) => {
-    const current = onSave ? onSave() : workFlow;
-    if (!current) {
-      message.error("No workflow data available");
-      return;
-    }
-    setExplainResult(null);
-    setExplainOpen(true);
-    setExplainLoading(true);
-    try {
-      const prompt = buildExplainPrompt(applicationName, current);
-      const result = await callAI(token, prompt);
-      setExplainResult(result);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setExplainResult(`Error: ${msg}`);
-      message.error("AI explain failed");
-    } finally {
-      setExplainLoading(false);
-    }
-  };
-
-  const clearToken = () => {
-    localStorage.removeItem(AI_TOKEN_KEY);
-    message.info("AI token cleared");
-  };
-
-  const cancelDeviceFlow = () => {
-    deviceFlow.cancel();
-    setDeviceFlowOpen(false);
-  };
-
-  const callAIForGenerator = async (
-    prompt: string,
-    onProgress?: (msg: string) => void
-  ): Promise<string> => {
-    const token = localStorage.getItem(AI_TOKEN_KEY);
-    if (!isValidToken(token)) throw new Error("No valid AI token");
-
-    const MAX_CONTINUATIONS = 5;
-    const MAX_TOKENS = 8192;
-    const CONTINUE_MSG =
-      "Continue the JSON exactly where you stopped. Output only the continuation — no repetition, no preamble, no explanation.";
-    const isAnthropic = token!.startsWith("sk-ant-");
-
-    let accumulated = "";
-
-    for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
-      if (i === 0) {
-        onProgress?.("Generating…");
-      } else {
-        onProgress?.(`Response incomplete — fetching part ${i + 1}…`);
-      }
-
-      let part: string;
-      if (i === 0) {
-        part = await callAI(token!, prompt, MAX_TOKENS);
-      } else {
-        // Multi-turn continuation: replay conversation + ask to continue
-        const messages =
-          i === 1
-            ? [
-                { role: "user", content: prompt },
-                { role: "assistant", content: accumulated },
-                { role: "user", content: CONTINUE_MSG },
-              ]
-            : [
-                { role: "user", content: prompt },
-                { role: "assistant", content: accumulated },
-                { role: "user", content: CONTINUE_MSG },
-              ];
-
-        if (isAnthropic) {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": token!,
-              "anthropic-version": "2023-06-01",
-              "anthropic-dangerous-direct-browser-access": "true",
-            },
-            body: JSON.stringify({
-              model: "claude-haiku-4-5-20251001",
-              max_tokens: MAX_TOKENS,
-              messages,
-            }),
-          });
-          if (!res.ok) throw new Error(`Anthropic API error ${res.status}: ${await res.text()}`);
-          const data = await res.json();
-          part = data.content?.[0]?.text ?? "";
-        } else {
-          const res = await fetch("https://models.inference.ai.azure.com/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token!}`,
-            },
-            body: JSON.stringify({
-              model: "gpt-4o-mini",
-              messages,
-              max_tokens: MAX_TOKENS,
-            }),
-          });
-          if (!res.ok) throw new Error(`GitHub Models API error ${res.status}: ${await res.text()}`);
-          const data = await res.json();
-          part = data.choices?.[0]?.message?.content ?? "";
-        }
-      }
-
-      accumulated += part;
-
-      // Check completion: outermost JSON object closes with }
-      const stripped = accumulated
-        .trim()
-        .replace(/^```(?:json5?|javascript|js)?\s*/i, "")
-        .replace(/\s*```\s*$/i, "")
-        .trim();
-      if (stripped.endsWith("}")) {
-        onProgress?.("Generating…"); // reset
-        return accumulated;
-      }
-
-      if (i === MAX_CONTINUATIONS) {
-        throw new Error(
-          `Response still incomplete after ${MAX_CONTINUATIONS} continuations. ` +
-            "Try describing a simpler workflow with fewer steps."
-        );
-      }
-    }
-
-    return accumulated; // unreachable but satisfies TS
-  };
+  const getWorkflow = () => (onSave ? onSave() : workFlow) ?? null;
 
   const handleGeneratorNeedToken = () => {
     setGeneratorOpen(false);
-    setDeviceFlowOpen(true);
-    deviceFlow.start();
+    aiExplain.setDeviceFlowOpen(true);
+    aiExplain.deviceFlow.start();
   };
 
   const openGitHub = (verificationUri: string) => {
     const opened = window.open(verificationUri, "_blank");
     if (!opened) {
-      // Popup blocked — show the URL as fallback (handled in modal UI)
       message.info(`Please open ${verificationUri} in your browser and enter the code.`);
     }
   };
 
-  // Derive Device Flow modal body based on current state
   const renderDeviceFlowContent = () => {
-    const { state } = deviceFlow;
+    const { state } = aiExplain.deviceFlow;
 
     if (state.status === "requesting") {
       return (
@@ -487,7 +156,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             Authorization timed out — please try again.
           </Typography.Text>
           <div className="mt-3">
-            <Button onClick={() => deviceFlow.start()}>Try again</Button>
+            <Button onClick={() => aiExplain.deviceFlow.start()}>Try again</Button>
           </div>
         </div>
       );
@@ -510,7 +179,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             {state.message}
           </Typography.Text>
           <div className="mt-3">
-            <Button onClick={() => deviceFlow.start()}>Try again</Button>
+            <Button onClick={() => aiExplain.deviceFlow.start()}>Try again</Button>
           </div>
         </div>
       );
@@ -556,7 +225,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                       key: "explain",
                       label: "Explain",
                       icon: <BulbOutlined />,
-                      onClick: explainFlow,
+                      onClick: () => aiExplain.explainFlow(getWorkflow, applicationName),
                       disabled: !!isLoading,
                     },
                     {
@@ -606,7 +275,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
               <Button
                 size="small"
                 icon={<BulbOutlined />}
-                onClick={explainFlow}
+                onClick={() => aiExplain.explainFlow(getWorkflow, applicationName)}
                 disabled={isLoading}
                 className="text-xs font-medium"
                 style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
@@ -650,7 +319,6 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         </Space>
       </Flex>
 
-      {/* GitHub OAuth Device Flow modal */}
       <Modal
         title={
           <Space>
@@ -658,14 +326,14 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             <span>Authorize with GitHub</span>
           </Space>
         }
-        open={deviceFlowOpen}
-        onCancel={cancelDeviceFlow}
+        open={aiExplain.deviceFlowOpen}
+        onCancel={aiExplain.cancelDeviceFlow}
         footer={
           <Space>
-            <Button type="link" size="small" className="text-xs text-zinc-400" onClick={openManualTokenModal}>
+            <Button type="link" size="small" className="text-xs text-zinc-400" onClick={aiExplain.openManualTokenModal}>
               Paste a token manually
             </Button>
-            <Button onClick={cancelDeviceFlow}>Cancel</Button>
+            <Button onClick={aiExplain.cancelDeviceFlow}>Cancel</Button>
           </Space>
         }
         width={420}
@@ -673,12 +341,11 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         {renderDeviceFlowContent()}
       </Modal>
 
-      {/* Manual token entry modal (fallback) */}
       <Modal
         title="Set AI Token"
-        open={tokenPromptOpen}
-        onCancel={() => setTokenPromptOpen(false)}
-        onOk={saveTokenAndExplain}
+        open={aiExplain.tokenPromptOpen}
+        onCancel={() => aiExplain.setTokenPromptOpen(false)}
+        onOk={() => aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}
         okText="Save & Explain"
         width={480}
       >
@@ -690,14 +357,13 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         </Typography.Paragraph>
         <Input.Password
           placeholder="sk-ant-… or ghp_… / gho_…"
-          value={tokenInput}
-          onChange={(e) => setTokenInput(e.target.value)}
-          onPressEnter={saveTokenAndExplain}
+          value={aiExplain.tokenInput}
+          onChange={(e) => aiExplain.setTokenInput(e.target.value)}
+          onPressEnter={() => aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}
           autoFocus
         />
       </Modal>
 
-      {/* Explain result modal */}
       <Modal
         title={
           <Space>
@@ -705,25 +371,25 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
             <span>AI Workflow Explainer — {applicationName}</span>
           </Space>
         }
-        open={explainOpen}
-        onCancel={() => setExplainOpen(false)}
+        open={aiExplain.explainOpen}
+        onCancel={() => aiExplain.setExplainOpen(false)}
         footer={
           <Space>
-            <Button size="small" onClick={clearToken} type="text" className="text-zinc-400 text-xs">
+            <Button size="small" onClick={aiExplain.clearToken} type="text" className="text-zinc-400 text-xs">
               Clear token
             </Button>
-            <Button onClick={() => setExplainOpen(false)}>Close</Button>
+            <Button onClick={() => aiExplain.setExplainOpen(false)}>Close</Button>
           </Space>
         }
         width={680}
       >
-        {explainLoading ? (
+        {aiExplain.explainLoading ? (
           <div className="py-10 text-center text-zinc-400 text-sm">
             Analysing workflow with AI…
           </div>
-        ) : explainResult ? (
+        ) : aiExplain.explainResult ? (
           <div className="max-h-[60vh] overflow-y-auto pr-1">
-            <SimpleMarkdown content={explainResult} />
+            <SimpleMarkdown content={aiExplain.explainResult} />
           </div>
         ) : null}
       </Modal>
@@ -735,7 +401,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         onClose={() => setGeneratorOpen(false)}
         onGenerated={(wf) => { onWorkflowGenerated?.(wf); }}
         callAI={callAIForGenerator}
-        isTokenAvailable={isValidToken(localStorage.getItem(AI_TOKEN_KEY))}
+        isTokenAvailable={isValidToken(getStoredToken())}
         onNeedToken={handleGeneratorNeedToken}
       />
 

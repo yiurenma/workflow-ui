@@ -35,15 +35,9 @@ export const ButtonEdge: React.FC<EdgeProps> = ({
     return selected ? { strokeWidth: 2, stroke: "#4F46E5" } : {};
   }, [selected]);
 
-  // Handle edge delete button click
   const onEdgeDelete = (event: React.MouseEvent) => {
-    // Stop propagation to prevent edge selection
     event.stopPropagation();
-
-    // Remove the edge from the graph
     setEdges((edges) => edges.filter((edge) => edge.id !== id));
-
-    console.log("Edge deleted:", id);
   };
 
   return (

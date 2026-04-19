@@ -71,7 +71,6 @@ export const WorkflowDialogProvider: React.FC<WorkflowDialogProviderProps> = ({
         });
       }
     } catch (error) {
-      console.error("failed to submit:", error);
       message.error("Could not create application");
     }
   };

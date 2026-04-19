@@ -28,7 +28,15 @@ dist-ssr
 playwright-report/
 test-results/
 test-output.log
+e2e-test-output.log
 
 # Fresh UAT demo captures (large binaries; regenerate locally or in CI)
 e2e/uat-demo-media/
 e2e/uat-demo-capture-output/
+
+# Core dumps and system files
+core
+*.core
+
+# Style refactor logs
+STYLE_REFACTOR_LOG.md
