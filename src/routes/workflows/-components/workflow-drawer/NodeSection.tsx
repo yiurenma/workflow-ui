@@ -10,46 +10,69 @@ type NodeSectionProps = {
   headingTooltip?: string;
 };
 
-/**
- * Shared panel wrapper for the three-panel node editor layout.
- * variant="inset" applies a shaded card background (used for the Action panel).
- * subtitle: plain-English one-liner for business users.
- * headingTooltip: persisted field map for developers (shown on ⓘ icon hover).
- */
 const NodeSection: React.FC<NodeSectionProps> = ({
   title,
   children,
   variant = "default",
   subtitle,
   headingTooltip,
-}) => (
-  <div
-    className={
-      variant === "inset"
-        ? "mb-4 p-3"
-        : "mb-4 p-3"
-    }
-    style={{
-      background: variant === "inset" ? "#f4f4f4" : "#ffffff",
-      border: "1px solid #e0e0e0",
-      borderRadius: 0,
-    }}
-  >
-    <div className="flex items-center gap-1 mb-1">
-      <p className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
-        {title}
-      </p>
-      {headingTooltip && (
-        <Tooltip title={headingTooltip} overlayClassName="carbon-tooltip">
-          <InfoCircleOutlined className="text-[10px] cursor-help" style={{ color: "#8d8d8d" }} />
-        </Tooltip>
-      )}
+}) => {
+  const isInset = variant === "inset";
+  return (
+    <div style={{ marginBottom: 10, border: "1px solid #e0e0e0", overflow: "hidden" }}>
+      {/* Section header with colored left bar */}
+      <div
+        style={{
+          padding: "8px 12px",
+          background: isInset ? "#f4f4f4" : "#fafafa",
+          borderBottom: "1px solid #e0e0e0",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            width: 3,
+            alignSelf: "stretch",
+            minHeight: 28,
+            background: isInset ? "#8d8d8d" : "#0f62fe",
+            flexShrink: 0,
+            marginTop: 1,
+          }}
+        />
+        <div style={{ paddingTop: 1, flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+                color: isInset ? "#525252" : "#161616",
+              }}
+            >
+              {title}
+            </span>
+            {headingTooltip && (
+              <Tooltip title={headingTooltip} overlayClassName="carbon-tooltip">
+                <InfoCircleOutlined style={{ fontSize: 10, color: "#8d8d8d", cursor: "help" }} />
+              </Tooltip>
+            )}
+          </div>
+          {subtitle && (
+            <div style={{ fontSize: 11, color: "#525252", marginTop: 2, lineHeight: 1.4 }}>
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Section body */}
+      <div style={{ padding: 12, background: isInset ? "#f9f9f9" : "#fff" }}>
+        {children}
+      </div>
     </div>
-    {subtitle && (
-      <p className="text-xs mb-3" style={{ color: "#525252", letterSpacing: "0.16px" }}>{subtitle}</p>
-    )}
-    {children}
-  </div>
-);
+  );
+};
 
 export default NodeSection;

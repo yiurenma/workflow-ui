@@ -1,146 +1,27 @@
 import React from 'react';
-import { Typography } from 'antd';
 
-const { Title, Paragraph } = Typography;
+const TILES = [
+  { title: "Canvas",     desc: "Visual flow editor",   color: "#0f62fe" },
+  { title: "Conditions", desc: "JSONPath branching",   color: "#D97706" },
+  { title: "Records",    desc: "Execution history",    color: "#0891B2" },
+  { title: "AI Tools",   desc: "Explain & Generate",   color: "#7C3AED" },
+];
 
-/**
- * Workflow Studio Introduction Component
- * Displays product overview on the home screen (applications list)
- */
-export const WorkflowStudioIntro: React.FC = () => {
-  return (
-    <div
-      style={{
-        padding: '32px 0',
-        marginBottom: '24px',
-        borderBottom: '1px solid #e0e0e0',
-      }}
-    >
-      <Title
-        level={2}
-        style={{
-          fontSize: '28px',
-          fontWeight: 400,
-          color: '#161616',
-          marginBottom: '12px',
-          fontFamily: 'IBM Plex Sans, sans-serif',
-        }}
-      >
-        Workflow Studio
-      </Title>
-
-      <Paragraph
-        style={{
-          fontSize: '16px',
-          lineHeight: '24px',
-          color: '#525252',
-          marginBottom: '20px',
-          maxWidth: '800px',
-          fontFamily: 'IBM Plex Sans, sans-serif',
-          letterSpacing: '0.16px',
-        }}
-      >
-        Workflow Studio enables configurable message enrichment, conditional logic, and multi-channel delivery without writing custom backend code.
-      </Paragraph>
-
-      <div style={{ marginBottom: '20px' }}>
-        <Title
-          level={5}
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#161616',
-            marginBottom: '8px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.32px',
-          }}
-        >
-          Who it's for
-        </Title>
-        <Paragraph
-          style={{
-            fontSize: '14px',
-            lineHeight: '20px',
-            color: '#525252',
-            marginBottom: '0',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            letterSpacing: '0.16px',
-          }}
-        >
-          Integration engineers, application developers, QA/operations teams, and business analysts
-        </Paragraph>
-      </div>
-
-      <div style={{ marginBottom: '20px' }}>
-        <Title
-          level={5}
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#161616',
-            marginBottom: '8px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.32px',
-          }}
-        >
-          Key Benefits
-        </Title>
-        <ul
-          style={{
-            fontSize: '14px',
-            lineHeight: '20px',
-            color: '#525252',
-            marginBottom: '0',
-            paddingLeft: '20px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            letterSpacing: '0.16px',
-          }}
-        >
-          <li>Speed vs code-only integration — visual editor, no deploy cycle for config changes</li>
-          <li>Shared business/engineering view — non-technical stakeholders can understand workflows</li>
-          <li>Rules as guardrails — JSONPath conditions prevent invalid data flow</li>
-          <li>Records as observability — execution history for debugging and auditing</li>
-        </ul>
-      </div>
-
-      <div>
-        <Title
-          level={5}
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#161616',
-            marginBottom: '8px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.32px',
-          }}
-        >
-          Features
-        </Title>
-        <ul
-          style={{
-            fontSize: '14px',
-            lineHeight: '20px',
-            color: '#525252',
-            marginBottom: '0',
-            paddingLeft: '20px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-            letterSpacing: '0.16px',
-          }}
-        >
-          <li><strong>Applications</strong> — Manage workflow configurations with versioning and rollback</li>
-          <li><strong>Canvas</strong> — Visual workflow editor with nodes, rules (JSONPath), and actions</li>
-          <li><strong>Run</strong> — Test workflows with sample data before deploying</li>
-          <li><strong>Records</strong> — View execution history and drill into individual runs</li>
-          <li><strong>Explain</strong> — AI-powered workflow documentation</li>
-          <li><strong>Generate</strong> — AI-powered workflow creation from natural language</li>
-          <li><strong>JsonPath tool</strong> — Validate JSONPath expressions against sample data</li>
-          <li><strong>Mobile experience</strong> — Full-featured mobile UI for on-the-go access</li>
-        </ul>
-      </div>
+export const WorkflowStudioIntro: React.FC = () => (
+  <div style={{ paddingBottom: 24, marginBottom: 28, borderBottom: "1px solid #e8e8e8" }}>
+    <h1 style={{ fontSize: 26, fontWeight: 300, color: "#161616", letterSpacing: "-0.3px", marginBottom: 8, margin: "0 0 8px" }}>
+      Workflow Studio
+    </h1>
+    <p style={{ fontSize: 14, color: "#525252", lineHeight: 1.6, maxWidth: 680, letterSpacing: "0.16px", marginBottom: 16 }}>
+      Configurable message enrichment, conditional logic, and multi-channel delivery — without writing custom backend code.
+    </p>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 1, border: "1px solid #e0e0e0", background: "#e0e0e0", overflow: "hidden" }}>
+      {TILES.map(({ title, desc, color }) => (
+        <div key={title} style={{ background: "#fff", padding: "10px 14px", borderLeft: `2px solid ${color}` }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#161616", marginBottom: 2 }}>{title}</div>
+          <div style={{ fontSize: 11, color: "#525252" }}>{desc}</div>
+        </div>
+      ))}
     </div>
-  );
-};
+  </div>
+);
