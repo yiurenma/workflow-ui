@@ -64,11 +64,33 @@ export const DeployModal: React.FC<DeployModalProps> = ({
       "Content-Type": "application/json",
     };
 
+    // 检测跨域并自动使用代理
+    const isCrossOrigin = (url: string) => {
+      try {
+        const targetOrigin = new URL(url).origin;
+        const currentOrigin = window.location.origin;
+        return targetOrigin !== currentOrigin;
+      } catch {
+        return true;
+      }
+    };
+
+    const buildUrl = (path: string, method: "POST" | "PATCH") => {
+      const fullUrl = `${formData.baseUrl}${path}`;
+      if (isCrossOrigin(formData.baseUrl)) {
+        // 跨域:使用代理
+        const proxyBase = "https://workflow-operation-api-n9sbp.ondigitalocean.app";
+        const proxyPath = method === "POST" ? "/workflow/deploy/proxy" : "/workflow/deploy/proxy";
+        return `${proxyBase}${proxyPath}?targetUrl=${encodeURIComponent(fullUrl)}`;
+      }
+      return fullUrl;
+    };
+
     try {
       // Step 1: Create Application Name
       updateProgress(1, "in-progress");
       const createResponse = await fetch(
-        `${formData.baseUrl}/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`,
+        buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`, "POST"),
         {
           method: "POST",
           headers,
@@ -90,7 +112,7 @@ export const DeployModal: React.FC<DeployModalProps> = ({
       // Step 2: Update Application Name
       updateProgress(2, "in-progress");
       const updateResponse = await fetch(
-        `${formData.baseUrl}/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`,
+        buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`, "PATCH"),
         {
           method: "PATCH",
           headers,
@@ -117,7 +139,7 @@ export const DeployModal: React.FC<DeployModalProps> = ({
       // Step 3: Save Workflow
       updateProgress(3, "in-progress");
       const saveResponse = await fetch(
-        `${formData.baseUrl}/workflow?applicationName=${encodeURIComponent(formData.applicationName)}`,
+        buildUrl(`/workflow?applicationName=${encodeURIComponent(formData.applicationName)}`, "POST"),
         {
           method: "POST",
           headers,
