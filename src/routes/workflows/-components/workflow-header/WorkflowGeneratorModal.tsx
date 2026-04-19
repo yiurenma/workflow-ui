@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Input, Button, Typography, Space, message } from "antd";
-import { RobotOutlined, LoadingOutlined } from "@ant-design/icons";
 import JSON5 from "json5";
 import type { WorkFlow } from "@/api/types";
+import { useToast } from "@/contexts/ToastContext";
 
 export const WORKFLOW_GENERATOR_SYSTEM_PROMPT = `You are an expert workflow architect. Given a plain-English description of a business process, you output a JSON workflow definition that conforms exactly to the following schema.
 
@@ -77,6 +76,7 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
   isTokenAvailable,
   onNeedToken,
 }) => {
+  const { showToast } = useToast();
   const [userPrompt, setUserPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("Generating…");
@@ -89,7 +89,7 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
       return;
     }
     if (!userPrompt.trim()) {
-      message.error("Please describe the workflow first");
+      showToast("Please describe the workflow first", "error");
       return;
     }
 
@@ -131,79 +131,71 @@ export const WorkflowGeneratorModal: React.FC<Props> = ({
       }
 
       onGenerated(parsed);
-      message.success("Workflow generated — review and save when ready");
+      showToast("Workflow generated — review and save when ready", "success");
       onClose();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setParseError(`Failed to parse AI response: ${msg}`);
-      message.error("Generation failed — see error below");
+      showToast("Generation failed — see error below", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Modal
-      title={
-        <Space>
-          <RobotOutlined className="text-indigo-500" />
-          <span>AI Workflow Generator</span>
-        </Space>
-      }
-      open={open}
-      onCancel={onClose}
-      footer={
-        <Space>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button
-            type="primary"
+    <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box slide-up" style={{ maxWidth: 560 }}>
+        <div className="modal-header">
+          <span className="modal-title">AI Workflow Generator</span>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <p style={{ fontSize: 13, color: "#525252", marginBottom: 16, lineHeight: 1.6 }}>
+            Describe the business process in plain English. The AI will produce a draft workflow
+            definition which will replace the current canvas. You can edit it before saving.
+          </p>
+          <div className="form-group">
+            <label className="cds-label">Business process description</label>
+            <textarea
+              className="cds-input"
+              rows={6}
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              placeholder="e.g. Check customer eligibility, then call the pricing service, and finally send a confirmation notification."
+              autoFocus
+              style={{ resize: "vertical" }}
+            />
+          </div>
+          {loading && loadingText !== "Generating…" && (
+            <div style={{ fontSize: 12, color: "#0f62fe", marginTop: 8 }}>⟳ {loadingText}</div>
+          )}
+          {!isTokenAvailable && !loading && (
+            <div style={{ fontSize: 12, color: "#D97706", marginTop: 8 }}>
+              No AI token saved — clicking Generate will prompt you to log in with GitHub or paste a token.
+            </div>
+          )}
+          {parseError && (
+            <div style={{ fontSize: 12, color: "#da1e28", marginTop: 8 }}>{parseError}</div>
+          )}
+          {rawResult && parseError && (
+            <pre style={{ marginTop: 8, background: "#f4f4f4", padding: 12, fontSize: 11, maxHeight: 160, overflow: "auto", fontFamily: '"IBM Plex Mono",monospace' }}>
+              {rawResult}
+            </pre>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button
+            className="btn btn-primary"
             onClick={generate}
             disabled={loading}
-            icon={loading ? <LoadingOutlined /> : <RobotOutlined />}
           >
             {loading ? loadingText : "Generate"}
-          </Button>
-        </Space>
-      }
-      width={560}
-      destroyOnClose
-    >
-      <Space direction="vertical" style={{ width: "100%" }} size="middle" className="mt-2">
-        <Typography.Text className="text-sm text-zinc-600">
-          Describe the business process in plain English. The AI will produce a draft workflow
-          definition which will replace the current canvas. You can edit it before saving.
-        </Typography.Text>
-        <div>
-          <Typography.Text className="text-xs text-slate-500">Business process description</Typography.Text>
-          <Input.TextArea
-            rows={6}
-            value={userPrompt}
-            onChange={(e) => setUserPrompt(e.target.value)}
-            placeholder="e.g. Check customer eligibility, then call the pricing service, and finally send a confirmation notification."
-            className="mt-1"
-            autoFocus
-          />
+          </button>
         </div>
-        {loading && loadingText !== "Generating…" && (
-          <Typography.Text className="text-xs text-indigo-500">
-            <LoadingOutlined className="mr-1" />
-            {loadingText}
-          </Typography.Text>
-        )}
-        {!isTokenAvailable && !loading && (
-          <Typography.Text type="warning" className="text-xs">
-            No AI token saved — clicking Generate will prompt you to log in with GitHub or paste a token.
-          </Typography.Text>
-        )}
-        {parseError && (
-          <Typography.Text type="danger" className="text-xs">
-            {parseError}
-          </Typography.Text>
-        )}
-        {rawResult && parseError && (
-          <pre className="rounded bg-slate-50 p-2 text-xs max-h-40 overflow-auto">{rawResult}</pre>
-        )}
-      </Space>
-    </Modal>
+      </div>
+    </div>
   );
 };

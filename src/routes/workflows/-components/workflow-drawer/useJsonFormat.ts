@@ -1,4 +1,3 @@
-import type { FormInstance } from "antd";
 import type React from "react";
 
 /**
@@ -15,23 +14,21 @@ export function tryFormatJson(value: string | undefined): string | undefined {
 }
 
 /**
- * Returns a blur handler factory for JSON-bearing textarea fields.
- * On blur: if the field value is valid JSON, pretty-print it (2-space indent).
- * If the value is not valid JSON, leave it unchanged — no corruption.
+ * Returns a blur handler that formats a textarea's JSON value in place.
+ * `setValue` is a state setter (or any function) that updates the field value.
  */
 export function useJsonFormat(
-  form: FormInstance,
-  onValuesChange?: (values: unknown) => void,
-): (fieldName: string) => React.FocusEventHandler<HTMLTextAreaElement> {
-  return (fieldName) => (e) => {
-    const raw = e.target.value;
-    if (!raw.trim()) return;
+  getValue: () => string,
+  setValue: (formatted: string) => void,
+): React.FocusEventHandler<HTMLTextAreaElement> {
+  return () => {
+    const raw = getValue();
+    if (!raw?.trim()) return;
     try {
       const parsed = JSON.parse(raw);
       const formatted = JSON.stringify(parsed, null, 2);
       if (formatted !== raw) {
-        form.setFieldValue(fieldName, formatted);
-        onValuesChange?.(form.getFieldsValue());
+        setValue(formatted);
       }
     } catch {
       // Not valid JSON — leave unchanged, no user feedback

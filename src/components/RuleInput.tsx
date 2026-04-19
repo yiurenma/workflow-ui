@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Input } from 'antd';
-import { JSONPath } from 'jsonpath-plus';
+import React, { useState } from "react";
+import { JSONPath } from "jsonpath-plus";
 
 interface RuleInputProps {
   value: string;
@@ -11,27 +10,17 @@ interface RuleInputProps {
 
 function validateRuleKey(key: string): { valid: boolean; error?: string } {
   if (!key.trim()) {
-    return { valid: false, error: 'Rule key cannot be empty' };
+    return { valid: false, error: "Rule key cannot be empty" };
   }
-
-  // Check for multiple paths (comma or semicolon separated)
-  if (key.includes(',') || key.includes(';')) {
-    return {
-      valid: false,
-      error: 'Rule key must be a single JSONPath expression (e.g., $.customer.id)',
-    };
+  if (key.includes(",") || key.includes(";")) {
+    return { valid: false, error: "Rule key must be a single JSONPath expression (e.g., $.customer.id)" };
   }
-
-  // Validate JSONPath syntax
   try {
-    JSONPath({ path: key, json: {}, resultType: 'value' });
+    JSONPath({ path: key, json: {}, resultType: "value" });
     return { valid: true };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return {
-      valid: false,
-      error: `Invalid JSONPath syntax: ${msg}`,
-    };
+    return { valid: false, error: `Invalid JSONPath syntax: ${msg}` };
   }
 }
 
@@ -51,28 +40,21 @@ export const RuleInput: React.FC<RuleInputProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
-    // Clear error on change
-    if (error) {
-      setError(undefined);
-    }
+    if (error) setError(undefined);
   };
 
   return (
     <div>
-      <Input
+      <input
+        className="cds-input"
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
-        status={error ? 'error' : undefined}
         placeholder={placeholder}
+        style={error ? { borderBottomColor: "#da1e28", borderBottomWidth: 2 } : undefined}
       />
       {error && (
-        <div
-          className="text-[12px] mt-1"
-          style={{ color: '#da1e28' }}
-        >
-          {error}
-        </div>
+        <div style={{ fontSize: 12, marginTop: 4, color: "#da1e28" }}>{error}</div>
       )}
     </div>
   );

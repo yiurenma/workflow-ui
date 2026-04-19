@@ -1,9 +1,5 @@
 import React from "react";
-import { Layout, Button, Tooltip, Divider } from "antd";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Plugin, PluginMetadataMap, PluginDisplayName, pluginMenuList } from "@/types/plugins";
-
-const { Sider } = Layout;
 
 type WorkflowSiderProps = {
   collapsed: boolean;
@@ -23,101 +19,78 @@ export const WorkflowSider: React.FC<WorkflowSiderProps> = ({
   };
 
   return (
-    <Sider
-      width={180}
-      collapsible
-      collapsed={collapsed}
-      trigger={null}
-      collapsedWidth={44}
-      theme="light"
-      onCollapse={(value: boolean) => setCollapsed(value)}
-      className="overflow-y-auto"
-      style={{ background: "#ffffff", borderRight: "1px solid var(--cds-border-subtle)" }}
+    <div
+      className="sider"
+      style={{ width: collapsed ? 44 : 176, flexShrink: 0 }}
     >
-      <div className="flex flex-col h-full">
-        {/* Collapse toggle */}
-        <div className={`flex ${collapsed ? "justify-center" : "justify-end"} px-2 pt-2 pb-1`}>
-          <Button
-            type="text"
-            size="small"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ color: "#525252" }}
-          />
-        </div>
-
-        {pluginMenuList.map((group) => (
-          <React.Fragment key={group.key}>
-            {!collapsed && (
-              <div className="px-3 pt-3 pb-1">
-                <span
-                  className="text-[9px] font-semibold uppercase"
-                  style={{ color: "#525252", letterSpacing: "0.32px" }}
-                >
-                  {group.label}
-                </span>
-              </div>
-            )}
-
-            {collapsed && (
-              <Divider className="my-1" style={{ borderColor: "var(--cds-border-subtle)" }} />
-            )}
-
-            <div className="flex flex-col gap-0.5 px-1.5">
-              {group.children.map((child) => {
-                const meta = PluginMetadataMap[child.key];
-                const accent = meta.color ?? "#525252";
-                const displayName = PluginDisplayName[child.key];
-                const description = meta.description;
-                return (
-                  <Tooltip
-                    title={collapsed ? `${displayName}: ${description}` : undefined}
-                    key={child.key}
-                    placement="right"
-                    overlayClassName="carbon-tooltip"
-                  >
-                    <div
-                      draggable
-                      onDragStart={(event) => onDragStart(event, child.key)}
-                      className="flex flex-col gap-1 px-2 py-2 cursor-grab transition-colors duration-100"
-                      style={{ borderRadius: 0 }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--cds-layer-01)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = ""; }}
-                    >
-                      {/* Colored icon badge */}
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className="flex items-center justify-center w-[22px] h-[22px] text-[12px] shrink-0"
-                          style={{ backgroundColor: `${accent}18`, color: accent, borderRadius: 0 }}
-                        >
-                          {child.icon}
-                        </span>
-                        {!collapsed && (
-                          <span
-                            className="text-[11px] font-medium leading-none truncate"
-                            style={{ color: "#525252", letterSpacing: "0.16px" }}
-                          >
-                            {displayName}
-                          </span>
-                        )}
-                      </div>
-                      {/* Description - only show when not collapsed */}
-                      {!collapsed && (
-                        <span
-                          className="text-[10px] leading-tight"
-                          style={{ color: "#525252", paddingLeft: "30px" }}
-                        >
-                          {description}
-                        </span>
-                      )}
-                    </div>
-                  </Tooltip>
-                );
-              })}
-            </div>
-          </React.Fragment>
-        ))}
+      {/* Collapse toggle */}
+      <div style={{ display: "flex", justifyContent: collapsed ? "center" : "flex-end", padding: "6px 8px" }}>
+        <button
+          style={{ background: "none", border: "none", cursor: "pointer", color: "#525252", fontSize: 14, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? "Expand" : "Collapse"}
+        >
+          {collapsed ? "▶" : "◀"}
+        </button>
       </div>
-    </Sider>
+
+      {pluginMenuList.map((group) => (
+        <React.Fragment key={group.key}>
+          {!collapsed && (
+            <div style={{ padding: "0 12px 6px", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.32px", color: "#525252" }}>
+              {group.label}
+            </div>
+          )}
+
+          {collapsed && (
+            <div style={{ margin: "4px 0", height: 1, background: "#c6c6c6", opacity: 0.4 }} />
+          )}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 6px" }}>
+            {group.children.map((child) => {
+              const meta = PluginMetadataMap[child.key];
+              const accent = meta.color ?? "#525252";
+              const displayName = PluginDisplayName[child.key];
+              const description = meta.description;
+              return (
+                <div
+                  key={child.key}
+                  className="sider-item"
+                  draggable
+                  onDragStart={(event) => onDragStart(event, child.key)}
+                  title={collapsed ? `${displayName}: ${description}` : undefined}
+                  style={{ padding: "8px 10px", borderRadius: 0 }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span
+                      style={{
+                        width: 22, height: 22,
+                        background: `${accent}18`,
+                        color: accent,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 12, fontWeight: 700, flexShrink: 0,
+                        borderRadius: 0,
+                      }}
+                    >
+                      {child.icon}
+                    </span>
+                    {!collapsed && (
+                      <span style={{ fontSize: 11, fontWeight: 500, color: "#525252", letterSpacing: "0.16px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {displayName}
+                      </span>
+                    )}
+                  </div>
+                  {!collapsed && (
+                    <span style={{ fontSize: 10, color: "#8d8d8d", paddingLeft: 30, lineHeight: 1.3 }}>
+                      {description}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </React.Fragment>
+      ))}
+    </div>
   );
 };

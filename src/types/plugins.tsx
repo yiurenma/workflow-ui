@@ -1,13 +1,4 @@
 import { Node } from "@xyflow/react";
-import {
-  BranchesOutlined,
-  CloudDownloadOutlined,
-  CodeOutlined,
-  FolderOutlined,
-  SafetyCertificateOutlined,
-  SendOutlined,
-  ThunderboltOutlined,
-} from "@ant-design/icons";
 
 export enum Plugin {
   CONSUMER = "Consumer",
@@ -43,6 +34,14 @@ export type ConsumerPluginProps = BaseNode;
 export type ConsumerWithoutErrorPluginProps = BaseNode;
 export type FunctionV3PluginProps = BaseNode;
 
+/** Simple SVG/text icons replacing @ant-design/icons */
+const IconHTTP = () => <span style={{ fontSize: 14 }}>↓</span>;
+const IconSend = () => <span style={{ fontSize: 14 }}>→</span>;
+const IconBranch = () => <span style={{ fontSize: 14 }}>⑂</span>;
+const IconCode = () => <span style={{ fontSize: 13, fontFamily: "monospace" }}>{"{}"}</span>;
+const IconShield = () => <span style={{ fontSize: 14 }}>⊙</span>;
+const IconBolt = () => <span style={{ fontSize: 14 }}>⚡</span>;
+
 export const PluginMetadataMap: Record<
   Plugin,
   {
@@ -53,32 +52,32 @@ export const PluginMetadataMap: Record<
   }
 > = {
   [Plugin.CONSUMER]: {
-    icon: <CloudDownloadOutlined />,
+    icon: <IconHTTP />,
     color: "#3B82F6",
     description: "Fetch data from external APIs",
   },
   [Plugin.MESSAGE]: {
-    icon: <SendOutlined />,
+    icon: <IconSend />,
     color: "#7C3AED",
     description: "Send messages to channels",
   },
   [Plugin.IF_ELSE]: {
-    icon: <BranchesOutlined />,
+    icon: <IconBranch />,
     color: "#D97706",
     description: "Branch based on conditions",
   },
   [Plugin.FUNCTION]: {
-    icon: <CodeOutlined />,
+    icon: <IconCode />,
     color: "#059669",
     description: "Transform data with logic",
   },
   [Plugin.CONSUMER_WITHOUT_ERROR]: {
-    icon: <SafetyCertificateOutlined />,
+    icon: <IconShield />,
     color: "#0D9488",
     description: "Safe fetch without errors",
   },
   [Plugin.FUNCTION_V3]: {
-    icon: <ThunderboltOutlined />,
+    icon: <IconBolt />,
     color: "#0891B2",
     description: "Advanced data transform",
   },
@@ -101,7 +100,7 @@ export const getPluginMenuList = (): PluginMenuGroup => {
   const group: PluginMenu = {
     label: "Nodes",
     key: "basic",
-    icon: <FolderOutlined />,
+    icon: <span>⊞</span>,
     children: [],
   };
 

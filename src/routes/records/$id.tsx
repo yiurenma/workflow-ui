@@ -1,17 +1,8 @@
-import {
-  Button,
-  Descriptions,
-  Flex,
-  Spin,
-  Table,
-  Tag,
-  Typography,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useWorkflowRecordDetail } from "@/api/hooks/workflow";
 import type { WorkflowRecord } from "@/api/types";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { StatusBadge } from "./index";
 
 export const Route = createFileRoute("/records/$id")({
   component: RecordDetailPage,
@@ -27,79 +18,102 @@ function RecordDetailPage() {
   const record = data?.record;
   const children = data?.children ?? [];
 
-  const childColumns: ColumnsType<WorkflowRecord> = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80 },
-    { title: "Overall Status", dataIndex: "overallStatus", key: "overallStatus", width: 160,
-      render: (v: string) => v ? <Tag>{v}</Tag> : "—" },
-    { title: "Tracking No.", dataIndex: "trackingNumber", key: "trackingNumber", ellipsis: true },
-    { title: "Customer ID", dataIndex: "customerId", key: "customerId", width: 130 },
-    { title: "Retries", dataIndex: "retryTimes", key: "retryTimes", width: 80 },
-    { title: "Created", dataIndex: "createdDateTime", key: "createdDateTime", width: 200,
-      render: (v: string) => v ?? "—" },
-  ];
+  if (isLoading) {
+    return (
+      <div style={{ padding: "40px 0", textAlign: "center", color: "#525252", fontSize: 13 }}>Loading…</div>
+    );
+  }
+
+  const fields: [string, React.ReactNode][] = record
+    ? [
+        ["ID", <span style={{ fontFamily: '"IBM Plex Mono",monospace' }}>{record.id}</span>],
+        ["Application", record.applicationName ?? "—"],
+        ["Overall Status", <StatusBadge key="s" status={record.overallStatus} />],
+        ["Retry Times", String(record.retryTimes ?? 0)],
+        ["Confirmation No.", <span style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12 }}>{record.transactionConfirmationNumber ?? "—"}</span>],
+        ["Tracking No.", <span style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12 }}>{record.trackingNumber ?? "—"}</span>],
+        ["Customer ID", <span style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12 }}>{record.customerId ?? "—"}</span>],
+        [
+          "Origin Record ID",
+          record.originWorkflowRecordId != null ? (
+            <button
+              className="btn-link"
+              onClick={() => navigate({ to: "/records/$id", params: { id: String(record.originWorkflowRecordId) } })}
+            >
+              {record.originWorkflowRecordId}
+            </button>
+          ) : "—",
+        ],
+        ["Created", record.createdDateTime ?? "—"],
+        ["Last Modified", record.lastModifiedDateTime ?? "—"],
+      ]
+    : [];
 
   return (
-    <Flex vertical gap="large" flex={1} className={`${isMobile ? "p-4" : "p-8"} min-h-full`} style={{ background: "#ffffff" }}>
-      <Flex align="center" gap="middle">
-        <Button type="link" className="px-0" onClick={() => navigate({ to: "/records" })}>
+    <div
+      className="page-content-mobile"
+      style={{ padding: isMobile ? "16px" : "32px", overflowY: "auto", height: "100%", background: "#fff" }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+        <button className="btn-link" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 4 }} onClick={() => navigate({ to: "/records" })}>
           ← Records
-        </Button>
-        <Typography.Title level={3} className="!mb-0" style={{ color: "#161616" }}>
-          Record #{id}
-        </Typography.Title>
-      </Flex>
+        </button>
+        <span style={{ color: "#c6c6c6" }}>|</span>
+        <h2 style={{ fontSize: 20, fontWeight: 400, color: "#161616", margin: 0 }}>Record #{id}</h2>
+      </div>
 
-      <Spin spinning={isLoading}>
-        {record && (
-          <div className="p-6" style={{ background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 0 }}>
-            <Typography.Title level={5} className="!mb-4">Record Details</Typography.Title>
-            <Descriptions bordered size="small" column={isMobile ? 1 : 2}>
-              <Descriptions.Item label="ID">{record.id}</Descriptions.Item>
-              <Descriptions.Item label="Application">{record.applicationName ?? "—"}</Descriptions.Item>
-              <Descriptions.Item label="Overall Status">
-                {record.overallStatus ? <Tag>{record.overallStatus}</Tag> : "—"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Retry Times">{record.retryTimes ?? 0}</Descriptions.Item>
-              <Descriptions.Item label="Confirmation No." span={2}>
-                {record.transactionConfirmationNumber ?? "—"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Tracking No." span={2}>
-                {record.trackingNumber ?? "—"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Customer ID">{record.customerId ?? "—"}</Descriptions.Item>
-              <Descriptions.Item label="Origin Record ID">
-                {record.originWorkflowRecordId != null ? (
-                  <Button
-                    type="link"
-                    className="px-0"
-                    onClick={() => navigate({ to: "/records/$id", params: { id: String(record.originWorkflowRecordId) } })}
-                  >
-                    {record.originWorkflowRecordId}
-                  </Button>
-                ) : "—"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Created">{record.createdDateTime ?? "—"}</Descriptions.Item>
-              <Descriptions.Item label="Last Modified">{record.lastModifiedDateTime ?? "—"}</Descriptions.Item>
-            </Descriptions>
+      {record && (
+        <div style={{ border: "1px solid #e0e0e0", marginBottom: 20 }}>
+          <div style={{ padding: "12px 16px", background: "#f4f4f4", borderBottom: "1px solid #e0e0e0", fontSize: 13, fontWeight: 600, color: "#161616" }}>
+            Record Details
           </div>
-        )}
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr" }}>
+            {fields.map(([k, v], i) => (
+              <div
+                key={String(k)}
+                style={{
+                  padding: "10px 16px",
+                  borderBottom: i < fields.length - (isMobile ? 1 : 2) ? "1px solid #f4f4f4" : "none",
+                  display: "flex", gap: 12, alignItems: "flex-start",
+                }}
+              >
+                <div style={{ width: 160, flexShrink: 0, fontSize: 12, color: "#525252", paddingTop: 1 }}>{k}</div>
+                <div style={{ fontSize: 12, color: "#161616" }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {children.length > 0 && (
-          <div className="p-6 mt-4" style={{ background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 0 }}>
-            <Typography.Title level={5} className="!mb-4">
-              Child Records ({children.length})
-            </Typography.Title>
-            <Table<WorkflowRecord>
-              rowKey={(r) => String(r.id)}
-              columns={childColumns}
-              dataSource={children}
-              pagination={false}
-              size="small"
-              scroll={isMobile ? { x: 600 } : undefined}
-            />
+      {children.length > 0 && (
+        <div style={{ border: "1px solid #e0e0e0" }}>
+          <div style={{ padding: "12px 16px", background: "#f4f4f4", borderBottom: "1px solid #e0e0e0", fontSize: 13, fontWeight: 600, color: "#161616" }}>
+            Child Records ({children.length})
           </div>
-        )}
-      </Spin>
-    </Flex>
+          <div style={{ overflowX: "auto" }}>
+            <table className="cds-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Overall Status</th><th>Tracking No.</th>
+                  <th>Customer ID</th><th>Retries</th><th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {children.map((c: WorkflowRecord) => (
+                  <tr key={String(c.id)} className="app-row">
+                    <td style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12 }}>{c.id}</td>
+                    <td><StatusBadge status={c.overallStatus} /></td>
+                    <td style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 11, color: "#525252" }}>{c.trackingNumber ?? "—"}</td>
+                    <td style={{ fontSize: 12, color: "#525252" }}>{c.customerId ?? "—"}</td>
+                    <td style={{ fontSize: 12, color: "#525252" }}>{c.retryTimes ?? 0}</td>
+                    <td style={{ fontSize: 12, color: "#525252" }}>{c.createdDateTime ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

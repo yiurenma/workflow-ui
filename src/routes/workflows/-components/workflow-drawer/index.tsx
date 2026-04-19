@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Drawer, Empty, Button, Space } from "antd";
 import { Node } from "@xyflow/react";
-import { Plugin } from "@/types/plugins";
+import { Plugin, PluginMetadataMap } from "@/types/plugins";
 import HttpCallForm from "./forms/HttpCallForm";
 import LogicForm from "./forms/LogicForm";
 import NodeView from "./NodeView";
@@ -27,14 +26,13 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [drawerWidth, setDrawerWidth] = useState(DEFAULT_WIDTH);
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [mode, setMode] = useState<"view" | "edit">("view");
   const [editingData, setEditingData] = useState<PluginFormData | null>(null);
   const resizeState = useRef({ active: false, startX: 0, startWidth: DEFAULT_WIDTH });
 
-  // Reset to view mode when drawer opens with a new node
   useEffect(() => {
     if (open && selectedNode) {
-      setMode('view');
+      setMode("view");
       setEditingData(null);
     }
   }, [open, selectedNode?.id]);
@@ -48,7 +46,7 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 
       const onMove = (ev: PointerEvent) => {
         if (!s.active) return;
-        const dx = s.startX - ev.clientX; // drag left → positive dx → wider
+        const dx = s.startX - ev.clientX;
         setDrawerWidth(Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, s.startWidth + dx)));
       };
       const onUp = () => {
@@ -62,22 +60,18 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
     [drawerWidth]
   );
 
-  const handleEdit = () => {
-    setMode('edit');
-  };
+  const handleEdit = () => setMode("edit");
 
   const handleDone = () => {
-    // Save changes if any
     if (editingData && selectedNode) {
       onFormChange?.(selectedNode.id, editingData);
     }
-    setMode('view');
+    setMode("view");
     setEditingData(null);
   };
 
   const handleCancel = () => {
-    // Discard changes
-    setMode('view');
+    setMode("view");
     setEditingData(null);
   };
 
@@ -87,109 +81,64 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
 
   const renderContent = () => {
     if (!selectedNode) {
-      return <Empty description="Please select a node" />;
+      return (
+        <div style={{ padding: "40px 0", textAlign: "center", color: "#525252", fontSize: 13 }}>
+          Please select a node
+        </div>
+      );
     }
 
-    if (mode === 'view') {
-      return <NodeView selectedNode={selectedNode} />;
-    }
+    if (mode === "view") return <NodeView selectedNode={selectedNode} />;
 
-    // Edit mode - render form
     const nodeType = selectedNode.type as Plugin;
-    const onValuesChange = handleFormChange;
-
     switch (nodeType) {
       case Plugin.CONSUMER:
       case Plugin.CONSUMER_WITHOUT_ERROR:
       case Plugin.MESSAGE:
-        return <HttpCallForm selectedNode={selectedNode} onValuesChange={onValuesChange} />;
+        return <HttpCallForm selectedNode={selectedNode} onValuesChange={handleFormChange} />;
       case Plugin.IF_ELSE:
       case Plugin.FUNCTION:
       case Plugin.FUNCTION_V3:
-        return <LogicForm selectedNode={selectedNode} onValuesChange={onValuesChange} />;
+        return <LogicForm selectedNode={selectedNode} onValuesChange={handleFormChange} />;
       default:
         return (
-          <Empty description={`Configuration for ${nodeType} nodes is not supported yet`} />
+          <div style={{ padding: "40px 0", textAlign: "center", color: "#525252", fontSize: 13 }}>
+            Configuration for {nodeType} nodes is not supported yet
+          </div>
         );
     }
   };
 
-  const drawerTitle = (
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="text-[10px] font-semibold uppercase" style={{ color: "#525252", letterSpacing: "0.32px" }}>
-          Node Configuration
-        </span>
-        <span className="text-sm font-semibold leading-tight truncate" style={{ color: "#161616" }}>
-          {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
-        </span>
+  const nodeType = selectedNode?.type as Plugin | undefined;
+  const meta = nodeType ? PluginMetadataMap[nodeType] : undefined;
+  const accent = meta?.color ?? "#525252";
+
+  const drawerHeader = (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.32px", color: "#525252", marginBottom: 2 }}>Node Configuration</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "#161616", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
+          {selectedNode && (
+            <span style={{ width: 10, height: 10, background: accent, display: "inline-block", flexShrink: 0 }} />
+          )}
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {selectedNode ? String(selectedNode.data?.label || "Unnamed Node") : "Select a node"}
+          </span>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        {mode === 'view' ? (
-          <Button
-            type="primary"
-            size="small"
-            onClick={handleEdit}
-            style={{
-              background: "#0f62fe",
-              borderColor: "#0f62fe",
-              borderRadius: 0,
-              minWidth: 60,
-              minHeight: 32,
-            }}
-          >
-            Edit
-          </Button>
+      <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+        {mode === "view" ? (
+          <button className="btn btn-primary btn-sm" onClick={handleEdit} style={{ minWidth: 60 }}>Edit</button>
         ) : (
-          <Space size="small">
-            <Button
-              size="small"
-              onClick={handleCancel}
-              style={{
-                borderRadius: 0,
-                minWidth: 60,
-                minHeight: 32,
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              size="small"
-              onClick={handleDone}
-              style={{
-                background: "#0f62fe",
-                borderColor: "#0f62fe",
-                borderRadius: 0,
-                minWidth: 60,
-                minHeight: 32,
-              }}
-            >
-              Done
-            </Button>
-          </Space>
+          <>
+            <button className="btn btn-ghost btn-sm" onClick={handleCancel} style={{ minWidth: 60 }}>Cancel</button>
+            <button className="btn btn-primary btn-sm" onClick={handleDone} style={{ minWidth: 60 }}>Done</button>
+          </>
         )}
         <button
           onClick={onClose}
+          style={{ background: "none", border: "none", cursor: "pointer", color: "#525252", fontSize: 16, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}
           aria-label="Close"
-          className="ant-drawer-close"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "8px",
-            color: "#525252",
-            fontSize: 16,
-            lineHeight: 1,
-            flexShrink: 0,
-            minWidth: 44,
-            minHeight: 44,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            zIndex: 1,
-          }}
         >
           ✕
         </button>
@@ -197,99 +146,60 @@ const WorkflowDrawer: React.FC<WorkflowDrawerProps> = ({
     </div>
   );
 
-  /* ── Mobile: bottom sheet, adaptive height, scrollable body ── */
+  if (!open) return null;
+
+  /* Mobile: bottom sheet */
   if (isMobile) {
     return (
-      <Drawer
-        title={drawerTitle}
-        placement="bottom"
-        height="auto"
-        onClose={onClose}
-        open={open}
-        mask={false}
-        maskClosable={true}
-        keyboard={false}
-        closable={false}
-        aria-label="Node Configuration"
-        styles={{
-          wrapper: {
-            minHeight: "40dvh",
-            maxHeight: "70dvh",
+      <>
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 900 }}
+          onClick={onClose}
+        />
+        <div
+          style={{
+            position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 901,
+            background: "#fff", borderTop: "1px solid #c6c6c6",
             boxShadow: "0 -2px 6px rgba(0,0,0,0.3)",
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            overflow: "hidden",
-          },
-          content: {
-            display: "flex",
-            flexDirection: "column",
-            minHeight: "40dvh",
-            maxHeight: "70dvh",
-          },
-          header: {
-            borderBottom: "1px solid #c6c6c6",
-            padding: "12px 16px",
-            flexShrink: 0,
-            background: "#f4f4f4",
-          },
-          body: {
-            flex: "1 1 0",
-            minHeight: 0,
-            overflowY: "auto",
-            padding: "16px",
-            paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
-            background: "#ffffff",
-          },
-        }}
-      >
-        {renderContent()}
-      </Drawer>
+            minHeight: "40dvh", maxHeight: "70dvh",
+            display: "flex", flexDirection: "column",
+          }}
+          className="fade-in"
+        >
+          <div className="drawer-header">{drawerHeader}</div>
+          <div className="drawer-body">{renderContent()}</div>
+        </div>
+      </>
     );
   }
 
-  /* ── Desktop: right drawer, draggable left edge to resize ── */
+  /* Desktop: right drawer with drag-to-resize */
   return (
-    <Drawer
-      title={drawerTitle}
-      placement="right"
-      onClose={onClose}
-      open={open}
-      width={drawerWidth}
-      closable={false}
-      maskClosable={true}
-      keyboard={true}
-      aria-label="Node Configuration"
-      styles={{
-        header: { borderBottom: "1px solid #c6c6c6", padding: "12px 16px", background: "#f4f4f4" },
-        body: { padding: "16px", position: "relative", overflowY: "auto", background: "#ffffff" },
-      }}
-    >
-      {/* Drag handle — left edge of drawer body */}
+    <>
       <div
-        onPointerDown={onResizePointerDown}
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 6,
-          cursor: "ew-resize",
-          zIndex: 10,
-          background: "transparent",
-          transition: "background 0.15s",
-          userSelect: "none",
-        }}
-        onMouseEnter={(e) =>
-          ((e.currentTarget as HTMLDivElement).style.background =
-            "rgba(15,98,254,0.12)")
-        }
-        onMouseLeave={(e) =>
-          ((e.currentTarget as HTMLDivElement).style.background = "transparent")
-        }
-        title="Drag to resize panel"
+        style={{ position: "fixed", inset: 0, zIndex: 900 }}
+        onClick={onClose}
       />
-      {renderContent()}
-    </Drawer>
+      <div
+        className="drawer-panel fade-in"
+        style={{ width: drawerWidth }}
+      >
+        {/* Drag handle */}
+        <div
+          onPointerDown={onResizePointerDown}
+          style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 6,
+            cursor: "ew-resize", zIndex: 10, background: "transparent",
+            transition: "background 0.15s", userSelect: "none",
+          }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.background = "rgba(15,98,254,0.12)")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.background = "transparent")}
+          title="Drag to resize panel"
+        />
+        <div className="drawer-header">{drawerHeader}</div>
+        <div className="drawer-body">{renderContent()}</div>
+      </div>
+    </>
   );
 };
 

@@ -1,7 +1,6 @@
-import { Modal, Form, Input, Button, Typography, Space, message } from "antd";
-import { CheckCircleOutlined, LoadingOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import type { WorkFlow, WorkflowEntitySettingRow } from "@/api/types";
+import { useToast } from "@/contexts/ToastContext";
 
 interface DeployModalProps {
   open: boolean;
@@ -24,13 +23,22 @@ interface DeployProgress {
   message?: string;
 }
 
+const STEP_LABELS = ["Create Application", "Update Settings", "Save Workflow"];
+
 export const DeployModal: React.FC<DeployModalProps> = ({
   open,
   onClose,
   currentWorkflow,
   currentSettings,
 }) => {
-  const [form] = Form.useForm<DeployFormData>();
+  const { showToast } = useToast();
+  const [form, setForm] = useState<DeployFormData>({
+    baseUrl: "",
+    applicationName: currentSettings?.applicationName ?? "",
+    username: "",
+    password: "",
+    environment: "",
+  });
   const [deploying, setDeploying] = useState(false);
   const [progress, setProgress] = useState<DeployProgress[]>([
     { step: 1, status: "pending" },
@@ -38,158 +46,107 @@ export const DeployModal: React.FC<DeployModalProps> = ({
     { step: 3, status: "pending" },
   ]);
 
-  const resetProgress = () => {
-    setProgress([
-      { step: 1, status: "pending" },
-      { step: 2, status: "pending" },
-      { step: 3, status: "pending" },
-    ]);
-  };
+  const resetProgress = () => setProgress([
+    { step: 1, status: "pending" },
+    { step: 2, status: "pending" },
+    { step: 3, status: "pending" },
+  ]);
 
   const updateProgress = (step: 1 | 2 | 3, status: DeployProgress["status"], message?: string) => {
-    setProgress((prev) =>
-      prev.map((p) => (p.step === step ? { ...p, status, message } : p))
-    );
+    setProgress((prev) => prev.map((p) => (p.step === step ? { ...p, status, message } : p)));
   };
 
-  const deployToRemote = async (formData: DeployFormData) => {
+  const set = (k: keyof DeployFormData, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const isCrossOrigin = (url: string) => {
+    try {
+      const targetOrigin = new URL(url).origin;
+      return targetOrigin !== window.location.origin;
+    } catch { return true; }
+  };
+
+  const buildUrl = (path: string) => {
+    const fullUrl = `${form.baseUrl}${path}`;
+    if (isCrossOrigin(form.baseUrl)) {
+      const proxyBase = "https://workflow-operation-api-n9sbp.ondigitalocean.app";
+      return `${proxyBase}/workflow/deploy/proxy?targetUrl=${encodeURIComponent(fullUrl)}`;
+    }
+    return fullUrl;
+  };
+
+  const deployToRemote = async () => {
     if (!currentWorkflow || !currentSettings) {
-      message.error("No workflow or settings data available");
+      showToast("No workflow or settings data available", "error");
       return;
     }
 
-    const auth = btoa(`${formData.username}:${formData.password}`);
-    const headers = {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/json",
-    };
+    const auth = btoa(`${form.username}:${form.password}`);
+    const headers = { Authorization: `Basic ${auth}`, "Content-Type": "application/json" };
 
-    // 检测跨域并自动使用代理
-    const isCrossOrigin = (url: string) => {
-      try {
-        const targetOrigin = new URL(url).origin;
-        const currentOrigin = window.location.origin;
-        return targetOrigin !== currentOrigin;
-      } catch {
-        return true;
-      }
-    };
-
-    const buildUrl = (path: string, method: "POST" | "PATCH") => {
-      const fullUrl = `${formData.baseUrl}${path}`;
-      if (isCrossOrigin(formData.baseUrl)) {
-        // 跨域:使用代理
-        const proxyBase = "https://workflow-operation-api-n9sbp.ondigitalocean.app";
-        const proxyPath = method === "POST" ? "/workflow/deploy/proxy" : "/workflow/deploy/proxy";
-        return `${proxyBase}${proxyPath}?targetUrl=${encodeURIComponent(fullUrl)}`;
-      }
-      return fullUrl;
-    };
-
-    try {
-      // Step 1: Create Application Name
-      updateProgress(1, "in-progress");
-      const createResponse = await fetch(
-        buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`, "POST"),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            enabled: true,
-            asyncMode: false,
-            retry: false,
-            tracking: false,
-            ignoreDuplicateRecordError: false,
-          }),
-        }
-      );
-      if (!createResponse.ok) {
-        const errorText = await createResponse.text();
-        throw new Error(`Step 1 failed: ${errorText || createResponse.statusText}`);
-      }
-      updateProgress(1, "success");
-
-      // Step 2: Update Application Name
-      updateProgress(2, "in-progress");
-      const updateResponse = await fetch(
-        buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(formData.applicationName)}`, "PATCH"),
-        {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify({
-            enabled: currentSettings.enabled,
-            asyncMode: currentSettings.asyncMode,
-            retry: currentSettings.retry,
-            tracking: currentSettings.tracking,
-            ignoreDuplicateRecordError: currentSettings.ignoreDuplicateRecordError,
-            eimId: currentSettings.eimId,
-            defaultServiceAccount: currentSettings.defaultServiceAccount,
-            region: currentSettings.region,
-            retryProperties: currentSettings.retryProperties,
-            description: currentSettings.description || "Deployed from Hub",
-          }),
-        }
-      );
-      if (!updateResponse.ok) {
-        const errorText = await updateResponse.text();
-        throw new Error(`Step 2 failed: ${errorText || updateResponse.statusText}`);
-      }
-      updateProgress(2, "success");
-
-      // Step 3: Save Workflow
-      updateProgress(3, "in-progress");
-      const saveResponse = await fetch(
-        buildUrl(`/workflow?applicationName=${encodeURIComponent(formData.applicationName)}`, "POST"),
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify(currentWorkflow),
-        }
-      );
-      if (!saveResponse.ok) {
-        const errorText = await saveResponse.text();
-        throw new Error(`Step 3 failed: ${errorText || saveResponse.statusText}`);
-      }
-      updateProgress(3, "success");
-
-      message.success("Deployment successful");
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      message.error(errorMessage);
-
-      // Mark current step as error
-      const failedStep = progress.findIndex((p) => p.status === "in-progress");
-      if (failedStep !== -1) {
-        updateProgress((failedStep + 1) as 1 | 2 | 3, "error", errorMessage);
-      }
-      throw error;
+    updateProgress(1, "in-progress");
+    const createResponse = await fetch(
+      buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(form.applicationName)}`),
+      { method: "POST", headers, body: JSON.stringify({ enabled: true, asyncMode: false, retry: false, tracking: false, ignoreDuplicateRecordError: false }) }
+    );
+    if (!createResponse.ok) {
+      const t = await createResponse.text();
+      throw new Error(`Step 1 failed: ${t || createResponse.statusText}`);
     }
+    updateProgress(1, "success");
+
+    updateProgress(2, "in-progress");
+    const updateResponse = await fetch(
+      buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(form.applicationName)}`),
+      {
+        method: "PATCH", headers,
+        body: JSON.stringify({
+          enabled: currentSettings.enabled, asyncMode: currentSettings.asyncMode,
+          retry: currentSettings.retry, tracking: currentSettings.tracking,
+          ignoreDuplicateRecordError: currentSettings.ignoreDuplicateRecordError,
+          eimId: currentSettings.eimId, defaultServiceAccount: currentSettings.defaultServiceAccount,
+          region: currentSettings.region, retryProperties: currentSettings.retryProperties,
+          description: currentSettings.description || "Deployed from Hub",
+        }),
+      }
+    );
+    if (!updateResponse.ok) {
+      const t = await updateResponse.text();
+      throw new Error(`Step 2 failed: ${t || updateResponse.statusText}`);
+    }
+    updateProgress(2, "success");
+
+    updateProgress(3, "in-progress");
+    const saveResponse = await fetch(
+      buildUrl(`/workflow?applicationName=${encodeURIComponent(form.applicationName)}`),
+      { method: "POST", headers, body: JSON.stringify(currentWorkflow) }
+    );
+    if (!saveResponse.ok) {
+      const t = await saveResponse.text();
+      throw new Error(`Step 3 failed: ${t || saveResponse.statusText}`);
+    }
+    updateProgress(3, "success");
   };
 
   const handleDeploy = async () => {
+    if (!form.baseUrl || !form.applicationName || !form.username || !form.password || !form.environment) {
+      showToast("Please fill in all fields", "error");
+      return;
+    }
+
+    if (form.baseUrl.startsWith("http://")) {
+      if (!window.confirm("You are using HTTP instead of HTTPS. Credentials will be sent unencrypted. Continue?")) return;
+    }
+
+    setDeploying(true);
+    resetProgress();
     try {
-      const values = await form.validateFields();
-
-      // Validate HTTPS
-      if (values.baseUrl.startsWith("http://")) {
-        const confirmed = await new Promise<boolean>((resolve) => {
-          Modal.confirm({
-            title: "HTTP Warning",
-            content: "You are using HTTP instead of HTTPS. Credentials will be sent unencrypted. Continue?",
-            okText: "Continue",
-            okType: "danger",
-            onOk: () => resolve(true),
-            onCancel: () => resolve(false),
-          });
-        });
-        if (!confirmed) return;
-      }
-
-      setDeploying(true);
-      resetProgress();
-      await deployToRemote(values);
+      await deployToRemote();
+      showToast("Deployment successful", "success");
     } catch (error) {
-      // Error already handled in deployToRemote
+      const msg = error instanceof Error ? error.message : String(error);
+      showToast(msg, "error");
+      const failedStep = progress.findIndex((p) => p.status === "in-progress");
+      if (failedStep !== -1) updateProgress((failedStep + 1) as 1 | 2 | 3, "error", msg);
     } finally {
       setDeploying(false);
     }
@@ -197,121 +154,86 @@ export const DeployModal: React.FC<DeployModalProps> = ({
 
   const handleClose = () => {
     if (!deploying) {
-      form.resetFields();
       resetProgress();
       onClose();
     }
   };
 
-  const renderStepIcon = (step: DeployProgress) => {
-    switch (step.status) {
-      case "in-progress":
-        return <LoadingOutlined style={{ color: "#0f62fe" }} />;
-      case "success":
-        return <CheckCircleOutlined style={{ color: "#24a148" }} />;
-      case "error":
-        return <CloseCircleOutlined style={{ color: "#da1e28" }} />;
-      default:
-        return <div style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #c6c6c6" }} />;
-    }
+  const stepIcon = (p: DeployProgress) => {
+    if (p.status === "in-progress") return <span style={{ color: "#0f62fe", fontSize: 16 }}>⟳</span>;
+    if (p.status === "success") return <span style={{ color: "#24a148", fontSize: 14 }}>✓</span>;
+    if (p.status === "error") return <span style={{ color: "#da1e28", fontSize: 14 }}>✕</span>;
+    return <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", border: "2px solid #c6c6c6", flexShrink: 0 }} />;
   };
 
-  const stepLabels = ["Create Application", "Update Settings", "Save Workflow"];
+  const anyProgress = progress.some((p) => p.status !== "pending");
+
+  if (!open) return null;
 
   return (
-    <Modal
-      title="Deploy Application"
-      open={open}
-      onCancel={handleClose}
-      footer={
-        <Space>
-          <Button onClick={handleClose} disabled={deploying}>
-            Cancel
-          </Button>
-          <Button type="primary" onClick={handleDeploy} loading={deploying}>
-            Deploy
-          </Button>
-        </Space>
-      }
-      width={560}
-      maskClosable={!deploying}
-    >
-      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        <Typography.Paragraph style={{ color: "#525252", fontSize: 14, marginBottom: 16 }}>
-          Deploy this application and its workflow to a remote environment. The system will execute three sequential API calls to create the application, update its settings, and save the workflow.
-        </Typography.Paragraph>
+    <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && handleClose()}>
+      <div className="modal-box slide-up" style={{ maxWidth: 560 }}>
+        <div className="modal-header">
+          <span className="modal-title">Deploy Application</span>
+          <button className="modal-close" onClick={handleClose} disabled={deploying}>✕</button>
+        </div>
+        <div className="modal-body">
+          <p style={{ fontSize: 13, color: "#525252", marginBottom: 20, lineHeight: 1.6 }}>
+            Deploy this application and its workflow to a remote environment. Three sequential API calls: create the application, update settings, and save the workflow.
+          </p>
 
-        <Form form={form} layout="vertical" requiredMark={false}>
-          <Form.Item
-            label="Deploy URL"
-            name="baseUrl"
-            rules={[
-              { required: true, message: "Deploy URL is required" },
-              {
-                pattern: /^https?:\/\/.+/,
-                message: "Must be a valid URL starting with http:// or https://",
-              },
-            ]}
-          >
-            <Input placeholder="https://workflow-operation-api-n9sbp.ondigitalocean.app" />
-          </Form.Item>
+          <div className="form-group">
+            <label className="cds-label">Deploy URL</label>
+            <input className="cds-input" placeholder="https://workflow-operation-api-xxx.ondigitalocean.app" value={form.baseUrl} onChange={(e) => set("baseUrl", e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="cds-label">Application Name</label>
+            <input className="cds-input" placeholder="my-application" value={form.applicationName} onChange={(e) => set("applicationName", e.target.value)} />
+          </div>
+          <div className="form-row-2">
+            <div className="form-group">
+              <label className="cds-label">Username</label>
+              <input className="cds-input" placeholder="service-account" value={form.username} onChange={(e) => set("username", e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="cds-label">Password</label>
+              <input className="cds-input" type="password" placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="cds-label">Environment</label>
+            <input className="cds-input" placeholder="UAT" value={form.environment} onChange={(e) => set("environment", e.target.value)} />
+          </div>
 
-          <Form.Item
-            label="Application Name"
-            name="applicationName"
-            rules={[{ required: true, message: "Application name is required" }]}
-          >
-            <Input placeholder="my-application" />
-          </Form.Item>
-
-          <Form.Item
-            label="Service Account Username"
-            name="username"
-            rules={[{ required: true, message: "Username is required" }]}
-          >
-            <Input placeholder="service-account" />
-          </Form.Item>
-
-          <Form.Item
-            label="Service Account Password"
-            name="password"
-            rules={[{ required: true, message: "Password is required" }]}
-          >
-            <Input.Password placeholder="••••••••" />
-          </Form.Item>
-
-          <Form.Item
-            label="Environment"
-            name="environment"
-            rules={[{ required: true, message: "Environment is required" }]}
-          >
-            <Input placeholder="UAT" />
-          </Form.Item>
-        </Form>
-
-        {progress.some((p) => p.status !== "pending") && (
-          <div style={{ marginTop: 16, padding: 16, background: "#f4f4f4", borderRadius: 0 }}>
-            <Typography.Text strong style={{ fontSize: 12, color: "#161616", marginBottom: 12, display: "block" }}>
-              DEPLOYMENT PROGRESS
-            </Typography.Text>
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-              {progress.map((step, index) => (
-                <div key={step.step} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {renderStepIcon(step)}
-                  <span style={{ fontSize: 14, color: "#161616" }}>
-                    Step {step.step}: {stepLabels[index]}
+          {anyProgress && (
+            <div style={{ marginTop: 16, padding: 16, background: "#f4f4f4", border: "1px solid #e0e0e0" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.32px", color: "#161616", marginBottom: 12 }}>Deployment Progress</div>
+              {progress.map((p, index) => (
+                <div key={p.step} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                  {stepIcon(p)}
+                  <span style={{
+                    fontSize: 13,
+                    color: p.status === "success" ? "#198038" : p.status === "error" ? "#da1e28" : p.status === "in-progress" ? "#0f62fe" : "#525252",
+                  }}>
+                    Step {p.step}: {STEP_LABELS[index]}
                   </span>
                 </div>
               ))}
-            </Space>
-            {progress.some((p) => p.status === "error") && (
-              <Typography.Text type="danger" style={{ fontSize: 12, marginTop: 12, display: "block" }}>
-                {progress.find((p) => p.status === "error")?.message}
-              </Typography.Text>
-            )}
-          </div>
-        )}
-      </Space>
-    </Modal>
+              {progress.some((p) => p.status === "error") && (
+                <div style={{ fontSize: 12, color: "#da1e28", marginTop: 12 }}>
+                  {progress.find((p) => p.status === "error")?.message}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={handleClose} disabled={deploying}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleDeploy} disabled={deploying}>
+            {deploying ? "Deploying…" : "Deploy"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
