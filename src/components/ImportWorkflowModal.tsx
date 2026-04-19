@@ -162,22 +162,7 @@ function validateWorkflow(json: unknown): ValidationResult {
     });
   }
 
-  // Validate edge references
-  const pluginIds = new Set(plugins.map((p) => String(p.id)));
-  edges.forEach((edge, index) => {
-    if (edge.source && !pluginIds.has(String(edge.source)) && !isIFELSEBranchId(String(edge.source), plugins)) {
-      errors.push({
-        path: `uiMapList[${index}].source`,
-        message: `Edge source "${edge.source}" does not exist in pluginList`,
-      });
-    }
-    if (edge.target && !pluginIds.has(String(edge.target)) && !isIFELSEBranchId(String(edge.target), plugins)) {
-      errors.push({
-        path: `uiMapList[${index}].target`,
-        message: `Edge target "${edge.target}" does not exist in pluginList`,
-      });
-    }
-  });
+  // Edge references are not validated - allow any source/target IDs
 
   // Warnings: orphaned nodes
   if (edges.length > 0) {
