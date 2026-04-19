@@ -44,10 +44,10 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     await clickCanvasHeaderAction(page, 'Explain');
 
     // Should open either token prompt or explain modal
-    await expect(page.locator('.ant-modal')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.modal-box')).toBeVisible({ timeout: 5_000 });
 
     // Verify modal has expected content (token prompt or explain result)
-    const modal = page.locator('.ant-modal');
+    const modal = page.locator('.modal-box');
     const hasTokenPrompt = await modal.getByText(/token/i).count() > 0;
     const hasExplainContent = await modal.getByText(/workflow/i).count() > 0;
     expect(hasTokenPrompt || hasExplainContent).toBeTruthy();
@@ -62,13 +62,13 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
     if (isMobile) {
       await page.getByRole('button', { name: /more actions/i }).click();
-      await page.locator('.ant-dropdown-menu').getByText('Generate').click();
+      await page.locator('.dropdown-menu').getByText('Generate').click();
     } else {
       await page.getByRole('button', { name: /generate/i }).click();
     }
 
     // Verify Generator modal opens
-    const modal = page.locator('.ant-modal').filter({ hasText: /generator/i });
+    const modal = page.locator('.modal-box').filter({ hasText: /generator/i });
     await expect(modal).toBeVisible({ timeout: 5_000 });
 
     // Verify modal has input field
@@ -86,7 +86,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     await page.waitForTimeout(1000);
 
     // Check if token prompt appears (means no token stored)
-    const hasTokenPrompt = await page.locator('.ant-modal').filter({ hasText: /token/i }).count() > 0;
+    const hasTokenPrompt = await page.locator('.modal-box').filter({ hasText: /token/i }).count() > 0;
 
     if (hasTokenPrompt) {
       // Verify localStorage is accessible (token storage uses localStorage)
@@ -123,7 +123,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     await page.waitForTimeout(1000);
 
     // Verify no error message appears
-    const errorMessage = page.locator('.ant-message-error');
+    const errorMessage = page.locator('.error-message');
     await expect(errorMessage).not.toBeVisible();
   });
 
@@ -179,7 +179,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
 
     await page.goto('/workflows/');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('table, .ant-spin-container, .ant-flex', { timeout: 15000 });
+    await page.waitForSelector('table, [class*="loading"], [class*="flex"]', { timeout: 15000 });
 
     // Click "New application" button
     const newAppBtn = page.getByRole('button', { name: /new application/i });
@@ -187,7 +187,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
       await newAppBtn.click();
 
       // Verify dialog opens
-      const dialog = page.locator('.ant-modal');
+      const dialog = page.locator('.modal-box');
       await expect(dialog).toBeVisible({ timeout: 5_000 });
 
       // Verify form field exists
@@ -249,7 +249,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     await clickCanvasHeaderAction(page, 'JsonPath');
 
     // Verify modal opens
-    const modal = page.locator('.ant-modal').filter({ hasText: /jsonpath/i });
+    const modal = page.locator('.modal-box').filter({ hasText: /jsonpath/i });
     await expect(modal).toBeVisible({ timeout: 5_000 });
 
     // Verify modal has input fields
@@ -266,7 +266,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
     await clickCanvasHeaderAction(page, 'Run');
 
     // Verify modal opens
-    const modal = page.locator('.ant-modal').filter({ hasText: /run/i });
+    const modal = page.locator('.modal-box').filter({ hasText: /run/i });
     await expect(modal).toBeVisible({ timeout: 5_000 });
 
     // Verify modal has textarea for body input

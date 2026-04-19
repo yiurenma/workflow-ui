@@ -48,7 +48,7 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     // Layer 4: Interact - tap opens sheet
     await fab.tap();
 
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel');
 
     // Layer 1: Exist
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -60,7 +60,7 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     expect(box!.height).toBeGreaterThan(viewportHeight * 0.40);
 
     // Layer 3: Viewport - Sheet header in viewport
-    const drawerHeader = drawer.locator('.ant-drawer-header').first();
+    const drawerHeader = drawer.locator('.drawer-panel-header').first();
     await expect(drawerHeader).toBeInViewport();
   });
 
@@ -72,7 +72,7 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     await page.mouse.down();
     await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2 + 20, { steps: 10 });
     await page.mouse.up();
-    const drawerVisible = await page.locator('.ant-drawer-open').first()
+    const drawerVisible = await page.locator('.drawer-panel:visible').first()
       .waitFor({ state: 'visible', timeout: 1000 }).then(() => true).catch(() => false);
     expect(drawerVisible).toBe(false);
   });
@@ -104,10 +104,10 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
   test('TC-CANVAS-MOB-08 overflow menu contains Straighten, Explain, JsonPath, Run', async ({ page }) => {
     const moreBtn = page.getByRole('button', { name: /more actions/i });
     await moreBtn.tap();
-    await expect(page.locator('.ant-dropdown-menu').getByText('Straighten')).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.ant-dropdown-menu').getByText('Explain')).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.ant-dropdown-menu').getByText('JsonPath')).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.ant-dropdown-menu').getByText('Run')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.dropdown-menu').getByText('Straighten')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.dropdown-menu').getByText('Explain')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.dropdown-menu').getByText('JsonPath')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.dropdown-menu').getByText('Run')).toBeVisible({ timeout: 3000 });
   });
 
   test('TC-CANVAS-MOB-09 node drawer opens from bottom on mobile', async ({ page }) => {
@@ -115,7 +115,7 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click({ timeout: 10_000 });
 
-    const drawer = page.locator('.ant-drawer-bottom');
+    const drawer = page.locator('.drawer-panel-bottom');
 
     // Layer 1: Exist
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -127,7 +127,7 @@ test.describe('Canvas — Mobile Add-Node FAB (TC-CANVAS-MOB)', () => {
     expect(box!.height).toBeGreaterThan(viewportHeight * 0.35);
 
     // Layer 3: Viewport - Drawer header in viewport
-    const drawerContent = drawer.locator('.ant-drawer-content').first();
+    const drawerContent = drawer.locator('.drawer-panel-content').first();
     await expect(drawerContent).toBeInViewport();
   });
 });

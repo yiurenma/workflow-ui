@@ -14,14 +14,14 @@ test.describe('Node Editor (TC-NODE)', () => {
     const node = page.locator('.react-flow__node').first();
     await expect(node).toBeVisible({ timeout: 10_000 });
     await node.click();
-    await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.drawer-panel, .drawer-header')).toBeVisible({ timeout: 5_000 });
   });
 
   test('TC-NODE-02 drawer contains Description, Rules, Action sections', async ({ page }) => {
     const node = page.locator('.react-flow__node').first();
     await expect(node).toBeVisible({ timeout: 10_000 });
     await node.click();
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel, .drawer-header').first();
     await expect(drawer).toBeVisible();
     await expect(drawer.getByText(/description/i).first()).toBeVisible();
     await expect(drawer.getByText(/rule/i).first()).toBeVisible();

@@ -86,11 +86,11 @@ test.describe('AI Workflow Generator (TC-GENERATOR)', () => {
     const isMobile = (page.viewportSize()?.width ?? 1280) < 768;
     if (isMobile) {
       await page.getByRole('button', { name: /more actions/i }).click();
-      await page.locator('.ant-dropdown-menu').getByText('Generate').click();
+      await page.locator('.dropdown-menu').getByText('Generate').click();
     } else {
       await page.getByRole('button', { name: /generate/i }).click();
     }
-    await expect(page.locator('.ant-modal').filter({ hasText: 'AI Workflow Generator' })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.modal-box').filter({ hasText: 'AI Workflow Generator' })).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -113,12 +113,12 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
 
   test('TC-JSONPATH-02 modal opens', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'JsonPath');
-    await expect(page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' })).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.modal-box').filter({ hasText: 'JsonPath Playground' })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-JSONPATH-03 valid expression returns result', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'JsonPath');
-    const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'JsonPath Playground' });
     await modal.getByPlaceholder('$.customer.id').fill('$.customer.id');
     await modal.locator('textarea').fill('{"customer":{"id":"C001"}}');
     await modal.getByRole('button', { name: 'Validate' }).click();
@@ -127,7 +127,7 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
 
   test('TC-JSONPATH-04 invalid JSON shows error', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'JsonPath');
-    const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'JsonPath Playground' });
     await modal.locator('textarea').fill('{ invalid json');
     await modal.getByRole('button', { name: 'Validate' }).click();
     await expect(modal.getByText(/Invalid JSON:/i)).toBeVisible({ timeout: 3000 });
@@ -135,7 +135,7 @@ test.describe('JsonPath Playground (TC-JSONPATH)', () => {
 
   test('TC-JSONPATH-05 no-match expression shows "(no match)"', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'JsonPath');
-    const modal = page.locator('.ant-modal').filter({ hasText: 'JsonPath Playground' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'JsonPath Playground' });
     await modal.getByPlaceholder('$.customer.id').fill('$.nonexistent.field');
     await modal.locator('textarea').fill('{"customer":{"id":"C001"}}');
     await modal.getByRole('button', { name: 'Validate' }).click();

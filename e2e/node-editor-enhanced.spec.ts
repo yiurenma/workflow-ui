@@ -33,7 +33,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel, .drawer-header');
 
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -42,7 +42,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     await page.waitForTimeout(300);
 
     // v31.0 read-first mode: click Edit to enter form mode
-    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.locator('.drawer-panel, .drawer-header button:has-text("Edit")').click();
     await page.waitForTimeout(300);
 
     // Layer 2: Size sufficiency (desktop drawer should be >200px height)
@@ -71,7 +71,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
 
     // Accessibility
     const axeResults = await new AxeBuilder({ page })
-      .include('.ant-drawer')
+      .include('.drawer-panel, .drawer-header')
       .analyze();
     expect(axeResults.violations).toHaveLength(0);
   });
@@ -89,7 +89,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.tap();
 
-    const drawer = page.locator('.ant-drawer-bottom');
+    const drawer = page.locator('.drawer-panel, .drawer-header-bottom');
 
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -124,7 +124,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
 
     // Accessibility - touch targets must be ≥44px
     const axeResults = await new AxeBuilder({ page })
-      .include('.ant-drawer-bottom')
+      .include('.drawer-panel, .drawer-header-bottom')
       .analyze();
     expect(axeResults.violations).toHaveLength(0);
   });
@@ -133,7 +133,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel, .drawer-header');
     await expect(drawer).toBeVisible();
 
     // Layer 3: All three sections must be in viewport (not clipped)
@@ -150,11 +150,11 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel, .drawer-header');
     await expect(drawer).toBeVisible();
 
     // v31.0 read-first mode: click Edit to enter form mode
-    await page.locator('.ant-drawer button:has-text("Edit")').click();
+    await page.locator('.drawer-panel, .drawer-header button:has-text("Edit")').click();
     await page.waitForTimeout(300);
 
     // Find Rules section textarea
@@ -175,13 +175,13 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    // Wait for content wrapper to be visible (outer .ant-drawer stays in DOM always)
-    const contentWrapper = page.locator('.ant-drawer-content-wrapper');
+    // Wait for content wrapper to be visible (outer .drawer-panel, .drawer-header stays in DOM always)
+    const contentWrapper = page.locator('.drawer-panel, .drawer-header-content-wrapper');
     await expect(contentWrapper).toBeVisible({ timeout: 5000 });
 
-    // Use custom close button (aria-label="Close") — Ant Design internal .ant-drawer-close
+    // Use custom close button (aria-label="Close") — Ant Design internal .drawer-panel, .drawer-header-close
     // is hidden via closable={false} in v29.0
-    const customCloseBtn = page.locator('.ant-drawer [aria-label="Close"]');
+    const customCloseBtn = page.locator('.drawer-panel, .drawer-header [aria-label="Close"]');
     const customCloseBtnVisible = await customCloseBtn.isVisible().catch(() => false);
     if (customCloseBtnVisible) {
       await customCloseBtn.click();

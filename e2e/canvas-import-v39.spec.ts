@@ -24,7 +24,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Layer 1: Existence
@@ -48,13 +48,13 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     await page.waitForTimeout(1500);
 
     // Layer 5: Effect — validation passes
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
     await expect(successAlert).toContainText('0 edge');
 
     // Verify no error about invalid plugin type
-    const errorAlert = modal.locator('.ant-alert-error');
+    const errorAlert = modal.locator('[style*="background: #fff1f1"]');
     await expect(errorAlert).not.toBeVisible();
   });
 
@@ -62,7 +62,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -80,7 +80,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
     await expect(successAlert).toContainText('0 edge');
@@ -90,7 +90,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -108,7 +108,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -117,7 +117,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -135,7 +135,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -144,7 +144,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -162,7 +162,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -171,7 +171,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -189,7 +189,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -198,7 +198,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -215,13 +215,13 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     await page.waitForTimeout(1500);
 
     // Layer 5: Effect — validation fails
-    const errorAlert = modal.locator('.ant-alert-error').filter({ hasText: /Validation failed/i });
+    const errorAlert = modal.locator('[style*="background: #fff1f1"]').filter({ hasText: /Validation failed/i });
     await expect(errorAlert).toBeVisible({ timeout: 3000 });
     await expect(errorAlert).toContainText('Invalid plugin type');
     await expect(errorAlert).toContainText('HTTP_CALL');
 
     // Verify Apply button is disabled
-    const applyButton = modal.locator('.ant-modal-footer').getByRole('button', { name: 'Apply to Canvas' });
+    const applyButton = modal.locator('.modal-box-footer').getByRole('button', { name: 'Apply to Canvas' });
     await expect(applyButton).toBeDisabled();
   });
 
@@ -229,7 +229,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -245,12 +245,12 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const errorAlert = modal.locator('.ant-alert-error').filter({ hasText: /Validation failed/i });
+    const errorAlert = modal.locator('[style*="background: #fff1f1"]').filter({ hasText: /Validation failed/i });
     await expect(errorAlert).toBeVisible({ timeout: 3000 });
     await expect(errorAlert).toContainText('Invalid plugin type');
     await expect(errorAlert).toContainText('LOGIC');
 
-    const applyButton = modal.locator('.ant-modal-footer').getByRole('button', { name: 'Apply to Canvas' });
+    const applyButton = modal.locator('.modal-box-footer').getByRole('button', { name: 'Apply to Canvas' });
     await expect(applyButton).toBeDisabled();
   });
 
@@ -258,20 +258,20 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Layer 1: Existence — expand "What belongs here?" section
-    const whatBelongsCollapse = modal.locator('.ant-collapse-item').filter({ hasText: 'What belongs here?' });
+    const whatBelongsCollapse = modal.locator('details').filter({ hasText: 'What belongs here?' });
     await expect(whatBelongsCollapse).toBeVisible();
 
     // Layer 4: Interactable — click to expand
-    const collapseHeader = whatBelongsCollapse.locator('.ant-collapse-header');
+    const collapseHeader = whatBelongsCollapse.locator('summary');
     await collapseHeader.click();
     await page.waitForTimeout(500);
 
     // Layer 5: Effect — verify help text content
-    const collapseContent = whatBelongsCollapse.locator('.ant-collapse-content');
+    const collapseContent = whatBelongsCollapse.locator('details > div');
     await expect(collapseContent).toBeVisible();
 
     // Verify all 6 valid types are listed
@@ -292,7 +292,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     const importButton = page.getByRole('button', { name: 'Import' });
     await importButton.click();
 
-    const modal = page.locator('.ant-modal').filter({ hasText: 'Import Workflow from JSON' });
+    const modal = page.locator('.modal-box').filter({ hasText: 'Import Workflow from JSON' });
     await expect(modal).toBeVisible({ timeout: 5000 });
 
     const textarea = modal.locator('textarea').first();
@@ -325,7 +325,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('.ant-alert-success').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('3 node');
     await expect(successAlert).toContainText('2 edge');

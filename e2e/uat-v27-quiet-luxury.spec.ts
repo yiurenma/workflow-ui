@@ -290,13 +290,13 @@ test.describe('UAT v27.0 — Quiet Luxury Visual Refactoring', () => {
     await newAppBtn.click();
     await page.waitForTimeout(1500);
 
-    const dialog = page.locator('[role="dialog"], .ant-modal-content').first();
+    const dialog = page.locator('[role="dialog"], .modal-box-content').first();
     await expect(dialog).toBeVisible({ timeout: 8000 });
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'step5a-new-app-dialog.png') });
     console.log('New application dialog opened: PASS');
 
     // Close dialog — try close button, then Escape
-    const closeBtn = page.locator('.ant-modal-close, [aria-label="Close"], button[class*="close"]').first();
+    const closeBtn = page.locator('.modal-box-close, [aria-label="Close"], button[class*="close"]').first();
     if (await closeBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await closeBtn.click();
     } else {
@@ -349,12 +349,12 @@ test.describe('UAT v27.0 — Quiet Luxury Visual Refactoring', () => {
 
     if (settingsClicked) {
       await page.waitForTimeout(1500);
-      const settingsModal = page.locator('[role="dialog"], .ant-modal-content').first();
+      const settingsModal = page.locator('[role="dialog"], .modal-box-content').first();
       await expect(settingsModal).toBeVisible({ timeout: 8000 });
       await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'step5c-settings-modal.png') });
       console.log('Settings modal opened: PASS');
 
-      const closeSettings = page.locator('.ant-modal-close, [aria-label="Close"]').first();
+      const closeSettings = page.locator('.modal-box-close, [aria-label="Close"]').first();
       if (await closeSettings.isVisible({ timeout: 2000 }).catch(() => false)) {
         await closeSettings.click();
       } else {

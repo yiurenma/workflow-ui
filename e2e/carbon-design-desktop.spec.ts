@@ -28,7 +28,7 @@ test.describe('Carbon Design — Desktop (TC-CARBON-DESK)', () => {
     await page.goto('/workflows/');
     await page.waitForLoadState('networkidle');
     // Wait for content to render
-    await page.waitForSelector('table, .ant-flex', { timeout: 15000 });
+    await page.waitForSelector('table, [class*="flex"]', { timeout: 15000 });
   });
 
   // Layer 1 — Exist
@@ -83,7 +83,7 @@ test.describe('Carbon Design — Desktop (TC-CARBON-DESK)', () => {
     const btn = page.getByRole('button', { name: /new application/i }).first();
     await expect(btn).toBeVisible();
     await btn.click();
-    const modal = page.locator('.ant-modal, [role="dialog"]').first();
+    const modal = page.locator('.modal-box, [role="dialog"]').first();
     await expect(modal).toBeVisible({ timeout: 5000 });
   });
 

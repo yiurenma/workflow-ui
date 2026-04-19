@@ -7,7 +7,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     // Don't use mocks - run against real UAT backend
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
     // Wait for React to render - either table or loading spinner
-    await page.waitForSelector('table, .ant-spin-container, .ant-flex', { timeout: 15000 });
+    await page.waitForSelector('table, [class*="loading"], .cds-table', { timeout: 15000 });
   });
 
   test('TC-APP-DESK-01 table renders with columns', async ({ page }) => {
@@ -20,7 +20,8 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   });
 
   test('TC-APP-DESK-02 pagination visible below table', async ({ page }) => {
-    const pagination = page.locator('.ant-pagination').first();
+    // Carbon pagination uses custom component with page buttons
+    const pagination = page.getByRole('button', { name: /prev|next/i }).first();
     await expect(pagination).toBeVisible();
   });
 
@@ -29,7 +30,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   });
 
   test('TC-APP-DESK-04 search filters list', async ({ page }) => {
-    const searchInput = page.getByPlaceholder('Search application name').first();
+    const searchInput = page.getByPlaceholder(/search application/i).first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test-app-01');
     await searchInput.press('Enter');
@@ -56,7 +57,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(settingsBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await settingsBtn.click();
-    await expect(page.locator('.ant-modal')).toBeVisible();
+    await expect(page.locator('.modal-box')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
@@ -65,7 +66,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(historyBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await historyBtn.click();
-    await expect(page.locator('.ant-drawer')).toBeVisible();
+    await expect(page.locator('.drawer-panel, .drawer-header')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
@@ -74,7 +75,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(copyBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await copyBtn.click();
-    await expect(page.locator('.ant-modal')).toBeVisible();
+    await expect(page.locator('.modal-box')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
@@ -83,7 +84,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
     await expect(deleteBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await deleteBtn.click();
-    await expect(page.locator('.ant-modal-confirm')).toBeVisible();
+    await expect(page.locator('.modal-box')).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
     expect(page.url()).toBe(urlBefore);
   });
@@ -91,7 +92,7 @@ test.describe('Applications list — Desktop (TC-APP-DESK)', () => {
   test('TC-APP-DESK-10 Settings modal shows Application Name rename field', async ({ page }) => {
     const settingsBtn = page.getByRole('button', { name: 'Settings' }).first();
     await settingsBtn.click();
-    const modal = page.locator('.ant-modal');
+    const modal = page.locator('.modal-box');
     await expect(modal).toBeVisible({ timeout: 5000 });
     // The rename input must be present and pre-filled with current application name
     const nameInput = modal.getByLabel(/application name/i);

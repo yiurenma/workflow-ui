@@ -15,12 +15,12 @@ test.describe('Records list (TC-REC)', () => {
   });
 
   test('TC-REC-02 table or card view visible', async ({ page }) => {
-    const spinContainer = page.locator('.ant-spin-container');
+    const spinContainer = page.locator('[class*="loading"]');
     await expect(spinContainer.first()).toBeAttached();
   });
 
   test('TC-REC-03 pagination visible', async ({ page }) => {
-    const pagination = page.locator('.ant-pagination').first();
+    const pagination = page.locator('button[name*="prev"], button[name*="next"]').first();
     await expect(pagination).toBeVisible({ timeout: 8000 });
   });
 });

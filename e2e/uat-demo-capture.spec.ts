@@ -40,10 +40,10 @@ test.describe('UAT demo media (gamma)', () => {
     if (await newApp.isVisible({ timeout: 5000 }).catch(() => false)) {
       await newApp.click();
       await page.waitForTimeout(1200);
-      const dialog = page.locator('[role="dialog"], .ant-modal-content').first();
+      const dialog = page.locator('[role="dialog"], .modal-box-content').first();
       if (await dialog.isVisible({ timeout: 8000 }).catch(() => false)) {
         await page.screenshot({ path: path.join(OUT_DIR, '02-new-application-dialog.png') });
-        const closeBtn = page.locator('.ant-modal-close, [aria-label="Close"]').first();
+        const closeBtn = page.locator('.modal-box-close, [aria-label="Close"]').first();
         if (await closeBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
           await closeBtn.click();
         } else {
@@ -97,10 +97,10 @@ test.describe('UAT demo media (gamma)', () => {
     }
 
     await page.waitForTimeout(1200);
-    const modal = page.locator('[role="dialog"], .ant-modal-content').first();
+    const modal = page.locator('[role="dialog"], .modal-box-content').first();
     if (await modal.isVisible({ timeout: 8000 }).catch(() => false)) {
       await page.screenshot({ path: path.join(OUT_DIR, '05-settings-modal.png') });
-      const closeM = page.locator('.ant-modal-close, [aria-label="Close"]').first();
+      const closeM = page.locator('.modal-box-close, [aria-label="Close"]').first();
       if (await closeM.isVisible({ timeout: 2000 }).catch(() => false)) {
         await closeM.click();
       } else {

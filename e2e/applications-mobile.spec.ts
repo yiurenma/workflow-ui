@@ -7,13 +7,13 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     await setupMocks(page);
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
     // Wait for React to render - either cards or loading spinner
-    await page.waitForSelector('.ant-flex, .ant-spin-container', { timeout: 15000 });
+    await page.waitForSelector('[class*="flex"], [class*="loading"]', { timeout: 15000 });
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {
     // Layer 1: Exist - no table, cards present
     await expect(page.locator('table')).toHaveCount(0);
-    const cardContainer = page.locator('.ant-flex, .ant-spin-container');
+    const cardContainer = page.locator('[class*="flex"], [class*="loading"]');
     await expect(cardContainer.first()).toBeAttached();
 
     // Layer 2: Size - Card area has content
@@ -61,7 +61,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     const menuItem = page.getByRole('menuitem', { name: 'History' });
 
     // Layer 2: Size - Menu has visible items
-    const menu = page.locator('.ant-dropdown-menu').first();
+    const menu = page.locator('.dropdown-menu').first();
     await expect(menu).toBeVisible({ timeout: 5000 });
     const menuBox = await menu.boundingBox();
     if (menuBox) {
@@ -74,7 +74,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     await menuItem.click();
 
     // Layer 1: Exist - drawer opens
-    const drawer = page.locator('.ant-drawer');
+    const drawer = page.locator('.drawer-panel');
     await expect(drawer).toBeVisible();
 
     // Layer 5: Effect - no navigation occurred
@@ -90,7 +90,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Copy' }).click();
 
-    const modal = page.locator('.ant-modal');
+    const modal = page.locator('.modal-box');
 
     // Layer 1: Exist
     await expect(modal).toBeVisible();
@@ -102,7 +102,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     }
 
     // Layer 3: Viewport - Modal title in viewport
-    const modalTitle = modal.locator('.ant-modal-title').first();
+    const modalTitle = modal.locator('.modal-box-title').first();
     await expect(modalTitle).toBeInViewport();
 
     // Layer 5: Effect - no navigation
@@ -118,7 +118,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     await ellipsisBtn.click();
     await page.getByRole('menuitem', { name: 'Delete' }).click();
 
-    const confirmModal = page.locator('.ant-modal-confirm');
+    const confirmModal = page.locator('.modal-box-confirm');
 
     // Layer 1: Exist
     await expect(confirmModal).toBeVisible();
@@ -149,7 +149,7 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     await expect(settingsBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await settingsBtn.click();
-    await expect(page.locator('.ant-modal')).toBeVisible();
+    await expect(page.locator('.modal-box')).toBeVisible();
     expect(page.url()).toBe(urlBefore);
   });
 
@@ -162,6 +162,6 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
     const fab = page.locator('button[aria-label="New application"]');
     await expect(fab).toBeVisible();
     await fab.click();
-    await expect(page.locator('.ant-modal, .ant-drawer')).toBeVisible();
+    await expect(page.locator('.modal-box, .drawer-panel')).toBeVisible();
   });
 });

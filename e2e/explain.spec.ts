@@ -22,6 +22,6 @@ test.describe('Explain feature (TC-EXPLAIN)', () => {
   test('TC-EXPLAIN-02 clicking Explain opens token prompt or explain modal', async ({ page }) => {
     await clickCanvasHeaderAction(page, 'Explain');
     // Either a token prompt modal or the explain result modal should appear
-    await expect(page.locator('.ant-modal')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.modal-box')).toBeVisible({ timeout: 5_000 });
   });
 });
