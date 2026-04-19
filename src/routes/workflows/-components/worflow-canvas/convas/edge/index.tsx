@@ -1,4 +1,4 @@
-import { CloseOutlined } from "@ant-design/icons";
+import React from "react";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -32,7 +32,7 @@ export const ButtonEdge: React.FC<EdgeProps> = ({
   });
 
   const selectedStyle = useMemo(() => {
-    return selected ? { strokeWidth: 2, stroke: "#4F46E5" } : {};
+    return selected ? { strokeWidth: 2, stroke: "#0f62fe" } : {};
   }, [selected]);
 
   const onEdgeDelete = (event: React.MouseEvent) => {
@@ -55,16 +55,33 @@ export const ButtonEdge: React.FC<EdgeProps> = ({
             fontSize: 10,
             pointerEvents: "all",
             zIndex: 1001,
+            opacity: 0,
+            transition: "opacity 0.2s",
           }}
-          className="nodrag nopan opacity-0 hover:opacity-100 transition-opacity duration-300"
+          className="nodrag nopan edge-delete-btn"
+          onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = "1"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = "0"; }}
         >
           <button
-            className="cursor-pointer rounded-full bg-zinc-500 hover:bg-zinc-700 p-0.5 flex items-center justify-center w-4 h-4 shadow-sm transition-colors duration-150"
+            style={{
+              cursor: "pointer",
+              background: "#6f6f6f",
+              border: "none",
+              padding: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 16,
+              height: 16,
+              color: "#fff",
+              fontSize: 10,
+              fontFamily: "inherit",
+            }}
             type="button"
             onClick={onEdgeDelete}
             title="Delete connection"
           >
-            <CloseOutlined className="text-white text-[8px]" />
+            ✕
           </button>
         </div>
       </EdgeLabelRenderer>

@@ -3,7 +3,7 @@ import { WorkflowDialog } from "./index";
 import type { ApplicationFormValues } from "@/api/types";
 import { useCreateApplication } from "@/api/hooks/workflow";
 import { useNavigate } from "@tanstack/react-router";
-import { message } from "antd";
+import { useToast } from "@/contexts/ToastContext";
 
 type DialogMode = "create" | "edit";
 
@@ -35,6 +35,7 @@ export const WorkflowDialogProvider: React.FC<WorkflowDialogProviderProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<DialogMode>("create");
   const [selectedName, setSelectedName] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export const WorkflowDialogProvider: React.FC<WorkflowDialogProviderProps> = ({
     try {
       if (mode === "create") {
         await createApplication.mutateAsync(data.applicationName);
-        message.success("Application created");
+        showToast("Application created", "success");
         closeDialog();
         navigate({
           to: "/workflows/$applicationName",
@@ -71,7 +72,7 @@ export const WorkflowDialogProvider: React.FC<WorkflowDialogProviderProps> = ({
         });
       }
     } catch (error) {
-      message.error("Could not create application");
+      showToast("Could not create application", "error");
     }
   };
 

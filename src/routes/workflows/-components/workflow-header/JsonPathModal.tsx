@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Modal, Input, Button, Typography, Space } from "antd";
 import { JSONPath } from "jsonpath-plus";
 
 type JsonPathModalProps = {
@@ -42,46 +41,53 @@ export const JsonPathModal: React.FC<JsonPathModalProps> = ({ open, onClose }) =
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Modal
-      title="JsonPath Playground"
-      open={open}
-      onCancel={onClose}
-      footer={<Button onClick={onClose}>Close</Button>}
-      width={600}
-    >
-      <Space direction="vertical" style={{ width: "100%" }} size="middle">
-        <div>
-          <Typography.Text className="text-xs text-slate-500">JsonPath Expression</Typography.Text>
-          <Input
-            value={expression}
-            onChange={(e) => setExpression(e.target.value)}
-            placeholder="$.customer.id"
-            className="mt-1 font-mono"
-            onPressEnter={validate}
-          />
+    <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box slide-up" style={{ maxWidth: 600 }}>
+        <div className="modal-header">
+          <span className="modal-title">JsonPath Playground</span>
+          <button className="modal-close" onClick={onClose}>✕</button>
         </div>
-        <div>
-          <Typography.Text className="text-xs text-slate-500">JSON Document</Typography.Text>
-          <Input.TextArea
-            value={jsonDoc}
-            onChange={(e) => setJsonDoc(e.target.value)}
-            rows={8}
-            className="mt-1 font-mono text-sm"
-          />
+        <div className="modal-body">
+          <div className="form-group">
+            <label className="cds-label">JsonPath Expression</label>
+            <input
+              className="cds-input"
+              value={expression}
+              onChange={(e) => setExpression(e.target.value)}
+              placeholder="$.customer.id"
+              onKeyDown={(e) => e.key === "Enter" && validate()}
+              style={{ fontFamily: '"IBM Plex Mono",monospace' }}
+            />
+          </div>
+          <div className="form-group">
+            <label className="cds-label">JSON Document</label>
+            <textarea
+              className="cds-input"
+              value={jsonDoc}
+              onChange={(e) => setJsonDoc(e.target.value)}
+              rows={8}
+              style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "vertical" }}
+            />
+          </div>
+          <button className="btn btn-primary" onClick={validate}>
+            Validate
+          </button>
+          {error && (
+            <div style={{ marginTop: 10, fontSize: 13, color: "#da1e28" }}>{error}</div>
+          )}
+          {result !== null && !error && (
+            <pre style={{ marginTop: 10, background: "#f4f4f4", padding: 12, fontSize: 12, maxHeight: 192, overflow: "auto", fontFamily: '"IBM Plex Mono",monospace' }}>
+              {result}
+            </pre>
+          )}
         </div>
-        <Button type="primary" onClick={validate}>
-          Validate
-        </Button>
-        {error && (
-          <Typography.Text type="danger" className="text-sm">
-            {error}
-          </Typography.Text>
-        )}
-        {result !== null && !error && (
-          <pre className="rounded bg-slate-50 p-3 text-xs max-h-48 overflow-auto">{result}</pre>
-        )}
-      </Space>
-    </Modal>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
   );
 };

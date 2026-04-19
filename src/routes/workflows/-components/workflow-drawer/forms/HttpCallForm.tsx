@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Select, Button, Space } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Node } from "@xyflow/react";
 import type { BackendPlugin, BackendWorkflowRule, BackendWorkflowType } from "@/api/types/operation";
 import NodeSection from "../NodeSection";
-import { tryFormatJson, useJsonFormat } from "../useJsonFormat";
+import { tryFormatJson } from "../useJsonFormat";
 import { validateRuleKey } from "@/utils/validateRuleKey";
 
 export type HttpCallFormValues = {
@@ -26,185 +24,192 @@ type HttpCallFormProps = {
   onValuesChange?: (values: HttpCallFormValues) => void;
 };
 
+// Simple hook to manage form state
+function useFormState(initial: HttpCallFormValues, onChange?: (v: HttpCallFormValues) => void) {
+  const [values, setValues] = useState(initial);
+  const set = (k: keyof HttpCallFormValues, v: unknown) => {
+    setValues((prev) => {
+      const next = { ...prev, [k]: v };
+      onChange?.(next);
+      return next;
+    });
+  };
+  return { values, set, setValues };
+}
+
+function RulesList({
+  rules,
+  onChange,
+}: {
+  rules: { key?: string; remark?: string }[];
+  onChange: (rules: { key?: string; remark?: string }[]) => void;
+}) {
+  const [keyErrors, setKeyErrors] = useState<Record<number, string>>({});
+
+  const add = () => onChange([...rules, { key: "", remark: "" }]);
+  const remove = (i: number) => {
+    onChange(rules.filter((_, idx) => idx !== i));
+    const { [i]: _, ...rest } = keyErrors;
+    setKeyErrors(rest);
+  };
+  const setField = (i: number, k: string, v: string) =>
+    onChange(rules.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
+
+  return (
+    <div>
+      {rules.map((rule, i) => (
+        <div key={i} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 6 }}>
+          <div style={{ flex: 1 }}>
+            <input
+              className="cds-input"
+              placeholder='$.messageInformation[?(@.field == "value")]'
+              value={rule.key ?? ""}
+              onChange={(e) => setField(i, "key", e.target.value)}
+              onBlur={(e) => {
+                const result = validateRuleKey(e.target.value);
+                if (!result.valid) setKeyErrors({ ...keyErrors, [i]: result.error! });
+                else { const { [i]: _, ...rest } = keyErrors; setKeyErrors(rest); }
+              }}
+              style={{ marginBottom: 4, fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, borderColor: keyErrors[i] ? "#da1e28" : undefined }}
+            />
+            {keyErrors[i] && <div style={{ fontSize: 11, color: "#da1e28", marginBottom: 4 }}>{keyErrors[i]}</div>}
+            <input
+              className="cds-input"
+              placeholder="Human-readable explanation"
+              value={rule.remark ?? ""}
+              onChange={(e) => setField(i, "remark", e.target.value)}
+              style={{ fontSize: 12 }}
+            />
+          </div>
+          <button
+            onClick={() => remove(i)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#da1e28", fontSize: 18, marginTop: 6, flexShrink: 0 }}
+            title="Remove rule"
+          >
+            −
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={add}
+        style={{ width: "100%", padding: 6, background: "none", border: "1px dashed #c6c6c6", cursor: "pointer", fontSize: 12, color: "#525252", fontFamily: "inherit", marginTop: 4, borderRadius: 0 }}
+      >
+        ＋ Add rule
+      </button>
+    </div>
+  );
+}
+
 const HttpCallForm: React.FC<HttpCallFormProps> = ({ selectedNode, onValuesChange }) => {
-  const [form] = Form.useForm<HttpCallFormValues>();
-  const formatOnBlur = useJsonFormat(form, onValuesChange);
-  const [ruleKeyErrors, setRuleKeyErrors] = useState<Record<number, string>>({});
+  const bp = selectedNode?.data?.backendPlugin as BackendPlugin | undefined;
+  const action = bp?.action as BackendWorkflowType | undefined;
+
+  const initial: HttpCallFormValues = {
+    description: (bp?.description as string | undefined) ?? "",
+    ruleList: (bp?.ruleList as BackendWorkflowRule[] | undefined)?.map((r) => ({ key: r.key, remark: r.remark })) ?? [],
+    provider: action?.provider as string | undefined,
+    type: action?.type as string | undefined,
+    remark: action?.remark as string | undefined,
+    httpRequestMethod: (action?.httpRequestMethod as string | undefined) ?? "POST",
+    httpRequestUrlWithQueryParameter: action?.httpRequestUrlWithQueryParameter as string | undefined,
+    internalHttpRequestUrlWithQueryParameter: action?.internalHttpRequestUrlWithQueryParameter as string | undefined,
+    httpRequestHeaders: tryFormatJson(action?.httpRequestHeaders as string | undefined),
+    httpRequestBody: tryFormatJson(action?.httpRequestBody as string | undefined),
+    trackingNumberSchemaInHttpResponse: tryFormatJson(action?.trackingNumberSchemaInHttpResponse as string | undefined),
+  };
+
+  const { values, set, setValues } = useFormState(initial, onValuesChange);
 
   useEffect(() => {
     if (selectedNode?.data) {
-      const bp = selectedNode.data.backendPlugin as BackendPlugin | undefined;
-      const action = bp?.action as BackendWorkflowType | undefined;
-      form.setFieldsValue({
-        description: (bp?.description as string | undefined) ?? "",
-        ruleList: bp?.ruleList?.map((r: BackendWorkflowRule) => ({ key: r.key, remark: r.remark })) ?? [],
-        provider: action?.provider as string | undefined,
-        type: action?.type as string | undefined,
-        remark: action?.remark as string | undefined,
-        httpRequestMethod: (action?.httpRequestMethod as string | undefined) ?? "POST",
-        httpRequestUrlWithQueryParameter: action?.httpRequestUrlWithQueryParameter as string | undefined,
-        internalHttpRequestUrlWithQueryParameter: action?.internalHttpRequestUrlWithQueryParameter as string | undefined,
-        httpRequestHeaders: tryFormatJson(action?.httpRequestHeaders as string | undefined),
-        httpRequestBody: tryFormatJson(action?.httpRequestBody as string | undefined),
-        trackingNumberSchemaInHttpResponse: tryFormatJson(action?.trackingNumberSchemaInHttpResponse as string | undefined),
-      });
+      const bp2 = selectedNode.data.backendPlugin as BackendPlugin | undefined;
+      const action2 = bp2?.action as BackendWorkflowType | undefined;
+      const next: HttpCallFormValues = {
+        description: (bp2?.description as string | undefined) ?? "",
+        ruleList: (bp2?.ruleList as BackendWorkflowRule[] | undefined)?.map((r) => ({ key: r.key, remark: r.remark })) ?? [],
+        provider: action2?.provider as string | undefined,
+        type: action2?.type as string | undefined,
+        remark: action2?.remark as string | undefined,
+        httpRequestMethod: (action2?.httpRequestMethod as string | undefined) ?? "POST",
+        httpRequestUrlWithQueryParameter: action2?.httpRequestUrlWithQueryParameter as string | undefined,
+        internalHttpRequestUrlWithQueryParameter: action2?.internalHttpRequestUrlWithQueryParameter as string | undefined,
+        httpRequestHeaders: tryFormatJson(action2?.httpRequestHeaders as string | undefined),
+        httpRequestBody: tryFormatJson(action2?.httpRequestBody as string | undefined),
+        trackingNumberSchemaInHttpResponse: tryFormatJson(action2?.trackingNumberSchemaInHttpResponse as string | undefined),
+      };
+      setValues(next);
     }
-  }, [selectedNode, form]);
+  }, [selectedNode?.id]);
 
-  const handleValuesChange = (_: unknown, all: HttpCallFormValues) => {
-    onValuesChange?.(all);
+  const tryFmtBlur = (field: keyof HttpCallFormValues) => () => {
+    const val = values[field] as string | undefined;
+    const formatted = tryFormatJson(val);
+    if (formatted !== val) set(field, formatted);
+    onValuesChange?.(values);
   };
 
   return (
-    <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
-
-      {/* Panel 1 — Node Description */}
-      <NodeSection
-        title="Node Description"
-        subtitle="The name shown on the canvas. What is this step called?"
-        headingTooltip="Persisted as: plugin.description"
-      >
-        <Form.Item
-          name="description"
-          label="Step Name"
-          tooltip="The name displayed on the canvas node. Keep it short and descriptive."
-        >
-          <Input placeholder="Step description (shown as node label)" />
-        </Form.Item>
+    <div>
+      <NodeSection title="Node Description" subtitle="The name shown on the canvas. What is this step called?">
+        <label className="cds-label">Step Name</label>
+        <input
+          className="cds-input"
+          placeholder="Step description (shown as node label)"
+          value={values.description ?? ""}
+          onChange={(e) => set("description", e.target.value)}
+        />
       </NodeSection>
 
-      {/* Panel 2 — Rules */}
-      <NodeSection
-        title="Rules"
-        subtitle="Run only when… — conditions that must all match before this step executes."
-        headingTooltip="Persisted as: plugin.ruleList[].key + ruleList[].remark"
-      >
-        <Form.List name="ruleList">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name, ...rest }) => (
-                <div key={key} className="mb-2">
-                  <Space align="baseline" className="flex">
-                    <Form.Item
-                      {...rest}
-                      name={[name, "key"]}
-                      className="!mb-0"
-                      tooltip='e.g. $.messageInformation[?(@.customerId =~ /.+?/)] — evaluates to true when the path returns a result'
-                      validateStatus={ruleKeyErrors[name] ? 'error' : undefined}
-                    >
-                      <Input
-                        placeholder='$.messageInformation[?(@.field == "value")]'
-                        style={{ width: 200 }}
-                        onBlur={(e) => {
-                          const result = validateRuleKey(e.target.value);
-                          if (!result.valid) {
-                            setRuleKeyErrors({ ...ruleKeyErrors, [name]: result.error! });
-                          } else {
-                            const { [name]: _, ...rest } = ruleKeyErrors;
-                            setRuleKeyErrors(rest);
-                          }
-                        }}
-                      />
-                    </Form.Item>
-                    <Form.Item {...rest} name={[name, "remark"]} className="!mb-0">
-                      <Input placeholder="Human-readable explanation" style={{ width: 120 }} />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                  {ruleKeyErrors[name] && (
-                    <div className="text-red-600 text-xs mt-1">{ruleKeyErrors[name]}</div>
-                  )}
-                </div>
-              ))}
-              <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} block>
-                Add rule
-              </Button>
-            </>
-          )}
-        </Form.List>
+      <NodeSection title="Rules" subtitle="Run only when… — conditions that must all match before this step executes.">
+        <RulesList
+          rules={values.ruleList ?? []}
+          onChange={(v) => set("ruleList", v)}
+        />
       </NodeSection>
 
-      {/* Panel 3 — Action */}
-      <NodeSection
-        title="Action"
-        variant="inset"
-        subtitle="What the system does when this step runs."
-        headingTooltip="Persisted as: plugin.action (type, provider, httpRequest*, elseLogic, …)"
-      >
-        <Form.Item
-          name="provider"
-          label="Provider Name"
-          tooltip="Logical name for this service (e.g. CRMService, LoyaltyAPI). Used for logging and tracking."
-        >
-          <Input placeholder="e.g. CustomerDataService" />
-        </Form.Item>
-        <Form.Item
-          name="type"
-          label="Plugin Type"
-          tooltip="Auto-populated from the node type. Read-only."
-        >
-          <Input disabled />
-        </Form.Item>
-        <Form.Item
-          name="remark"
-          label="Step Note"
-          tooltip="Internal documentation note for this step."
-        >
-          <Input.TextArea rows={2} placeholder="Step remark" />
-        </Form.Item>
-        <Form.Item name="httpRequestMethod" label="HTTP Method">
-          <Select options={["GET", "POST", "PUT", "DELETE"].map((v) => ({ value: v, label: v }))} />
-        </Form.Item>
-        <Form.Item
-          name="httpRequestUrlWithQueryParameter"
-          label="External URL"
-          tooltip="The public/external endpoint URL. Supports <<<$.path>>> variable substitution from the runtime payload."
-        >
-          <Input.TextArea rows={2} placeholder="https://example.com/api/..." />
-        </Form.Item>
-        <Form.Item
-          name="internalHttpRequestUrlWithQueryParameter"
-          label="Internal URL"
-          tooltip="Internal service URL (used when running inside a private network). Falls back to External URL if empty."
-        >
-          <Input.TextArea rows={2} placeholder="https://internal.example.com/api/..." />
-        </Form.Item>
-        <Form.Item
-          name="httpRequestHeaders"
-          label="Request Headers"
-          tooltip='JSON object of HTTP headers. e.g. {"Authorization": "Bearer token", "Content-Type": "application/json"}'
-        >
-          <Input.TextArea
-            rows={3}
-            placeholder='{"Content-Type": "application/json"}'
-            onBlur={formatOnBlur("httpRequestHeaders")}
-          />
-        </Form.Item>
-        <Form.Item
-          name="httpRequestBody"
-          label="Request Body"
-          tooltip='JSON body template. Use <<<$.field>>> to inject runtime values. e.g. {"customerId": "<<<$.messageInformation.customerId>>>"}'
-        >
-          <Input.TextArea
-            rows={5}
-            placeholder="Request body template"
-            onBlur={formatOnBlur("httpRequestBody")}
-          />
-        </Form.Item>
-        <Form.Item
-          name="trackingNumberSchemaInHttpResponse"
-          label="Response Extraction Schema"
-          tooltip='JSON template to extract values from the HTTP response. Use <<<$.field>>> JSONPath. e.g. {"reference": "<<<$.data.id>>>"}. Leave as {} to skip extraction.'
-        >
-          <Input.TextArea
-            rows={3}
-            placeholder="JSONPath or schema to extract from response"
-            onBlur={formatOnBlur("trackingNumberSchemaInHttpResponse")}
-          />
-        </Form.Item>
+      <NodeSection title="Action" subtitle="What the system does when this step runs." variant="inset">
+        <div className="form-group">
+          <label className="cds-label">Provider Name</label>
+          <input className="cds-input" placeholder="e.g. CustomerDataService" value={values.provider ?? ""} onChange={(e) => set("provider", e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Plugin Type</label>
+          <input className="cds-input" value={values.type ?? ""} disabled style={{ opacity: 0.6 }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Step Note</label>
+          <textarea className="cds-input" rows={2} placeholder="Step remark" value={values.remark ?? ""} onChange={(e) => set("remark", e.target.value)} style={{ resize: "none" }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">HTTP Method</label>
+          <div style={{ position: "relative" }}>
+            <select className="cds-select" value={values.httpRequestMethod ?? "POST"} onChange={(e) => set("httpRequestMethod", e.target.value)}>
+              {["GET", "POST", "PUT", "DELETE"].map((m) => <option key={m}>{m}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="cds-label">External URL</label>
+          <textarea className="cds-input" rows={2} placeholder="https://example.com/api/..." value={values.httpRequestUrlWithQueryParameter ?? ""} onChange={(e) => set("httpRequestUrlWithQueryParameter", e.target.value)} style={{ resize: "none" }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Internal URL</label>
+          <textarea className="cds-input" rows={2} placeholder="https://internal.example.com/api/..." value={values.internalHttpRequestUrlWithQueryParameter ?? ""} onChange={(e) => set("internalHttpRequestUrlWithQueryParameter", e.target.value)} style={{ resize: "none" }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Request Headers</label>
+          <textarea className="cds-input" rows={3} placeholder='{"Content-Type": "application/json"}' value={values.httpRequestHeaders ?? ""} onChange={(e) => set("httpRequestHeaders", e.target.value)} onBlur={tryFmtBlur("httpRequestHeaders")} style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "none" }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Request Body</label>
+          <textarea className="cds-input" rows={5} placeholder="Request body template" value={values.httpRequestBody ?? ""} onChange={(e) => set("httpRequestBody", e.target.value)} onBlur={tryFmtBlur("httpRequestBody")} style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "none" }} />
+        </div>
+        <div className="form-group">
+          <label className="cds-label">Response Extraction Schema</label>
+          <textarea className="cds-input" rows={3} placeholder="JSONPath or schema to extract from response" value={values.trackingNumberSchemaInHttpResponse ?? ""} onChange={(e) => set("trackingNumberSchemaInHttpResponse", e.target.value)} onBlur={tryFmtBlur("trackingNumberSchemaInHttpResponse")} style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "none" }} />
+        </div>
       </NodeSection>
-
-    </Form>
+    </div>
   );
 };
 

@@ -1,9 +1,9 @@
 import { Connection, Edge, useReactFlow, addEdge } from "@xyflow/react";
 import { useCallback } from "react";
-import { message } from "antd";
 
 type UseWorkflowConnectionsProps = {
     setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void;
+    onError?: (msg: string) => void;
 };
 
 type UseWorkflowConnectionsReturn = {
@@ -14,14 +14,14 @@ type UseWorkflowConnectionsReturn = {
  * Hook to manage workflow node connections
  * Handles connection validation and creation
  */
-export const useWorkflowConnections = ({ setEdges }: UseWorkflowConnectionsProps): UseWorkflowConnectionsReturn => {
+export const useWorkflowConnections = ({ setEdges, onError }: UseWorkflowConnectionsProps): UseWorkflowConnectionsReturn => {
     const { getNode, getEdges } = useReactFlow();
 
     const onConnect = useCallback(
         (connection: Connection) => {
             // Validation 1: Check if source and target are the same node
             if (connection.source === connection.target) {
-                message.error("Cannot connect a node to itself");
+                onError?.("Cannot connect a node to itself");
                 return;
             }
 
@@ -40,7 +40,7 @@ export const useWorkflowConnections = ({ setEdges }: UseWorkflowConnectionsProps
                 (connection.sourceHandle?.includes("target") &&
                     connection.targetHandle?.includes("target"))
             ) {
-                message.error("Invalid connection: Must connect from output to input");
+                onError?.("Invalid connection: Must connect from output to input");
                 return;
             }
 
@@ -53,17 +53,17 @@ export const useWorkflowConnections = ({ setEdges }: UseWorkflowConnectionsProps
             );
 
             if (targetHandleHasConnection) {
-                message.error("This input already has a connection. Remove it first before creating a new one.");
+                onError?.("This input already has a connection. Remove it first before creating a new one.");
                 return;
             }
 
             // If all validations pass, add the edge
             setEdges((eds) => addEdge(connection, eds));
         },
-        [getNode, getEdges, setEdges]
+        [getNode, getEdges, setEdges, onError]
     );
 
     return {
         onConnect,
     };
-}; 
+};

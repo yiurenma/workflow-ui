@@ -1,6 +1,4 @@
-import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined, RobotOutlined, ImportOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
-import { Dropdown, Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
 import { useSaveWorkflow } from "@/api/hooks/workflow";
 import { onlineApi } from "@/api/services/online";
@@ -13,8 +11,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { useAIExplain } from "./useAIExplain";
 import { isValidToken, getStoredToken } from "@/utils/tokenStorage";
 import { callAIForGenerator } from "@/services/aiGeneratorService";
-
-const { TextArea } = Input;
+import { useToast } from "@/contexts/ToastContext";
 
 type WorkflowHeaderProps = {
   applicationName: string;
@@ -38,6 +35,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   onStraighten,
 }) => {
   const isMobile = useIsMobile();
+  const { showToast } = useToast();
   const saveWorkflow = useSaveWorkflow();
   const [runOpen, setRunOpen] = useState(false);
   const [runBody, setRunBody] = useState(defaultRunBody);
@@ -47,49 +45,41 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [jsonPathOpen, setJsonPathOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deviceFlowModalContent, setDeviceFlowModalContent] = useState<"device" | "token" | null>(null);
 
-  const aiExplain = useAIExplain();
+  const aiExplain = useAIExplain({
+    onError: (msg) => showToast(msg, "error"),
+    onInfo: (msg) => showToast(msg, "info"),
+  });
 
   const saveFlow = async () => {
     if (!workFlow) {
-      message.error("No workflow data to save");
+      showToast("No workflow data to save", "error");
       return;
     }
-
     try {
       const merged = onSave ? onSave() : null;
       const payload = merged ?? workFlow;
-      await saveWorkflow.mutateAsync({
-        applicationName,
-        workFlow: payload,
-      });
-      message.success("Workflow saved successfully");
-    } catch (error) {
-      message.error("Failed to save workflow");
+      await saveWorkflow.mutateAsync({ applicationName, workFlow: payload });
+      showToast("Workflow saved successfully", "success");
+    } catch {
+      showToast("Failed to save workflow", "error");
     }
-  };
-
-  const runFlow = () => {
-    setRunResult(null);
-    setRunOpen(true);
   };
 
   const executeRun = async () => {
     setRunLoading(true);
     setRunResult(null);
     try {
-      const res = await onlineApi.postWorkflow({
-        applicationName,
-        confirmationNumber,
-        body: runBody,
-      });
+      const res = await onlineApi.postWorkflow({ applicationName, confirmationNumber, body: runBody });
       const text = await res.text();
       setRunResult(text.slice(0, 8000));
-      message.success("Request completed");
+      showToast("Request completed", "success");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setRunResult(msg);
-      message.error("Online API request failed");
+      showToast("Online API request failed", "error");
     } finally {
       setRunLoading(false);
     }
@@ -105,313 +95,243 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
 
   const openGitHub = (verificationUri: string) => {
     const opened = window.open(verificationUri, "_blank");
-    if (!opened) {
-      message.info(`Please open ${verificationUri} in your browser and enter the code.`);
-    }
+    if (!opened) showToast(`Please open ${verificationUri} in your browser`, "info");
   };
 
   const renderDeviceFlowContent = () => {
     const { state } = aiExplain.deviceFlow;
-
     if (state.status === "requesting") {
-      return (
-        <div className="py-8 text-center text-zinc-400 text-sm">
-          <LoadingOutlined className="mr-2" />
-          Contacting GitHub…
-        </div>
-      );
+      return <div style={{ padding: "32px 0", textAlign: "center", color: "#525252", fontSize: 13 }}>Contacting GitHub…</div>;
     }
-
     if (state.status === "awaiting_user" || state.status === "polling") {
       const { userCode, verificationUri } = state;
       return (
-        <div className="space-y-4">
-          <Typography.Paragraph className="text-sm text-zinc-600">
-            Enter the code below on GitHub to authorize access to GitHub Models.
-          </Typography.Paragraph>
-          <div className="rounded-lg bg-amber-50 border border-amber-200 px-6 py-4 text-center">
-            <div className="text-2xl font-mono font-bold tracking-widest text-amber-700 select-all">
-              {userCode}
-            </div>
-            <div className="text-xs text-amber-500 mt-1">Click to copy</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <p style={{ fontSize: 13, color: "#525252" }}>Enter the code below on GitHub to authorize access to GitHub Models.</p>
+          <div style={{ background: "#fdf6ec", border: "1px solid #f8d89c", padding: "16px 24px", textAlign: "center" }}>
+            <div style={{ fontSize: 24, fontFamily: '"IBM Plex Mono",monospace', fontWeight: 700, letterSpacing: "0.2em", color: "#b45309", userSelect: "all" }}>{userCode}</div>
           </div>
-          <Button
-            type="primary"
-            icon={<GithubOutlined />}
-            block
-            onClick={() => openGitHub(verificationUri)}
-          >
-            Open GitHub to authorize
-          </Button>
-          {state.status === "polling" && (
-            <div className="text-center text-xs text-zinc-400">
-              <LoadingOutlined className="mr-1" />
-              Waiting for authorization…
-            </div>
-          )}
+          <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => openGitHub(verificationUri)}>Open GitHub to authorize</button>
+          {state.status === "polling" && <div style={{ textAlign: "center", fontSize: 12, color: "#525252" }}>Waiting for authorization…</div>}
         </div>
       );
     }
-
     if (state.status === "expired") {
-      return (
-        <div className="py-4 text-center">
-          <Typography.Text type="danger" className="text-sm">
-            Authorization timed out — please try again.
-          </Typography.Text>
-          <div className="mt-3">
-            <Button onClick={() => aiExplain.deviceFlow.start()}>Try again</Button>
-          </div>
-        </div>
-      );
+      return <div style={{ textAlign: "center" }}><span style={{ color: "#da1e28", fontSize: 13 }}>Authorization timed out — please try again.</span><br /><button className="btn btn-ghost" style={{ marginTop: 12 }} onClick={() => aiExplain.deviceFlow.start()}>Try again</button></div>;
     }
-
     if (state.status === "denied") {
-      return (
-        <div className="py-4 text-center">
-          <Typography.Text type="danger" className="text-sm">
-            Authorization was denied on GitHub. You can also paste a token manually.
-          </Typography.Text>
-        </div>
-      );
+      return <div style={{ textAlign: "center" }}><span style={{ color: "#da1e28", fontSize: 13 }}>Authorization was denied on GitHub.</span></div>;
     }
-
     if (state.status === "error") {
-      return (
-        <div className="py-4 text-center">
-          <Typography.Text type="danger" className="text-sm">
-            {state.message}
-          </Typography.Text>
-          <div className="mt-3">
-            <Button onClick={() => aiExplain.deviceFlow.start()}>Try again</Button>
-          </div>
-        </div>
-      );
+      return <div style={{ textAlign: "center" }}><span style={{ color: "#da1e28", fontSize: 13 }}>{state.message}</span><br /><button className="btn btn-ghost" style={{ marginTop: 12 }} onClick={() => aiExplain.deviceFlow.start()}>Try again</button></div>;
     }
-
     return null;
   };
 
   return (
     <>
-      <Flex
-        align="center"
-        justify={"space-between"}
-        gap={"middle"}
-        className="py-2 px-4 bg-white"
-        style={{ minHeight: 44, borderBottom: "1px solid #c6c6c6" }}
+      <div
+        style={{
+          height: 44, background: "#fff", borderBottom: "1px solid #c6c6c6",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 16px", flexShrink: 0,
+        }}
       >
-        <Space size={"middle"}>
-          <Link to={`/workflows`}>
-            <ArrowLeftOutlined style={{ color: "#525252" }} className="hover:text-[#161616] transition-colors" />
+        {/* Left side */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link to="/workflows" style={{ display: "flex", alignItems: "center", color: "#525252", textDecoration: "none", fontSize: 13 }}>
+            ←
           </Link>
-          <div className="flex flex-col">
-            <span className="font-semibold text-[13px] tracking-[0.16px]" style={{ color: "#161616" }}>
-              {isLoading ? "Loading..." : applicationName}
-            </span>
-          </div>
-        </Space>
-        <Space size={"small"}>
+          <span style={{ color: "#c6c6c6", fontSize: 13 }}>/</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#161616", letterSpacing: "0.16px" }}>
+            {isLoading ? "Loading…" : applicationName}
+          </span>
+        </div>
+
+        {/* Right side */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {isMobile ? (
             <>
-              <Dropdown
-                trigger={["click"]}
-                overlayClassName="carbon-dropdown"
-                menu={{
-                  items: [
-                    {
-                      key: "straighten",
-                      label: "Straighten",
-                      onClick: () => onStraighten?.(),
-                      disabled: !!isLoading,
-                    },
-                    {
-                      key: "explain",
-                      label: "Explain",
-                      icon: <BulbOutlined />,
-                      onClick: () => aiExplain.explainFlow(getWorkflow, applicationName),
-                      disabled: !!isLoading,
-                    },
-                    {
-                      key: "generate",
-                      label: "Generate",
-                      icon: <RobotOutlined />,
-                      onClick: () => setGeneratorOpen(true),
-                    },
-                    {
-                      key: "import",
-                      label: "Import",
-                      icon: <ImportOutlined />,
-                      onClick: () => setImportOpen(true),
-                    },
-                    {
-                      key: "jsonpath",
-                      label: "JsonPath",
-                      onClick: () => setJsonPathOpen(true),
-                    },
-                    {
-                      key: "run",
-                      label: "Run",
-                      onClick: () => runFlow(),
-                      disabled: !!isLoading,
-                    },
-                  ],
-                }}
-              >
-                <Button size="small" icon={<EllipsisOutlined />} aria-label="More actions" />
-              </Dropdown>
-              <Button
-                size="small"
-                type="primary"
-                onClick={saveFlow}
-                disabled={isLoading || saveWorkflow.isPending}
-                loading={saveWorkflow.isPending}
-                className="text-xs font-medium"
-              >
-                Save
-              </Button>
+              {/* Mobile: ellipsis menu */}
+              <div style={{ position: "relative" }}>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setMobileMenuOpen((v) => !v)}
+                  aria-label="More actions"
+                >
+                  ⋯
+                </button>
+                {mobileMenuOpen && (
+                  <>
+                    <div style={{ position: "fixed", inset: 0, zIndex: 998 }} onClick={() => setMobileMenuOpen(false)} />
+                    <div style={{
+                      position: "absolute", right: 0, top: "100%", zIndex: 999,
+                      background: "#fff", border: "1px solid #c6c6c6",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.3)", minWidth: 160,
+                    }}>
+                      {[
+                        { label: "Straighten", action: () => { onStraighten?.(); setMobileMenuOpen(false); }, disabled: !!isLoading },
+                        { label: "💡 Explain", action: () => { aiExplain.explainFlow(getWorkflow, applicationName); setMobileMenuOpen(false); }, disabled: !!isLoading },
+                        { label: "🤖 Generate", action: () => { setGeneratorOpen(true); setMobileMenuOpen(false); } },
+                        { label: "⬇ Import", action: () => { setImportOpen(true); setMobileMenuOpen(false); } },
+                        { label: "JsonPath", action: () => { setJsonPathOpen(true); setMobileMenuOpen(false); } },
+                        { label: "Run", action: () => { setRunOpen(true); setMobileMenuOpen(false); }, disabled: !!isLoading },
+                      ].map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={item.action}
+                          disabled={item.disabled}
+                          style={{
+                            display: "block", width: "100%", padding: "10px 16px",
+                            background: "none", border: "none", textAlign: "left",
+                            fontSize: 13, fontFamily: "inherit", cursor: item.disabled ? "not-allowed" : "pointer",
+                            color: item.disabled ? "#8d8d8d" : "#161616",
+                          }}
+                          onMouseEnter={(e) => { if (!item.disabled) (e.currentTarget as HTMLButtonElement).style.background = "#f4f4f4"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = ""; }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={saveFlow} disabled={isLoading || saveWorkflow.isPending}>
+                {saveWorkflow.isPending ? "Saving…" : "Save"}
+              </button>
             </>
           ) : (
             <>
-              <Button
-                size="small"
-                onClick={() => onStraighten?.()}
-                disabled={isLoading}
-                className="text-xs font-medium"
-                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
-              >
-                Straighten
-              </Button>
-              <Button
-                size="small"
-                icon={<BulbOutlined />}
-                onClick={() => aiExplain.explainFlow(getWorkflow, applicationName)}
-                disabled={isLoading}
-                className="text-xs font-medium"
-                style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
-              >
-                Explain
-              </Button>
-              <Button
-                size="small"
-                icon={<RobotOutlined />}
-                onClick={() => setGeneratorOpen(true)}
-                className="text-xs font-medium"
-                style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
-              >
-                Generate
-              </Button>
-              <Button
-                size="small"
-                icon={<ImportOutlined />}
-                onClick={() => setImportOpen(true)}
-                className="text-xs font-medium"
-                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
-              >
-                Import
-              </Button>
-              <Button
-                size="small"
-                onClick={() => setJsonPathOpen(true)}
-                className="text-xs font-medium"
-                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
-              >
-                JsonPath
-              </Button>
-              <Button size="small" onClick={() => runFlow()} disabled={isLoading}
-                className="text-xs font-medium"
-                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}>
-                Run
-              </Button>
-              <Button
-                size="small"
-                type="primary"
-                onClick={saveFlow}
-                disabled={isLoading || saveWorkflow.isPending}
-                loading={saveWorkflow.isPending}
-                className="text-xs font-medium"
-              >
-                Save
-              </Button>
+              <button className="btn btn-ghost btn-sm" onClick={() => onStraighten?.()} disabled={!!isLoading}>Straighten</button>
+              <button className="btn btn-ghost btn-sm" style={{ color: "#0f62fe", borderColor: "#0f62fe" }} onClick={() => aiExplain.explainFlow(getWorkflow, applicationName)} disabled={!!isLoading}>💡 Explain</button>
+              <button className="btn btn-ghost btn-sm" style={{ color: "#0f62fe", borderColor: "#0f62fe" }} onClick={() => setGeneratorOpen(true)}>🤖 Generate</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setImportOpen(true)}>⬇ Import</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setJsonPathOpen(true)}>JsonPath</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setRunOpen(true)} disabled={!!isLoading}>Run</button>
+              <button className="btn btn-primary btn-sm" onClick={saveFlow} disabled={isLoading || saveWorkflow.isPending}>
+                {saveWorkflow.isPending ? "Saving…" : "Save"}
+              </button>
             </>
           )}
-        </Space>
-      </Flex>
+        </div>
+      </div>
 
-      <Modal
-        title={
-          <Space>
-            <GithubOutlined />
-            <span>Authorize with GitHub</span>
-          </Space>
-        }
-        open={aiExplain.deviceFlowOpen}
-        onCancel={aiExplain.cancelDeviceFlow}
-        footer={
-          <Space>
-            <Button type="link" size="small" className="text-xs text-zinc-400" onClick={aiExplain.openManualTokenModal}>
-              Paste a token manually
-            </Button>
-            <Button onClick={aiExplain.cancelDeviceFlow}>Cancel</Button>
-          </Space>
-        }
-        width={420}
-      >
-        {renderDeviceFlowContent()}
-      </Modal>
-
-      <Modal
-        title="Set AI Token"
-        open={aiExplain.tokenPromptOpen}
-        onCancel={() => aiExplain.setTokenPromptOpen(false)}
-        onOk={() => aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}
-        okText="Save & Explain"
-        width={480}
-      >
-        <Typography.Paragraph type="secondary" className="text-sm">
-          Enter an <strong>Anthropic API key</strong> (<code>sk-ant-…</code>) or a{" "}
-          <strong>GitHub token</strong> (PAT <code>ghp_…</code> / fine-grained <code>github_pat_…</code>, or{" "}
-          device-flow OAuth <code>gho_…</code>) with GitHub Models access. Stored in <code>localStorage</code> — never
-          sent to this server.
-        </Typography.Paragraph>
-        <Input.Password
-          placeholder="sk-ant-… or ghp_… / gho_…"
-          value={aiExplain.tokenInput}
-          onChange={(e) => aiExplain.setTokenInput(e.target.value)}
-          onPressEnter={() => aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}
-          autoFocus
-        />
-      </Modal>
-
-      <Modal
-        title={
-          <Space>
-            <BulbOutlined className="text-amber-500" />
-            <span>AI Workflow Explainer — {applicationName}</span>
-          </Space>
-        }
-        open={aiExplain.explainOpen}
-        onCancel={() => aiExplain.setExplainOpen(false)}
-        footer={
-          <Space>
-            <Button size="small" onClick={aiExplain.clearToken} type="text" className="text-zinc-400 text-xs">
-              Clear token
-            </Button>
-            <Button onClick={() => aiExplain.setExplainOpen(false)}>Close</Button>
-          </Space>
-        }
-        width={680}
-      >
-        {aiExplain.explainLoading ? (
-          <div className="py-10 text-center text-zinc-400 text-sm">
-            Analysing workflow with AI…
+      {/* GitHub Device Flow Modal */}
+      {aiExplain.deviceFlowOpen && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && aiExplain.cancelDeviceFlow()}>
+          <div className="modal-box slide-up" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <span className="modal-title">Authorize with GitHub</span>
+              <button className="modal-close" onClick={aiExplain.cancelDeviceFlow}>✕</button>
+            </div>
+            <div className="modal-body">{renderDeviceFlowContent()}</div>
+            <div className="modal-footer" style={{ justifyContent: "space-between" }}>
+              <button className="btn-link" style={{ fontSize: 12 }} onClick={aiExplain.openManualTokenModal}>Paste a token manually</button>
+              <button className="btn btn-ghost" onClick={aiExplain.cancelDeviceFlow}>Cancel</button>
+            </div>
           </div>
-        ) : aiExplain.explainResult ? (
-          <div className="max-h-[60vh] overflow-y-auto pr-1">
-            <SimpleMarkdown content={aiExplain.explainResult} />
+        </div>
+      )}
+
+      {/* Token prompt Modal */}
+      {aiExplain.tokenPromptOpen && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && aiExplain.setTokenPromptOpen(false)}>
+          <div className="modal-box slide-up" style={{ maxWidth: 480 }}>
+            <div className="modal-header">
+              <span className="modal-title">Set AI Token</span>
+              <button className="modal-close" onClick={() => aiExplain.setTokenPromptOpen(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: 13, color: "#525252", marginBottom: 16, lineHeight: 1.6 }}>
+                Enter an <strong>Anthropic API key</strong> (<code style={{ fontFamily: '"IBM Plex Mono",monospace', background: "#f4f4f4", padding: "1px 4px" }}>sk-ant-…</code>) or a{" "}
+                <strong>GitHub token</strong> (PAT <code style={{ fontFamily: '"IBM Plex Mono",monospace', background: "#f4f4f4", padding: "1px 4px" }}>ghp_…</code>) with GitHub Models access. Stored in <code style={{ fontFamily: '"IBM Plex Mono",monospace', background: "#f4f4f4", padding: "1px 4px" }}>localStorage</code> — never sent to this server.
+              </p>
+              <input
+                type="password"
+                className="cds-input"
+                placeholder="sk-ant-… or ghp_… / gho_…"
+                value={aiExplain.tokenInput}
+                onChange={(e) => aiExplain.setTokenInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}
+                autoFocus
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => aiExplain.setTokenPromptOpen(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={() => aiExplain.saveTokenAndExplain(getWorkflow, applicationName)}>Save & Explain</button>
+            </div>
           </div>
-        ) : null}
-      </Modal>
+        </div>
+      )}
+
+      {/* AI Explain Modal */}
+      {aiExplain.explainOpen && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && aiExplain.setExplainOpen(false)}>
+          <div className="modal-box slide-up" style={{ maxWidth: 680 }}>
+            <div className="modal-header">
+              <span className="modal-title">💡 AI Workflow Explainer — {applicationName}</span>
+              <button className="modal-close" onClick={() => aiExplain.setExplainOpen(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {aiExplain.explainLoading ? (
+                <div style={{ padding: "40px 0", textAlign: "center", color: "#525252", fontSize: 13 }}>Analysing workflow with AI…</div>
+              ) : aiExplain.explainResult ? (
+                <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+                  <SimpleMarkdown content={aiExplain.explainResult} />
+                </div>
+              ) : null}
+            </div>
+            <div className="modal-footer" style={{ justifyContent: "space-between" }}>
+              <button className="btn-link" style={{ fontSize: 12 }} onClick={aiExplain.clearToken}>Clear token</button>
+              <button className="btn btn-ghost" onClick={() => aiExplain.setExplainOpen(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Run Modal */}
+      {runOpen && (
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setRunOpen(false)}>
+          <div className="modal-box slide-up" style={{ maxWidth: 640 }}>
+            <div className="modal-header">
+              <span className="modal-title">Run — {applicationName}</span>
+              <button className="modal-close" onClick={() => setRunOpen(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ fontSize: 12, color: "#525252", background: "#f4f4f4", padding: "10px 12px", marginBottom: 16, lineHeight: 1.6 }}>
+                Sends <span className="inline-code">POST</span> to the online service with query <span className="inline-code">applicationName</span> and optional <span className="inline-code">confirmationNumber</span>.
+              </div>
+              <div className="form-group">
+                <label className="cds-label">Confirmation Number</label>
+                <input className="cds-input" value={confirmationNumber} onChange={(e) => setConfirmationNumber(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="cds-label">Request Body (JSON or XML)</label>
+                <textarea
+                  className="cds-input"
+                  rows={8}
+                  value={runBody}
+                  onChange={(e) => setRunBody(e.target.value)}
+                  style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "vertical" }}
+                />
+              </div>
+              {runResult && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.32px", color: "#24a148", marginBottom: 6 }}>✓ Response</div>
+                  <pre style={{ background: "#f4f4f4", padding: 12, fontSize: 12, fontFamily: '"IBM Plex Mono",monospace', overflow: "auto", maxHeight: 160, border: "1px solid #e0e0e0" }}>{runResult}</pre>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setRunOpen(false)}>Close</button>
+              <button className="btn btn-primary" onClick={executeRun} disabled={runLoading}>
+                {runLoading ? "Sending…" : "Send POST /api/workflow"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <JsonPathModal open={jsonPathOpen} onClose={() => setJsonPathOpen(false)} />
 
@@ -429,52 +349,10 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         onClose={() => setImportOpen(false)}
         onApply={(wf) => {
           onWorkflowImported?.(wf);
-          message.success("Workflow imported to canvas");
+          showToast("Workflow imported to canvas", "success");
         }}
         hasExistingWorkflow={!!workFlow && (workFlow.pluginList?.length ?? 0) > 0}
       />
-
-      <Modal
-        title="Run against Online API"
-        open={runOpen}
-        onCancel={() => setRunOpen(false)}
-        onOk={executeRun}
-        okText="Send POST /api/workflow"
-        confirmLoading={runLoading}
-        width={640}
-      >
-        <Typography.Paragraph type="secondary" className="text-sm">
-          Sends <code>POST</code> to the online service with query{" "}
-          <code>applicationName</code>, optional <code>confirmationNumber</code>, and header{" "}
-          <code>X-Request-Correlation-Id</code> (generated per request).
-        </Typography.Paragraph>
-        <div className="mb-2">
-          <Typography.Text className="text-xs text-slate-500">confirmationNumber</Typography.Text>
-          <Input
-            value={confirmationNumber}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setConfirmationNumber(e.target.value)
-            }
-            className="mt-1"
-          />
-        </div>
-        <div className="mb-2">
-          <Typography.Text className="text-xs text-slate-500">Body (JSON or XML)</Typography.Text>
-          <TextArea
-            rows={10}
-            value={runBody}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setRunBody(e.target.value)
-            }
-            className="mt-1 font-mono text-sm"
-          />
-        </div>
-        {runResult && (
-          <pre className="mt-2 max-h-48 overflow-auto rounded bg-slate-50 p-2 text-xs">
-            {runResult}
-          </pre>
-        )}
-      </Modal>
     </>
   );
 };

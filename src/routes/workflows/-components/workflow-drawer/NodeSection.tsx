@@ -1,6 +1,4 @@
 import React from "react";
-import { Tooltip } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
 
 type NodeSectionProps = {
   title: string;
@@ -15,7 +13,6 @@ const NodeSection: React.FC<NodeSectionProps> = ({
   children,
   variant = "default",
   subtitle,
-  headingTooltip,
 }) => {
   const isInset = variant === "inset";
   return (
@@ -42,24 +39,17 @@ const NodeSection: React.FC<NodeSectionProps> = ({
           }}
         />
         <div style={{ paddingTop: 1, flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.4px",
-                color: isInset ? "#525252" : "#161616",
-              }}
-            >
-              {title}
-            </span>
-            {headingTooltip && (
-              <Tooltip title={headingTooltip} overlayClassName="carbon-tooltip">
-                <InfoCircleOutlined style={{ fontSize: 10, color: "#8d8d8d", cursor: "help" }} />
-              </Tooltip>
-            )}
-          </div>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.4px",
+              color: isInset ? "#525252" : "#161616",
+            }}
+          >
+            {title}
+          </span>
           {subtitle && (
             <div style={{ fontSize: 11, color: "#525252", marginTop: 2, lineHeight: 1.4 }}>
               {subtitle}

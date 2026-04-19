@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { message } from "antd";
 import type { WorkFlow } from "@/api/types";
 import { callAI } from "@/services/aiService";
 import { buildExplainPrompt } from "@/utils/workflowExplainer";
@@ -26,7 +25,14 @@ export type UseAIExplainReturn = {
   clearToken: () => void;
 };
 
-export function useAIExplain(): UseAIExplainReturn {
+type UseAIExplainOptions = {
+  onError?: (msg: string) => void;
+  onInfo?: (msg: string) => void;
+};
+
+export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn {
+  const { onError, onInfo } = options ?? {};
+
   const [explainOpen, setExplainOpen] = useState(false);
   const [explainLoading, setExplainLoading] = useState(false);
   const [explainResult, setExplainResult] = useState<string | null>(null);
@@ -48,7 +54,7 @@ export function useAIExplain(): UseAIExplainReturn {
   ) => {
     const current = getWorkflow();
     if (!current) {
-      message.error("No workflow data available");
+      onError?.("No workflow data available");
       return;
     }
     setExplainResult(null);
@@ -61,11 +67,11 @@ export function useAIExplain(): UseAIExplainReturn {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setExplainResult(`Error: ${msg}`);
-      message.error("AI explain failed");
+      onError?.("AI explain failed");
     } finally {
       setExplainLoading(false);
     }
-  }, []);
+  }, [onError]);
 
   const explainFlow = useCallback((
     getWorkflow: () => WorkFlow | null,
@@ -93,13 +99,13 @@ export function useAIExplain(): UseAIExplainReturn {
   ) => {
     const t = tokenInput.trim();
     if (!t) {
-      message.error("Please enter a token");
+      onError?.("Please enter a token");
       return;
     }
     saveToken(t);
     setTokenPromptOpen(false);
     runExplain(t, getWorkflow, applicationName);
-  }, [tokenInput, runExplain]);
+  }, [tokenInput, runExplain, onError]);
 
   const cancelDeviceFlow = useCallback(() => {
     deviceFlow.cancel();
@@ -108,8 +114,8 @@ export function useAIExplain(): UseAIExplainReturn {
 
   const clearToken = useCallback(() => {
     clearStoredToken();
-    message.info("AI token cleared");
-  }, []);
+    onInfo?.("AI token cleared");
+  }, [onInfo]);
 
   return {
     explainOpen,

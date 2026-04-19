@@ -30,6 +30,7 @@ import { FunctionV3Plugin } from "./convas/plugins/function-v3-plugin";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { MobileAddNodeSheet } from "./MobileAddNodeSheet";
 import { NodeContextMenu } from "@/components/NodeContextMenu";
+import { useToast } from "@/contexts/ToastContext";
 
 const X_COLUMN = 300;
 const Y_STEP = 120;
@@ -110,13 +111,14 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   straightenRef,
 }) => {
   const isMobile = useIsMobile();
+  const { showToast } = useToast();
 
   // Initialize workflow state
   const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange } =
     useWorkflowState({ applicationName, workFlow, onWorkflowChange });
 
   // Initialize connection handlers
-  const { onConnect } = useWorkflowConnections({ setEdges });
+  const { onConnect } = useWorkflowConnections({ setEdges, onError: (msg) => showToast(msg, "error") });
 
   // Initialize drag and drop handlers
   const { onDragOver, onDrop } = useWorkflowDragDrop({ setNodes });

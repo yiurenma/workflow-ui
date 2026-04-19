@@ -1,13 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ReactFlowProvider } from "@xyflow/react";
-import { Layout, Spin, Result, Button } from "antd";
-import { Content } from "antd/es/layout/layout";
 import { WorkflowSider } from "./-components/workflow-sider";
 import { useState, useCallback, useRef } from "react";
 import WorkflowEditor from "./-components/worflow-canvas";
 import WorkflowHeader from "./-components/workflow-header";
 import { useWorkflowQuery } from "@/api/hooks/workflow";
-import { Link } from "@tanstack/react-router";
 import { Node, Edge } from "@xyflow/react";
 import type { WorkFlow } from "@/api/types";
 import { mergeCanvasIntoWorkFlow } from "@/api/mappers/workFlowMapper";
@@ -29,14 +26,11 @@ function RouteComponent() {
   const [collapsed, setCollapsed] = useState(false);
   const { data: workFlow, isLoading, isError } = useWorkflowQuery(applicationName);
 
-  // Generated workflow overrides the server-fetched one on the canvas
   const [generatedWorkflow, setGeneratedWorkflow] = useState<WorkFlow | null>(null);
 
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
   const straightenRef = useRef<(() => void) | null>(null);
-
-  // Always points at the latest effective base (avoids stale closures in handleSave)
   const effectiveWorkflowRef = useRef<WorkFlow | null>(null);
 
   const handleWorkflowChange = useCallback((nodes: Node[], edges: Edge[]) => {
@@ -52,38 +46,35 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <Spin spinning={true}>
-        <div className="h-screen" />
-      </Spin>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#525252", fontSize: 14 }}>
+        Loading…
+      </div>
     );
   }
 
   if (isError || workFlow == null) {
     return (
-      <Result
-        status="404"
-        title="Application not found"
-        subTitle="No workflow for this application name, or the request failed."
-        extra={
-          <Link to="/workflows">
-            <Button type="primary">Back to applications</Button>
-          </Link>
-        }
-      />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 16 }}>
+        <div style={{ fontSize: 48, color: "#c6c6c6" }}>⚠</div>
+        <div style={{ fontSize: 20, fontWeight: 400, color: "#161616" }}>Application not found</div>
+        <div style={{ fontSize: 14, color: "#525252" }}>No workflow for this application name, or the request failed.</div>
+        <Link to="/workflows">
+          <button className="btn btn-primary">Back to applications</button>
+        </Link>
+      </div>
     );
   }
 
-  // Generated workflow takes priority; falls back to server data
   const effectiveWorkflow: WorkFlow = generatedWorkflow ?? workFlow;
   effectiveWorkflowRef.current = effectiveWorkflow;
 
   return (
     <ReactFlowProvider>
-      <Layout className="h-full">
+      <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
         {!isMobile && (
           <WorkflowSider collapsed={collapsed} setCollapsed={setCollapsed} />
         )}
-        <Layout className="h-full">
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
           <WorkflowHeader
             applicationName={applicationName}
             workFlow={effectiveWorkflow}
@@ -92,16 +83,16 @@ function RouteComponent() {
             onWorkflowGenerated={(wf) => setGeneratedWorkflow(wf)}
             onWorkflowImported={(wf) => setGeneratedWorkflow(wf)}
           />
-          <Content className="h-full overflow-hidden">
+          <div style={{ flex: 1, overflow: "hidden" }}>
             <WorkflowEditor
               applicationName={applicationName}
               workFlow={effectiveWorkflow}
               onWorkflowChange={handleWorkflowChange}
               straightenRef={straightenRef}
             />
-          </Content>
-        </Layout>
-      </Layout>
+          </div>
+        </div>
+      </div>
     </ReactFlowProvider>
   );
 }
