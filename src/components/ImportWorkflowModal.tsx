@@ -75,6 +75,15 @@ function stripCodeFences(input: string): string {
     .trim();
 }
 
+function isIFELSEBranchId(id: string, plugins: BackendPlugin[]): boolean {
+  const match = id.match(/^(.+)_(true|false)$/i);
+  if (!match) return false;
+
+  const [, nodeId] = match;
+  const parentNode = plugins.find((p) => String(p.id) === nodeId);
+  return parentNode?.action?.type === "IFELSE";
+}
+
 function validateWorkflow(json: unknown): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: string[] = [];
@@ -156,13 +165,13 @@ function validateWorkflow(json: unknown): ValidationResult {
   // Validate edge references
   const pluginIds = new Set(plugins.map((p) => String(p.id)));
   edges.forEach((edge, index) => {
-    if (edge.source && !pluginIds.has(String(edge.source))) {
+    if (edge.source && !pluginIds.has(String(edge.source)) && !isIFELSEBranchId(String(edge.source), plugins)) {
       errors.push({
         path: `uiMapList[${index}].source`,
         message: `Edge source "${edge.source}" does not exist in pluginList`,
       });
     }
-    if (edge.target && !pluginIds.has(String(edge.target))) {
+    if (edge.target && !pluginIds.has(String(edge.target)) && !isIFELSEBranchId(String(edge.target), plugins)) {
       errors.push({
         path: `uiMapList[${index}].target`,
         message: `Edge target "${edge.target}" does not exist in pluginList`,
