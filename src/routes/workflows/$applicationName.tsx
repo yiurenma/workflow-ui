@@ -90,6 +90,7 @@ function RouteComponent() {
             onSave={handleSave}
             onStraighten={() => straightenRef.current?.()}
             onWorkflowGenerated={(wf) => setGeneratedWorkflow(wf)}
+            onWorkflowImported={(wf) => setGeneratedWorkflow(wf)}
           />
           <Content className="h-full overflow-hidden">
             <WorkflowEditor

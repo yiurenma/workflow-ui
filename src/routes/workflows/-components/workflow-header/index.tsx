@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined, RobotOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BulbOutlined, EllipsisOutlined, GithubOutlined, LoadingOutlined, RobotOutlined, ImportOutlined } from "@ant-design/icons";
 import { Link } from "@tanstack/react-router";
 import { Dropdown, Flex, Space, Button, message, Modal, Input, Typography } from "antd";
 import type { WorkFlow } from "@/api/types";
@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { SimpleMarkdown } from "./SimpleMarkdown";
 import { JsonPathModal } from "./JsonPathModal";
 import { WorkflowGeneratorModal } from "./WorkflowGeneratorModal";
+import { ImportWorkflowModal } from "@/components/ImportWorkflowModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useAIExplain } from "./useAIExplain";
 import { isValidToken, getStoredToken } from "@/utils/tokenStorage";
@@ -21,6 +22,7 @@ type WorkflowHeaderProps = {
   isLoading?: boolean;
   onSave?: () => WorkFlow | null;
   onWorkflowGenerated?: (workflow: WorkFlow) => void;
+  onWorkflowImported?: (workflow: WorkFlow) => void;
   onStraighten?: () => void;
 };
 
@@ -32,6 +34,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   isLoading,
   onSave,
   onWorkflowGenerated,
+  onWorkflowImported,
   onStraighten,
 }) => {
   const isMobile = useIsMobile();
@@ -43,6 +46,7 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [runLoading, setRunLoading] = useState(false);
   const [jsonPathOpen, setJsonPathOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const aiExplain = useAIExplain();
 
@@ -235,6 +239,12 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                       onClick: () => setGeneratorOpen(true),
                     },
                     {
+                      key: "import",
+                      label: "Import",
+                      icon: <ImportOutlined />,
+                      onClick: () => setImportOpen(true),
+                    },
+                    {
                       key: "jsonpath",
                       label: "JsonPath",
                       onClick: () => setJsonPathOpen(true),
@@ -290,6 +300,15 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
                 style={{ color: "#0f62fe", borderColor: "#0f62fe", borderRadius: 0 }}
               >
                 Generate
+              </Button>
+              <Button
+                size="small"
+                icon={<ImportOutlined />}
+                onClick={() => setImportOpen(true)}
+                className="text-xs font-medium"
+                style={{ color: "#525252", borderColor: "#c6c6c6", borderRadius: 0 }}
+              >
+                Import
               </Button>
               <Button
                 size="small"
@@ -403,6 +422,16 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
         callAI={callAIForGenerator}
         isTokenAvailable={isValidToken(getStoredToken())}
         onNeedToken={handleGeneratorNeedToken}
+      />
+
+      <ImportWorkflowModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onApply={(wf) => {
+          onWorkflowImported?.(wf);
+          message.success("Workflow imported to canvas");
+        }}
+        hasExistingWorkflow={!!workFlow && (workFlow.pluginList?.length ?? 0) > 0}
       />
 
       <Modal

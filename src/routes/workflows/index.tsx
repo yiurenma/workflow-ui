@@ -5,6 +5,7 @@ import {
 } from "@/routes/workflows/-components/workflow-dialog/WorkflowDialogProvider";
 import SettingsModal from "@/routes/workflows/-components/settings-modal";
 import HistoryDrawer from "@/routes/workflows/-components/history-drawer";
+import { DeployModal } from "@/components/DeployModal";
 import { EllipsisOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -23,10 +24,11 @@ import {
 } from "antd";
 import { carbonConfirm } from "@/components/CarbonModal";
 import type { ColumnsType } from "antd/es/table";
-import type { WorkflowEntitySettingRow } from "@/api/types";
+import type { WorkflowEntitySettingRow, WorkFlow } from "@/api/types";
 import React, { useMemo, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { WorkflowStudioIntro } from "@/components/WorkflowStudioIntro";
+import { operationApi } from "@/api/services/operation";
 
 export const Route = createFileRoute("/workflows/")({
   component: RouteComponent,
@@ -59,6 +61,7 @@ const ApplicationList = () => {
   const [debounced, setDebounced] = useState("");
   const [settingsTarget, setSettingsTarget] = useState<WorkflowEntitySettingRow | null>(null);
   const [historyTarget, setHistoryTarget] = useState<string | null>(null);
+  const [deployTarget, setDeployTarget] = useState<{ settings: WorkflowEntitySettingRow; workflow: WorkFlow } | null>(null);
   const { openCreateDialog } = useWorkflowDialog();
   const deleteApplication = useDeleteApplication();
   const autoCopyWorkflow = useAutoCopyWorkflow();
@@ -137,8 +140,22 @@ const ApplicationList = () => {
     });
   };
 
+  const handleDeploy = async (record: WorkflowEntitySettingRow) => {
+    try {
+      const workflow = await operationApi.getWorkflow(record.applicationName);
+      setDeployTarget({ settings: record, workflow });
+    } catch (error) {
+      message.error("Failed to load workflow for deployment");
+    }
+  };
+
   const cardMenu = (record: WorkflowEntitySettingRow) => ({
     items: [
+      {
+        key: "deploy",
+        label: "Deploy",
+        onClick: () => handleDeploy(record),
+      },
       {
         key: "history",
         label: "History",
@@ -202,7 +219,7 @@ const ApplicationList = () => {
     {
       title: colTitle("Actions"),
       key: "actions",
-      width: 260,
+      width: 310,
       render: (_: unknown, record: WorkflowEntitySettingRow) => (
         <Space>
           <Button
@@ -229,6 +246,13 @@ const ApplicationList = () => {
             onClick={() => { setCopySource(record.applicationName); setCopyTargetName(""); }}
           >
             Copy
+          </Button>
+          <Button
+            type="link"
+            className="px-0"
+            onClick={() => handleDeploy(record)}
+          >
+            Deploy
           </Button>
           <Button
             type="link"
@@ -472,6 +496,13 @@ const ApplicationList = () => {
         open={historyTarget !== null}
         applicationName={historyTarget}
         onClose={() => setHistoryTarget(null)}
+      />
+
+      <DeployModal
+        open={deployTarget !== null}
+        onClose={() => setDeployTarget(null)}
+        currentWorkflow={deployTarget?.workflow ?? null}
+        currentSettings={deployTarget?.settings ?? null}
       />
 
       <Modal
