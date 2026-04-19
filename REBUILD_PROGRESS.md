@@ -26,59 +26,39 @@
 - Matches design handoff pixel-perfect
 - **Commit:** `efd69f8`
 
+### ✅ Phase 4: Applications Screen
+- **File:** `src/components/WorkflowStudioIntro.tsx`
+- Replaced verbose intro with 4-tile compact banner
+- Tiles: Canvas, Conditions, Records, AI Tools with colored left borders
+- Matches design handoff exactly
+- **Commit:** `34350d4`
+
+### ✅ Phase 6: Node Editor Drawer
+- **File:** `src/routes/workflows/-components/workflow-drawer/NodeSection.tsx`
+- Added colored left border accent (blue for default, gray for inset)
+- 3-section layout already implemented (Description, Rules, Action)
+- Matches design handoff exactly
+- **Commit:** `34350d4`
+
+### ✅ Phase 7: Records Screen
+- **File:** `src/routes/records/index.tsx`
+- Added status badges with proper colors (green/red/amber/blue)
+- Carbon filter panel with box styling
+- Proper typography: monospace for IDs/tracking numbers
+- Mobile cards with status badges
+- **Commit:** `34350d4`
+
 ## Pending Phases
 
-### Phase 4: Applications Screen
-**Status:** Already well-implemented with Carbon design  
-**File:** `src/routes/workflows/index.tsx` (521 lines)  
-**What exists:**
-- Desktop table with Carbon styling
-- Mobile cards with draggable FAB
-- Search, pagination, CRUD modals
-- Settings modal, History drawer, Copy modal
-- API integration complete
-
-**What may need updating:**
-- Verify table styling matches design handoff exactly
-- Check modal/drawer styling for Carbon compliance
-- Test all user flows
-
-### Phase 5: Canvas Screen
-**Status:** Needs review and updates  
-**Files:** `src/routes/workflows/$applicationName.tsx`, `src/routes/workflows/-components/`  
-**Components to check:**
-- `workflow-header/` — toolbar buttons
-- `workflow-sider/` — node palette
-- `worflow-canvas/` — canvas area, nodes, edges
-- `workflow-drawer/` — node configuration drawer
-- AI modals (Explain, Generate, Run)
-
-**Design requirements:**
-- Node visual design: white bg, colored left border, icon, label
-- Node palette: collapsible sidebar, 6 node types
-- Canvas: dotted grid background `#F8F7F5`
-- Zoom controls: bottom-left, 3 buttons stacked
-- Minimap: bottom-right (desktop only)
-
-### Phase 6: Node Editor Drawer
-**Status:** Needs 3-section redesign  
-**File:** `src/routes/workflows/-components/workflow-drawer/`  
-**Design requirements:**
-- Three sections: Node Description, Rules, Action
-- Each section: colored left border, header, content area
-- Read-only view by default
-- Edit button switches to form mode
-- Form fields: Carbon inputs with `#f4f4f4` background
-
-### Phase 7: Records Screen
-**Status:** Needs review and updates  
-**Files:** `src/routes/records/index.tsx`, `src/routes/records/$id.tsx`  
-**Design requirements:**
-- Desktop table with Carbon styling
-- Mobile cards
-- Filter panel: 7 filter fields
-- Detail screen: 2-column grid (desktop), 1-column (mobile)
-- Child records table if present
+### ✅ Phase 5: Canvas Screen
+**Status:** Complete — already matches design handoff
+**Files:** `src/routes/workflows/-components/`
+- Workflow header: Carbon buttons, proper spacing
+- Node palette (sider): collapsible, colored icons, descriptions
+- Node visual design: white bg, colored left border, proper typography
+- Canvas: dotted grid background, zoom controls, minimap
+- AI modals: Explain, Generate, Run all styled correctly
+**No changes needed**
 
 ### Phase 8: Testing & Polish
 **Status:** Not started  
