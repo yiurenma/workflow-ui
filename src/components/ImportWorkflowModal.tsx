@@ -29,22 +29,44 @@ const EXAMPLE_JSON = `{
   "pluginList": [
     {
       "id": 1,
-      "description": "Validate input",
+      "description": "Fetch data",
       "linkingIdOfRuleListAndAction": "rule-1",
       "ruleList": [
         { "key": "$.data.amount", "remark": "Amount exists" }
       ],
       "action": {
+        "type": "CONSUMER",
+        "provider": "http",
+        "remark": "GET /api/data"
+      }
+    },
+    {
+      "id": 2,
+      "description": "Process result",
+      "linkingIdOfRuleListAndAction": "rule-2",
+      "ruleList": [
+        { "key": "$.data.status", "remark": "Status exists" }
+      ],
+      "action": {
         "type": "FUNCTION_V2",
-        "provider": "validation",
-        "remark": "Check amount"
+        "provider": "compute",
+        "remark": "Calculate total"
       }
     }
   ],
-  "uiMapList": []
+  "uiMapList": [
+    { "id": "edge-1", "source": "1", "target": "2" }
+  ]
 }`;
 
-const VALID_PLUGIN_TYPES = ["FUNCTION_V2", "FUNCTION_V3", "HTTP_CALL", "LOGIC"];
+const VALID_PLUGIN_TYPES = [
+  "CONSUMER",
+  "CONSUMERWITHOUTERROR",
+  "IFELSE",
+  "MESSAGE",
+  "FUNCTION_V2",
+  "FUNCTION_V3"
+];
 
 function stripCodeFences(input: string): string {
   return input
@@ -311,7 +333,7 @@ export const ImportWorkflowModal: React.FC<ImportWorkflowModalProps> = ({
               children: (
                 <Space direction="vertical" size="small" style={{ width: "100%" }}>
                   <Typography.Text style={{ fontSize: 13, color: "#525252" }}>
-                    A valid <code>WorkFlow</code> JSON object with <code>pluginList</code> and <code>uiMapList</code> arrays — the same format the app saves. Plugin types: <code>FUNCTION_V2</code>, <code>FUNCTION_V3</code>, <code>HTTP_CALL</code>, <code>LOGIC</code>.
+                    A valid <code>WorkFlow</code> JSON object with <code>pluginList</code> and <code>uiMapList</code> arrays — the same format the app saves. Plugin types: <code>CONSUMER</code>, <code>CONSUMERWITHOUTERROR</code>, <code>IFELSE</code>, <code>MESSAGE</code>, <code>FUNCTION_V2</code>, <code>FUNCTION_V3</code>.
                   </Typography.Text>
                   <pre
                     style={{
