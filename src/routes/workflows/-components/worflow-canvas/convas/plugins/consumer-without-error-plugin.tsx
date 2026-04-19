@@ -3,44 +3,29 @@ import { Position, Handle, NodeProps } from "@xyflow/react";
 
 const ACCENT = "#0D9488";
 
-export const ConsumerWithoutErrorPlugin: React.FC<NodeProps<ConsumerWithoutErrorPluginProps>> = ({
-  data,
-  selected,
-}) => {
-  return (
-    <div
-      className="relative flex flex-col w-52 bg-white overflow-hidden border transition-all duration-150"
-      style={{
-        borderColor: selected ? "#0f62fe" : "var(--cds-border-subtle)",
-        boxShadow: selected
-          ? "0 0 0 2px #0f62fe"
-          : "none",
-      }}
-    >
-      {/* Top accent strip */}
-      <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: ACCENT }} />
-
-      <Handle id="target-handle" type="target" position={Position.Left} className="handle-style" />
-
-      {/* Body */}
-      <div className="flex items-center gap-2.5 px-3 py-2.5 min-w-0">
-        <span
-          className="flex items-center justify-center w-[22px] h-[22px] rounded shrink-0 text-[13px]"
-          style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
-        >
-          {data.icon}
+export const ConsumerWithoutErrorPlugin: React.FC<NodeProps<ConsumerWithoutErrorPluginProps>> = ({ data, selected }) => (
+  <div
+    className="flow-node"
+    style={{
+      position: "relative", display: "flex", flexDirection: "column",
+      width: 208, background: "#fff", overflow: "hidden",
+      border: `1px solid ${selected ? "#0f62fe" : "#e0e0e0"}`,
+      boxShadow: selected ? "0 0 0 2px rgba(15,98,254,0.3)" : "0 1px 4px rgba(0,0,0,0.08)",
+    }}
+  >
+    <div style={{ height: 3, background: ACCENT, flexShrink: 0 }} />
+    <Handle id="target-handle" type="target" position={Position.Left} className="handle-style" />
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", minWidth: 0 }}>
+      <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 4, flexShrink: 0, fontSize: 13, background: `${ACCENT}22`, color: ACCENT }}>
+        {data.icon}
+      </span>
+      <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.25, color: "#161616" }}>Safe Fetch</span>
+        <span style={{ fontSize: 10, lineHeight: 1.25, marginTop: 2, color: "#525252", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {data.label || "Unconfigured"}
         </span>
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-[11px] font-semibold leading-tight tracking-tight" style={{ color: "#161616" }}>
-            Safe Fetch
-          </span>
-          <span className="text-[10px] truncate leading-tight mt-0.5" style={{ color: "#525252" }}>
-            {data.label || "Unconfigured"}
-          </span>
-        </div>
       </div>
-
-      <Handle id="source-handle" type="source" position={Position.Right} className="handle-style" />
     </div>
-  );
-};
+    <Handle id="source-handle" type="source" position={Position.Right} className="handle-style" />
+  </div>
+);
