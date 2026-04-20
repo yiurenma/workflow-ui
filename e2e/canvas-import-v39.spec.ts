@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { setupMocks } from './mocks';
 
 // E2E tests for v39.0 — Import Plugin Type Validation Alignment
 // Tests VALID_PLUGIN_TYPES fix: ["CONSUMER", "CONSUMERWITHOUTERROR", "IFELSE", "MESSAGE", "FUNCTION_V2", "FUNCTION_V3"]
 test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
   test.beforeEach(async ({ page }) => {
+    await setupMocks(page);
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 

@@ -1,22 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { setupMocks } from './mocks';
 
 test.describe('Canvas Import - IFELSE Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://workflow-ui-gamma.vercel.app/workflows');
+    await setupMocks(page);
+    await page.goto('/workflows/', { waitUntil: 'networkidle' });
 
-    // Create or select an application
-    const appCards = page.locator('[data-testid="app-card"]');
-    const appCount = await appCards.count();
-
-    if (appCount === 0) {
-      await page.getByRole('button', { name: /new application/i }).click();
-      await page.getByPlaceholder(/application name/i).fill('IFELSE Test App');
-      await page.getByRole('button', { name: /create/i }).click();
-      await page.waitForURL(/\/workflows\/.+/);
-    } else {
-      await appCards.first().click();
-      await page.waitForURL(/\/workflows\/.+/);
-    }
+    // Navigate to first application's canvas
+    const firstRow = page.locator('table tbody tr').first();
+    await expect(firstRow).toBeVisible({ timeout: 10000 });
+    const openButton = firstRow.getByRole('button', { name: 'Open' });
+    await openButton.click();
+    await page.waitForURL(/\/workflows\/.+/, { timeout: 10000 });
+    await page.waitForSelector('.react-flow, [data-testid="rf__wrapper"]', { timeout: 15000 });
+    await page.waitForTimeout(1000);
   });
 
   test('TC-VAL-IFELSE-01: Single IFELSE with TRUE/FALSE branches', async ({ page }) => {

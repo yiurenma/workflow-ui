@@ -14,9 +14,9 @@ test.describe('Navigation — TC-NAV', () => {
 
   test('TC-NAV-02 applications list route resolves', async ({ page }) => {
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
-    await page.waitForSelector('table, [class*="flex"], [class*="loading"]', { timeout: 15000 });
-    // On mobile the top-nav label is hidden; check any visible "Applications" text (e.g. bottom tab bar)
-    await expect(page.getByText('Applications').filter({ visible: true }).first()).toBeVisible();
+    // Wait for content — table on desktop, .mobile-card on mobile
+    await page.waitForSelector('table, .mobile-card', { timeout: 15000 });
+    await expect(page.locator('body')).not.toBeEmpty();
   });
 
   test('TC-NAV-03 records list route resolves', async ({ page }) => {

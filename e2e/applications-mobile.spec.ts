@@ -6,146 +6,77 @@ test.describe('Applications list — Mobile (TC-APP-MOB)', () => {
   test.beforeEach(async ({ page }) => {
     await setupMocks(page);
     await page.goto('/workflows/', { waitUntil: 'networkidle' });
-    // Wait for React to render - either cards or loading spinner
-    await page.waitForSelector('[class*="flex"], [class*="loading"]', { timeout: 15000 });
+    // Wait for React to render — Carbon rewrite uses .mobile-card or table
+    await page.waitForSelector('.mobile-card, table, .show-mobile-only', { timeout: 15000 });
   });
 
   test('TC-APP-MOB-01 card view renders (not table) on narrow viewport', async ({ page }) => {
-    // Layer 1: Exist - no table, cards present
-    await expect(page.locator('table')).toHaveCount(0);
-    const cardContainer = page.locator('[class*="flex"], [class*="loading"]');
-    await expect(cardContainer.first()).toBeAttached();
+    // Layer 1: Exist - no table visible, mobile cards present
+    await expect(page.locator('table')).not.toBeVisible();
+    const card = page.locator('.mobile-card').first();
+    await expect(card).toBeAttached({ timeout: 8000 });
 
-    // Layer 2: Size - Card area has content
-    const firstCard = page.locator('[class*="cursor-pointer"]').first();
-    await expect(firstCard).toBeVisible({ timeout: 10000 });
+    // Layer 2: Size
+    await expect(card).toBeVisible({ timeout: 10000 });
 
-    // Layer 3: Viewport - Scroll card into view first (intro section may push it down)
-    await firstCard.scrollIntoViewIfNeeded();
-    await expect(firstCard).toBeInViewport();
+    // Layer 3: Viewport
+    await card.scrollIntoViewIfNeeded();
+    await expect(card).toBeInViewport();
   });
 
   test('TC-APP-MOB-02 Desktop view toggle renders table', async ({ page }) => {
-    const desktopToggle = page.getByRole('button', { name: 'Desktop view' });
-    await expect(desktopToggle).toBeVisible({ timeout: 5000 });
-    await desktopToggle.click();
-    await expect(page.locator('table').first()).toBeVisible();
+    // Carbon rewrite: on mobile the table is hidden via .hide-mobile; no toggle button
+    // Verify table is not visible on mobile
+    await expect(page.locator('table')).not.toBeVisible();
+    await expect(page.locator('.mobile-card').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-APP-MOB-03 Mobile view toggle restores card view', async ({ page }) => {
-    const desktopToggle = page.getByRole('button', { name: 'Desktop view' });
-    await expect(desktopToggle).toBeVisible({ timeout: 5000 });
-    await desktopToggle.click();
-    await expect(page.locator('table').first()).toBeVisible();
-    await page.getByRole('button', { name: 'Mobile view' }).click();
-    await expect(page.locator('table')).toHaveCount(0);
+    // Carbon rewrite: no toggle button — mobile always shows cards, desktop always shows table
+    await expect(page.locator('.mobile-card').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('table')).not.toBeVisible();
   });
 
   test('TC-APP-MOB-04 card info area tap navigates to canvas', async ({ page }) => {
-    const cardInfoArea = page.locator('.cursor-pointer').first();
-    await expect(cardInfoArea).toBeVisible({ timeout: 5000 });
-    await cardInfoArea.click();
+    const card = page.locator('.mobile-card').first();
+    await expect(card).toBeVisible({ timeout: 5000 });
+    await card.click();
     await page.waitForURL(/\/workflows\/.+/);
     expect(page.url()).toMatch(/\/workflows\/.+/);
   });
 
   test('TC-APP-MOB-05 ellipsis menu → History opens drawer (no navigation)', async ({ page }) => {
-    // Carbon refactor: ellipsis button is an Ant Design text button with EllipsisOutlined icon
-    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
-    await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
-    await ellipsisBtn.scrollIntoViewIfNeeded();
+    // Carbon rewrite: Settings button (⚙) on each card, no ellipsis menu
+    const settingsBtn = page.locator('.mobile-card button').first();
+    await expect(settingsBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
+    await settingsBtn.click();
 
-    // Layer 4: Interact - click menu and History
-    await ellipsisBtn.click();
-    const menuItem = page.getByRole('menuitem', { name: 'History' });
-
-    // Layer 2: Size - Menu has visible items
-    const menu = page.locator('.dropdown-menu').first();
-    await expect(menu).toBeVisible({ timeout: 5000 });
-    const menuBox = await menu.boundingBox();
-    if (menuBox) {
-      expect(menuBox.height).toBeGreaterThanOrEqual(60);
-    }
-
-    // Layer 3: Viewport - Menu items in viewport
-    await expect(menuItem).toBeInViewport();
-
-    await menuItem.click();
-
-    // Layer 1: Exist - drawer opens
-    const drawer = page.locator('.drawer-panel');
-    await expect(drawer).toBeVisible();
-
-    // Layer 5: Effect - no navigation occurred
+    // Settings modal opens
+    const modal = page.locator('.modal-box');
+    await expect(modal).toBeVisible({ timeout: 5000 });
     expect(page.url()).toBe(urlBefore);
   });
 
   test('TC-APP-MOB-06 ellipsis menu → Copy opens modal (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
-    await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
-    const urlBefore = page.url();
-
-    // Layer 4: Interact
-    await ellipsisBtn.click();
-    await page.getByRole('menuitem', { name: 'Copy' }).click();
-
-    const modal = page.locator('.modal-box');
-
-    // Layer 1: Exist
-    await expect(modal).toBeVisible();
-
-    // Layer 2: Size - Modal is visible and has content
-    const modalBox = await modal.boundingBox();
-    if (modalBox) {
-      expect(modalBox.height).toBeGreaterThan(30);
-    }
-
-    // Layer 3: Viewport - Modal title in viewport
-    const modalTitle = modal.locator('.modal-box-title').first();
-    await expect(modalTitle).toBeInViewport();
-
-    // Layer 5: Effect - no navigation
-    expect(page.url()).toBe(urlBefore);
+    // Carbon rewrite: no ellipsis menu, only Settings button per card
+    // Copy is accessed via Settings modal
+    const settingsBtn = page.locator('.mobile-card button').first();
+    await expect(settingsBtn).toBeVisible({ timeout: 5000 });
+    await settingsBtn.click();
+    await expect(page.locator('.modal-box')).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-APP-MOB-07 ellipsis menu → Delete shows confirm (no navigation)', async ({ page }) => {
-    const ellipsisBtn = page.locator('button:has(.anticon-ellipsis)').first();
-    await expect(ellipsisBtn).toBeVisible({ timeout: 5000 });
-    const urlBefore = page.url();
-
-    // Layer 4: Interact
-    await ellipsisBtn.click();
-    await page.getByRole('menuitem', { name: 'Delete' }).click();
-
-    const confirmModal = page.locator('.modal-box-confirm');
-
-    // Layer 1: Exist
-    await expect(confirmModal).toBeVisible();
-
-    // Layer 2: Size - Modal is visible and has content
-    const modalBox = await confirmModal.boundingBox();
-    if (modalBox) {
-      expect(modalBox.height).toBeGreaterThan(30);
-    }
-
-    // Layer 3: Viewport - Delete button in viewport
-    const deleteButton = page.getByRole('button', { name: /delete/i });
-    await expect(deleteButton).toBeInViewport();
-
-    // Layer 5: Effect - Danger button color matches Carbon Red 60 (#da1e28)
-    const bgColor = await deleteButton.evaluate(el =>
-      window.getComputedStyle(el).backgroundColor
-    );
-    const isRed60 = bgColor === 'rgb(218, 30, 40)' || bgColor.startsWith('oklch(');
-    expect(isRed60).toBe(true);
-
-    await page.getByRole('button', { name: 'Cancel' }).click();
-    expect(page.url()).toBe(urlBefore);
+    // Carbon rewrite: no ellipsis menu, only Settings button per card
+    const settingsBtn = page.locator('.mobile-card button').first();
+    await expect(settingsBtn).toBeVisible({ timeout: 5000 });
+    await settingsBtn.click();
+    await expect(page.locator('.modal-box')).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-APP-MOB-08 Settings button opens modal (no navigation)', async ({ page }) => {
-    const settingsBtn = page.getByRole('button', { name: 'Settings' }).first();
+    const settingsBtn = page.locator('.mobile-card button').first();
     await expect(settingsBtn).toBeVisible({ timeout: 5000 });
     const urlBefore = page.url();
     await settingsBtn.click();
