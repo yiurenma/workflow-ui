@@ -33,7 +33,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.drawer-panel, .drawer-header');
+    const drawer = page.locator('.drawer-panel').first();
 
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -42,7 +42,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     await page.waitForTimeout(300);
 
     // v31.0 read-first mode: click Edit to enter form mode
-    await page.locator('.drawer-panel, .drawer-header button:has-text("Edit")').click();
+    await page.locator('.drawer-panel button:has-text("Edit")').click();
     await page.waitForTimeout(300);
 
     // Layer 2: Size sufficiency (desktop drawer should be >200px height)
@@ -89,7 +89,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.tap();
 
-    const drawer = page.locator('.drawer-panel, .drawer-header-bottom');
+    const drawer = page.locator('.drawer-panel').first();
 
     // Layer 1: Existence
     await expect(drawer).toBeVisible({ timeout: 5000 });
@@ -133,7 +133,7 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.drawer-panel, .drawer-header');
+    const drawer = page.locator('.drawer-panel').first();
     await expect(drawer).toBeVisible();
 
     // Layer 3: All three sections must be in viewport (not clipped)
@@ -150,11 +150,11 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    const drawer = page.locator('.drawer-panel, .drawer-header');
+    const drawer = page.locator('.drawer-panel').first();
     await expect(drawer).toBeVisible();
 
     // v31.0 read-first mode: click Edit to enter form mode
-    await page.locator('.drawer-panel, .drawer-header button:has-text("Edit")').click();
+    await page.locator('.drawer-panel button:has-text("Edit")').click();
     await page.waitForTimeout(300);
 
     // Find Rules section textarea
@@ -175,13 +175,12 @@ test.describe('Node Editor — 5-Layer Validation (TC-NODE-ENHANCED)', () => {
     const node = page.locator('.react-flow__node').first();
     await node.click();
 
-    // Wait for content wrapper to be visible (outer .drawer-panel, .drawer-header stays in DOM always)
-    const contentWrapper = page.locator('.drawer-panel, .drawer-header-content-wrapper');
+    // Wait for content wrapper to be visible
+    const contentWrapper = page.locator('.drawer-panel').first();
     await expect(contentWrapper).toBeVisible({ timeout: 5000 });
 
-    // Use custom close button (aria-label="Close") — Ant Design internal .drawer-panel, .drawer-header-close
-    // is hidden via closable={false} in v29.0
-    const customCloseBtn = page.locator('.drawer-panel, .drawer-header [aria-label="Close"]');
+    // Use custom close button (aria-label="Close")
+    const customCloseBtn = page.locator('[aria-label="Close"]').first();
     const customCloseBtnVisible = await customCloseBtn.isVisible().catch(() => false);
     if (customCloseBtnVisible) {
       await customCloseBtn.click();

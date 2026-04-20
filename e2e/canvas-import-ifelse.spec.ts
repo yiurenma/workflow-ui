@@ -61,12 +61,14 @@ test.describe('Canvas Import - IFELSE Validation', () => {
     await page.locator('textarea').fill(JSON.stringify(testData, null, 2));
 
     // Verify validation passes
-    await expect(page.getByText(/valid workflow/i)).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText(/4 nodes?, 3 edges?/i)).toBeVisible();
+    const validText = page.getByText(/valid workflow/i);
+    await expect(validText).toBeVisible({ timeout: 5000 });
+    await expect(validText).toContainText(/4 node/i);
+    await expect(validText).toContainText(/3 edge/i);
 
     // Verify no errors about IFELSE branches
-    await expect(page.getByText(/IFELSE_1_true.*does not exist/i)).not.toBeVisible();
-    await expect(page.getByText(/IFELSE_1_false.*does not exist/i)).not.toBeVisible();
+    const errorText = page.getByText(/validation failed/i);
+    await expect(errorText).not.toBeVisible();
 
     // Apply button should be enabled
     const applyButton = page.getByRole('button', { name: /apply/i });
@@ -103,8 +105,10 @@ test.describe('Canvas Import - IFELSE Validation', () => {
     await page.getByRole('button', { name: /import/i }).click();
     await page.locator('textarea').fill(JSON.stringify(testData));
 
-    await expect(page.getByText(/valid workflow/i)).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText(/5 nodes?, 5 edges?/i)).toBeVisible();
+    const validText = page.getByText(/valid workflow/i);
+    await expect(validText).toBeVisible({ timeout: 5000 });
+    await expect(validText).toContainText(/5 node/i);
+    await expect(validText).toContainText(/5 edge/i);
     await expect(page.getByRole('button', { name: /apply/i })).toBeEnabled();
   });
 

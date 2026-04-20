@@ -48,13 +48,13 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     await page.waitForTimeout(1500);
 
     // Layer 5: Effect — validation passes
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
     await expect(successAlert).toContainText('0 edge');
 
     // Verify no error about invalid plugin type
-    const errorAlert = modal.locator('[style*="background: #fff1f1"]');
+    const errorAlert = modal.getByText(/Validation failed/i);
     await expect(errorAlert).not.toBeVisible();
   });
 
@@ -80,7 +80,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
     await expect(successAlert).toContainText('0 edge');
@@ -108,7 +108,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -135,7 +135,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -162,7 +162,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -189,7 +189,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('1 node');
   });
@@ -215,7 +215,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
     await page.waitForTimeout(1500);
 
     // Layer 5: Effect — validation fails
-    const errorAlert = modal.locator('[style*="background: #fff1f1"]').filter({ hasText: /Validation failed/i });
+    const errorAlert = modal.getByText(/Validation failed/i);
     await expect(errorAlert).toBeVisible({ timeout: 3000 });
     await expect(errorAlert).toContainText('Invalid plugin type');
     await expect(errorAlert).toContainText('HTTP_CALL');
@@ -245,7 +245,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const errorAlert = modal.locator('[style*="background: #fff1f1"]').filter({ hasText: /Validation failed/i });
+    const errorAlert = modal.getByText(/Validation failed/i);
     await expect(errorAlert).toBeVisible({ timeout: 3000 });
     await expect(errorAlert).toContainText('Invalid plugin type');
     await expect(errorAlert).toContainText('LOGIC');
@@ -325,7 +325,7 @@ test.describe('Canvas Import Plugin Types v39.0 — Desktop', () => {
 
     await page.waitForTimeout(1500);
 
-    const successAlert = modal.locator('[style*="background: #defbe6"]').filter({ hasText: /Valid workflow/i });
+    const successAlert = modal.getByText(/Valid workflow/i);
     await expect(successAlert).toBeVisible({ timeout: 3000 });
     await expect(successAlert).toContainText('3 node');
     await expect(successAlert).toContainText('2 edge');

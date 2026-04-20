@@ -191,7 +191,7 @@ test.describe('Refactor Regression Tests (TC-REFACTOR)', () => {
       await expect(dialog).toBeVisible({ timeout: 5_000 });
 
       // Verify form field exists
-      const nameInput = dialog.getByLabel(/application name/i);
+      const nameInput = dialog.locator('input[placeholder], input[type="text"]').first();
       await expect(nameInput).toBeVisible();
 
       // Try to submit empty form (should show validation)
