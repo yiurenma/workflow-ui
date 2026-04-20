@@ -306,7 +306,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     // L3 — Viewport (not clipped)
     await expect(page.locator('.drawer-header').first()).toBeInViewport();
     await expect(closeButton(page)).toBeInViewport();
-    await expect(page.locator('.drawer-header-body').first()).toBeInViewport();
+    await expect(page.locator('.drawer-body').first()).toBeInViewport();
 
     // no horizontal overflow
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
@@ -336,7 +336,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     await page.waitForTimeout(500); // let animation settle
 
     // L2 — body height <= 70dvh
-    const body = page.locator('.drawer-header-body').first();
+    const body = page.locator('.drawer-body').first();
     await expect(body).toBeVisible({ timeout: 5_000 });
     const bodyBox = await body.boundingBox();
     expect(bodyBox).not.toBeNull();
@@ -347,7 +347,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     expect(bodyBox!.y + bodyBox!.height).toBeLessThanOrEqual(vh);
 
     // L3 — drawer content visible in viewport (read-only mode may not have input/textarea)
-    const drawerContent = page.locator('.drawer-header-body').first();
+    const drawerContent = page.locator('.drawer-body').first();
     await expect(drawerContent).toBeInViewport({ timeout: 5_000 });
   });
 
@@ -371,7 +371,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     expect(wrapperBox!.y + wrapperBox!.height).toBeLessThanOrEqual(vh);
 
     // L5 — paddingBottom (safe-area-inset-bottom resolves to 0px in headless Chromium)
-    const paddingBottom = await page.locator('.drawer-header-body').first().evaluate(
+    const paddingBottom = await page.locator('.drawer-body').first().evaluate(
       (el) => getComputedStyle(el).paddingBottom
     );
     console.log(`TC-DRAWER-CLOSE-04 paddingBottom: ${paddingBottom}`);
@@ -417,9 +417,9 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
 
     // L1 — Exist
     await openDrawer(page);
-    await expect(page.locator('.drawer-panel').first()).toBeVisible();
+    await expect(page.locator('.drawer-header').first()).toBeVisible();
 
-    // L5 — drawer title visible
+    // L5 — drawer header visible (mobile uses inline styles, no .drawer-panel)
     await expect(page.locator('.drawer-header').first()).toBeVisible({ timeout: 5_000 });
 
     // Close and reopen
@@ -431,8 +431,7 @@ test.describe('TC-DRAWER-CLOSE Mobile', () => {
     const count = await nodes.count();
     if (count >= 2) {
       await nodes.nth(1).tap();
-      await expect(page.locator('.drawer-panel').first()).toBeVisible({ timeout: 5_000 });
-      await expect(page.locator('.drawer-header').first()).toBeVisible();
+      await expect(page.locator('.drawer-header').first()).toBeVisible({ timeout: 5_000 });
     }
   });
 });
