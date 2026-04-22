@@ -38,6 +38,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api\/proxy\/github/, ''),
         },
+        // Proxy for GitHub Copilot API.
+        '/api/proxy/copilot': {
+          target: 'https://api.githubcopilot.com',
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api\/proxy\/copilot/, ''),
+        },
       },
     },
   }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { WorkFlow } from "@/api/types";
 import { callAI } from "@/services/aiService";
 import { buildExplainPrompt } from "@/utils/workflowExplainer";
@@ -39,13 +39,10 @@ export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn 
   const [deviceFlowOpen, setDeviceFlowOpen] = useState(false);
   const [tokenPromptOpen, setTokenPromptOpen] = useState(false);
   const [tokenInput, setTokenInput] = useState("");
-
-  const handleOAuthSuccess = useCallback((token: string) => {
-    saveToken(token);
-    setDeviceFlowOpen(false);
-  }, []);
-
-  const deviceFlow = useGitHubDeviceFlow(handleOAuthSuccess);
+  const [pendingExplain, setPendingExplain] = useState<{
+    getWorkflow: () => WorkFlow | null;
+    applicationName: string;
+  } | null>(null);
 
   const runExplain = useCallback(async (
     token: string,
@@ -73,12 +70,31 @@ export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn 
     }
   }, [onError]);
 
+  const handleOAuthSuccess = useCallback((token: string) => {
+    saveToken(token);
+    setDeviceFlowOpen(false);
+  }, []);
+
+  const deviceFlow = useGitHubDeviceFlow(handleOAuthSuccess);
+
+  // Handle pending explain after successful device flow auth
+  useEffect(() => {
+    if (!deviceFlowOpen && pendingExplain) {
+      const token = getStoredToken();
+      if (isValidToken(token)) {
+        runExplain(token!, pendingExplain.getWorkflow, pendingExplain.applicationName);
+        setPendingExplain(null);
+      }
+    }
+  }, [deviceFlowOpen, pendingExplain, runExplain]);
+
   const explainFlow = useCallback((
     getWorkflow: () => WorkFlow | null,
     applicationName: string
   ) => {
     const token = getStoredToken();
     if (!isValidToken(token)) {
+      setPendingExplain({ getWorkflow, applicationName });
       setDeviceFlowOpen(true);
       deviceFlow.start();
       return;
@@ -90,6 +106,7 @@ export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn 
     deviceFlow.cancel();
     setDeviceFlowOpen(false);
     setTokenInput("");
+    setPendingExplain(null);
     setTokenPromptOpen(true);
   }, [deviceFlow]);
 
@@ -104,16 +121,19 @@ export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn 
     }
     saveToken(t);
     setTokenPromptOpen(false);
+    setPendingExplain(null);
     runExplain(t, getWorkflow, applicationName);
   }, [tokenInput, runExplain, onError]);
 
   const cancelDeviceFlow = useCallback(() => {
     deviceFlow.cancel();
     setDeviceFlowOpen(false);
+    setPendingExplain(null);
   }, [deviceFlow]);
 
   const clearToken = useCallback(() => {
     clearStoredToken();
+    setPendingExplain(null);
     onInfo?.("AI token cleared");
   }, [onInfo]);
 
@@ -135,5 +155,5 @@ export function useAIExplain(options?: UseAIExplainOptions): UseAIExplainReturn 
     saveTokenAndExplain,
     cancelDeviceFlow,
     clearToken,
-  };
+  }
 }

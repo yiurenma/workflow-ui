@@ -1,14 +1,18 @@
+import { callCopilotChat } from "./githubCopilotService";
+
 export interface AIProvider {
   name: string;
   call(prompt: string, maxTokens?: number): Promise<string>;
 }
+
+const MAX_TOKENS = 8192;
 
 class AnthropicProvider implements AIProvider {
   name = "Anthropic";
 
   constructor(private token: string) {}
 
-  async call(prompt: string, maxTokens = 1024): Promise<string> {
+  async call(prompt: string, maxTokens = MAX_TOKENS): Promise<string> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -34,32 +38,13 @@ class AnthropicProvider implements AIProvider {
   }
 }
 
-class GitHubModelsProvider implements AIProvider {
-  name = "GitHub Models";
+class GitHubCopilotProvider implements AIProvider {
+  name = "GitHub Copilot";
 
-  constructor(private token: string) {}
+  constructor(private githubToken: string) {}
 
-  async call(prompt: string, maxTokens = 1024): Promise<string> {
-    const res = await fetch("https://models.inference.ai.azure.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: maxTokens,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`GitHub Models API error ${res.status}: ${err}`);
-    }
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "(no response)";
+  async call(prompt: string, maxTokens = MAX_TOKENS): Promise<string> {
+    return callCopilotChat(this.githubToken, [{ role: "user", content: prompt }], maxTokens);
   }
 }
 
@@ -75,7 +60,7 @@ export function createAIProvider(token: string): AIProvider {
     token.startsWith("ghu_") ||
     token.startsWith("ghs_")
   ) {
-    return new GitHubModelsProvider(token);
+    return new GitHubCopilotProvider(token);
   }
 
   throw new Error(
@@ -83,7 +68,7 @@ export function createAIProvider(token: string): AIProvider {
   );
 }
 
-export async function callAI(token: string, prompt: string, maxTokens = 1024): Promise<string> {
+export async function callAI(token: string, prompt: string, maxTokens = MAX_TOKENS): Promise<string> {
   const provider = createAIProvider(token);
   return provider.call(prompt, maxTokens);
 }
