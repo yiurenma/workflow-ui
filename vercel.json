@@ -13,6 +13,10 @@
       "destination": "https://github.com/$1"
     },
     {
+      "source": "/api/proxy/copilot/(.*)",
+      "destination": "https://api.githubcopilot.com/$1"
+    },
+    {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
