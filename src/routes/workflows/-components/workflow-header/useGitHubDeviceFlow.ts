@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Public OAuth App client_id — safe to commit (not a secret).
-// Replace with your GitHub OAuth App client_id before deploying.
-const GITHUB_OAUTH_CLIENT_ID = "Ov23liEP6mlAmOUsuVCn";
+// GitHub Copilot OAuth App client_id — safe to commit (not a secret).
+const GITHUB_OAUTH_CLIENT_ID = "Iv1.b507a08c87ecfe98";
 
 // Use app-origin proxy (Vercel rewrite + Vite dev server) so requests are same-origin and not blocked by CORS.
 const DEVICE_CODE_URL = "/api/proxy/github/login/device/code";

@@ -1,4 +1,5 @@
 import { callAI } from "./aiService";
+import { callCopilotChat } from "./githubCopilotService";
 import { getStoredToken, isValidToken } from "@/utils/tokenStorage";
 
 const MAX_CONTINUATIONS = 5;
@@ -52,21 +53,7 @@ export async function callAIForGenerator(
         const data = await res.json();
         part = data.content?.[0]?.text ?? "";
       } else {
-        const res = await fetch("https://models.inference.ai.azure.com/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token!}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages,
-            max_tokens: MAX_TOKENS,
-          }),
-        });
-        if (!res.ok) throw new Error(`GitHub Models API error ${res.status}: ${await res.text()}`);
-        const data = await res.json();
-        part = data.choices?.[0]?.message?.content ?? "";
+        part = await callCopilotChat(token!, messages, MAX_TOKENS);
       }
     }
 
