@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { WorkFlow, WorkflowEntitySettingRow } from "@/api/types";
 import { useToast } from "@/contexts/ToastContext";
+import { onlineApi } from "@/api/services/online";
 
 interface DeployModalProps {
   open: boolean;
@@ -9,22 +10,6 @@ interface DeployModalProps {
   currentSettings: WorkflowEntitySettingRow | null;
 }
 
-interface DeployFormData {
-  baseUrl: string;
-  applicationName: string;
-  username: string;
-  password: string;
-  environment: string;
-}
-
-interface DeployProgress {
-  step: 1 | 2 | 3;
-  status: "pending" | "in-progress" | "success" | "error";
-  message?: string;
-}
-
-const STEP_LABELS = ["Create Application", "Update Settings", "Save Workflow"];
-
 export const DeployModal: React.FC<DeployModalProps> = ({
   open,
   onClose,
@@ -32,121 +17,50 @@ export const DeployModal: React.FC<DeployModalProps> = ({
   currentSettings,
 }) => {
   const { showToast } = useToast();
-  const [form, setForm] = useState<DeployFormData>({
-    baseUrl: "",
-    applicationName: currentSettings?.applicationName ?? "",
-    username: "",
-    password: "",
-    environment: "",
-  });
+  const [applicationName, setApplicationName] = useState("");
   const [deploying, setDeploying] = useState(false);
-  const [progress, setProgress] = useState<DeployProgress[]>([
-    { step: 1, status: "pending" },
-    { step: 2, status: "pending" },
-    { step: 3, status: "pending" },
-  ]);
+  const [responseText, setResponseText] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const resetProgress = () => setProgress([
-    { step: 1, status: "pending" },
-    { step: 2, status: "pending" },
-    { step: 3, status: "pending" },
-  ]);
-
-  const updateProgress = (step: 1 | 2 | 3, status: DeployProgress["status"], message?: string) => {
-    setProgress((prev) => prev.map((p) => (p.step === step ? { ...p, status, message } : p)));
-  };
-
-  const set = (k: keyof DeployFormData, v: string) => setForm((f) => ({ ...f, [k]: v }));
-
-  const isCrossOrigin = (url: string) => {
-    try {
-      const targetOrigin = new URL(url).origin;
-      return targetOrigin !== window.location.origin;
-    } catch { return true; }
-  };
-
-  const buildUrl = (path: string) => {
-    const fullUrl = `${form.baseUrl}${path}`;
-    if (isCrossOrigin(form.baseUrl)) {
-      const proxyBase = "https://workflow-operation-api-n9sbp.ondigitalocean.app";
-      return `${proxyBase}/workflow/deploy/proxy?targetUrl=${encodeURIComponent(fullUrl)}`;
+  useEffect(() => {
+    if (open) {
+      setApplicationName(currentSettings?.applicationName ?? "");
+      setResponseText(null);
+      setErrorMsg(null);
     }
-    return fullUrl;
-  };
+  }, [open, currentSettings?.applicationName]);
 
-  const deployToRemote = async () => {
+  const handleDeploy = async () => {
+    if (!applicationName.trim()) {
+      showToast("Please enter an application name", "error");
+      return;
+    }
     if (!currentWorkflow || !currentSettings) {
       showToast("No workflow or settings data available", "error");
       return;
     }
 
-    const auth = btoa(`${form.username}:${form.password}`);
-    const headers = { Authorization: `Basic ${auth}`, "Content-Type": "application/json" };
-
-    updateProgress(1, "in-progress");
-    const createResponse = await fetch(
-      buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(form.applicationName)}`),
-      { method: "POST", headers, body: JSON.stringify({ enabled: true, asyncMode: false, retry: false, tracking: false, ignoreDuplicateRecordError: false }) }
-    );
-    if (!createResponse.ok) {
-      const t = await createResponse.text();
-      throw new Error(`Step 1 failed: ${t || createResponse.statusText}`);
-    }
-    updateProgress(1, "success");
-
-    updateProgress(2, "in-progress");
-    const updateResponse = await fetch(
-      buildUrl(`/workflow/entity-setting?applicationName=${encodeURIComponent(form.applicationName)}`),
-      {
-        method: "PATCH", headers,
-        body: JSON.stringify({
-          enabled: currentSettings.enabled, asyncMode: currentSettings.asyncMode,
-          retry: currentSettings.retry, tracking: currentSettings.tracking,
-          ignoreDuplicateRecordError: currentSettings.ignoreDuplicateRecordError,
-          eimId: currentSettings.eimId, defaultServiceAccount: currentSettings.defaultServiceAccount,
-          region: currentSettings.region, retryProperties: currentSettings.retryProperties,
-          description: currentSettings.description || "Deployed from Hub",
-        }),
-      }
-    );
-    if (!updateResponse.ok) {
-      const t = await updateResponse.text();
-      throw new Error(`Step 2 failed: ${t || updateResponse.statusText}`);
-    }
-    updateProgress(2, "success");
-
-    updateProgress(3, "in-progress");
-    const saveResponse = await fetch(
-      buildUrl(`/workflow?applicationName=${encodeURIComponent(form.applicationName)}`),
-      { method: "POST", headers, body: JSON.stringify(currentWorkflow) }
-    );
-    if (!saveResponse.ok) {
-      const t = await saveResponse.text();
-      throw new Error(`Step 3 failed: ${t || saveResponse.statusText}`);
-    }
-    updateProgress(3, "success");
-  };
-
-  const handleDeploy = async () => {
-    if (!form.baseUrl || !form.applicationName || !form.username || !form.password || !form.environment) {
-      showToast("Please fill in all fields", "error");
-      return;
-    }
-
-    if (form.baseUrl.startsWith("http://")) {
-      if (!window.confirm("You are using HTTP instead of HTTPS. Credentials will be sent unencrypted. Continue?")) return;
-    }
-
     setDeploying(true);
-    resetProgress();
+    setResponseText(null);
+    setErrorMsg(null);
+
     try {
-      await deployToRemote();
-      showToast("Deployment successful", "success");
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error);
+      const response = await onlineApi.postWorkflow({
+        applicationName: applicationName.trim(),
+        body: JSON.stringify({
+          entitySetting: currentSettings,
+          workflow: currentWorkflow,
+        }),
+        contentType: "application/json",
+      });
+
+      const text = await response.text();
+      setResponseText(text || "Deployment initiated successfully");
+      showToast("Deployment initiated", "success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg);
       showToast(msg, "error");
-      const failedStep = progress.findIndex((p) => p.status === "in-progress");
-      if (failedStep !== -1) updateProgress((failedStep + 1) as 1 | 2 | 3, "error", msg);
     } finally {
       setDeploying(false);
     }
@@ -154,19 +68,11 @@ export const DeployModal: React.FC<DeployModalProps> = ({
 
   const handleClose = () => {
     if (!deploying) {
-      resetProgress();
+      setResponseText(null);
+      setErrorMsg(null);
       onClose();
     }
   };
-
-  const stepIcon = (p: DeployProgress) => {
-    if (p.status === "in-progress") return <span style={{ color: "#0f62fe", fontSize: 16 }}>⟳</span>;
-    if (p.status === "success") return <span style={{ color: "#24a148", fontSize: 14 }}>✓</span>;
-    if (p.status === "error") return <span style={{ color: "#da1e28", fontSize: 14 }}>✕</span>;
-    return <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: "50%", border: "2px solid #c6c6c6", flexShrink: 0 }} />;
-  };
-
-  const anyProgress = progress.some((p) => p.status !== "pending");
 
   if (!open) return null;
 
@@ -179,57 +85,66 @@ export const DeployModal: React.FC<DeployModalProps> = ({
         </div>
         <div className="modal-body">
           <p style={{ fontSize: 13, color: "#525252", marginBottom: 20, lineHeight: 1.6 }}>
-            Deploy this application and its workflow to a remote environment. Three sequential API calls: create the application, update settings, and save the workflow.
+            Deploy this application via the online API. The source application settings and workflow are sent as the request body; the execution application name determines which deploy workflow runs.
           </p>
 
           <div className="form-group">
-            <label className="cds-label">Deploy URL</label>
-            <input className="cds-input" placeholder="https://workflow-operation-api-xxx.ondigitalocean.app" value={form.baseUrl} onChange={(e) => set("baseUrl", e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="cds-label">Application Name</label>
-            <input className="cds-input" placeholder="my-application" value={form.applicationName} onChange={(e) => set("applicationName", e.target.value)} />
-          </div>
-          <div className="form-row-2">
-            <div className="form-group">
-              <label className="cds-label">Username</label>
-              <input className="cds-input" placeholder="service-account" value={form.username} onChange={(e) => set("username", e.target.value)} />
+            <label className="cds-label">Execution Application Name</label>
+            <input
+              className="cds-input"
+              placeholder="e.g. deploy-workflow"
+              value={applicationName}
+              onChange={(e) => setApplicationName(e.target.value)}
+              disabled={deploying}
+            />
+            <div style={{ fontSize: 11, color: "#6f6f6f", marginTop: 4 }}>
+              The name of the workflow to execute on the online API (runtime execution name)
             </div>
-            <div className="form-group">
-              <label className="cds-label">Password</label>
-              <input className="cds-input" type="password" placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="cds-label">Environment</label>
-            <input className="cds-input" placeholder="UAT" value={form.environment} onChange={(e) => set("environment", e.target.value)} />
           </div>
 
-          {anyProgress && (
-            <div style={{ marginTop: 16, padding: 16, background: "#f4f4f4", border: "1px solid #e0e0e0" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.32px", color: "#161616", marginBottom: 12 }}>Deployment Progress</div>
-              {progress.map((p, index) => (
-                <div key={p.step} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-                  {stepIcon(p)}
-                  <span style={{
-                    fontSize: 13,
-                    color: p.status === "success" ? "#198038" : p.status === "error" ? "#da1e28" : p.status === "in-progress" ? "#0f62fe" : "#525252",
-                  }}>
-                    Step {p.step}: {STEP_LABELS[index]}
-                  </span>
-                </div>
-              ))}
-              {progress.some((p) => p.status === "error") && (
-                <div style={{ fontSize: 12, color: "#da1e28", marginTop: 12 }}>
-                  {progress.find((p) => p.status === "error")?.message}
-                </div>
-              )}
+          <div style={{ marginTop: 16, padding: 12, background: "#f4f4f4", border: "1px solid #e0e0e0", fontSize: 12 }}>
+            <div style={{ fontWeight: 700, color: "#161616", marginBottom: 8, textTransform: "uppercase", fontSize: 11, letterSpacing: "0.32px" }}>
+              Request Body
+            </div>
+            <div style={{ color: "#525252", lineHeight: 2 }}>
+              <div>
+                <span style={{ fontFamily: '"IBM Plex Mono",monospace', color: "#0f62fe", fontWeight: 600 }}>Block A</span>
+                <span style={{ marginLeft: 8 }}>Source application settings:</span>
+                <span style={{ fontFamily: '"IBM Plex Mono",monospace', color: "#161616", marginLeft: 8 }}>
+                  {currentSettings?.applicationName ?? "—"}
+                </span>
+              </div>
+              <div>
+                <span style={{ fontFamily: '"IBM Plex Mono",monospace', color: "#0f62fe", fontWeight: 600 }}>Block B</span>
+                <span style={{ marginLeft: 8 }}>Workflow definition:</span>
+                <span style={{ fontFamily: '"IBM Plex Mono",monospace', color: "#161616", marginLeft: 8 }}>
+                  {(currentWorkflow?.pluginList?.length ?? 0)} node(s)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {responseText && (
+            <div style={{ marginTop: 16, padding: 12, background: "#defbe6", border: "1px solid #24a148", fontSize: 12, color: "#198038" }}>
+              <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.32px" }}>Deployment Response</div>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-all", fontSize: 11, fontFamily: '"IBM Plex Mono",monospace', color: "#198038" }}>{responseText}</pre>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div style={{ marginTop: 16, padding: 12, background: "#fff1f1", border: "1px solid #da1e28", fontSize: 12 }}>
+              <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.32px", color: "#da1e28" }}>Deployment Failed</div>
+              <div style={{ color: "#da1e28" }}>{errorMsg}</div>
             </div>
           )}
         </div>
         <div className="modal-footer">
           <button className="btn btn-ghost" onClick={handleClose} disabled={deploying}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleDeploy} disabled={deploying}>
+          <button
+            className="btn btn-primary"
+            onClick={handleDeploy}
+            disabled={deploying || !applicationName.trim()}
+          >
             {deploying ? "Deploying…" : "Deploy"}
           </button>
         </div>
