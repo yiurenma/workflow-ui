@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { WorkFlow } from "@/api/types";
 import { useSaveWorkflow } from "@/api/hooks/workflow";
-import { onlineApi } from "@/api/services/online";
+import { onlineApi, type StepEvent } from "@/api/services/online";
 import React, { useState } from "react";
 import { SimpleMarkdown } from "./SimpleMarkdown";
 import { JsonPathModal } from "./JsonPathModal";
@@ -42,6 +42,10 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   const [confirmationNumber, setConfirmationNumber] = useState("test-confirmation");
   const [runResult, setRunResult] = useState<string | null>(null);
   const [runLoading, setRunLoading] = useState(false);
+  const [streamEnabled, setStreamEnabled] = useState(false);
+  const [streamEvents, setStreamEvents] = useState<(StepEvent & { expanded: boolean })[]>([]);
+  const [streamDone, setStreamDone] = useState(false);
+  const streamAbortRef = React.useRef<AbortController | null>(null);
   const [jsonPathOpen, setJsonPathOpen] = useState(false);
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -69,20 +73,50 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
   };
 
   const executeRun = async () => {
-    setRunLoading(true);
-    setRunResult(null);
-    try {
-      const res = await onlineApi.postWorkflow({ applicationName, confirmationNumber, body: runBody });
-      const text = await res.text();
-      setRunResult(text.slice(0, 8000));
-      showToast("Request completed", "success");
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setRunResult(msg);
-      showToast("Online API request failed", "error");
-    } finally {
-      setRunLoading(false);
+    if (streamEnabled) {
+      setStreamEvents([]);
+      setStreamDone(false);
+      setRunLoading(true);
+      const ctrl = onlineApi.postWorkflowStream(
+        { applicationName, confirmationNumber, body: runBody },
+        (event) => setStreamEvents((prev) => [...prev, { ...event, expanded: prev.length === 0 }]),
+        () => { setRunLoading(false); setStreamDone(true); showToast("Stream complete", "success"); },
+        (msg) => { showToast(msg, "error"); }
+      );
+      streamAbortRef.current = ctrl;
+    } else {
+      setRunLoading(true);
+      setRunResult(null);
+      try {
+        const res = await onlineApi.postWorkflow({ applicationName, confirmationNumber, body: runBody });
+        const text = await res.text();
+        setRunResult(text.slice(0, 8000));
+        showToast("Request completed", "success");
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        setRunResult(msg);
+        showToast("Online API request failed", "error");
+      } finally {
+        setRunLoading(false);
+      }
     }
+  };
+
+  const cancelStream = () => {
+    streamAbortRef.current?.abort();
+    streamAbortRef.current = null;
+    setRunLoading(false);
+    setStreamDone(true);
+  };
+
+  const toggleStepExpanded = (index: number) => {
+    setStreamEvents((prev) =>
+      prev.map((e, i) => (i === index ? { ...e, expanded: !e.expanded } : e))
+    );
+  };
+
+  const formatJson = (raw: string) => {
+    try { return JSON.stringify(JSON.parse(raw), null, 2); } catch { return raw; }
   };
 
   const getWorkflow = () => (onSave ? onSave() : workFlow) ?? null;
@@ -292,41 +326,104 @@ const WorkflowHeader: React.FC<WorkflowHeaderProps> = ({
 
       {/* Run Modal */}
       {runOpen && (
-        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && setRunOpen(false)}>
-          <div className="modal-box slide-up" style={{ maxWidth: 640 }}>
+        <div className="modal-overlay fade-in" onClick={(e) => e.target === e.currentTarget && !runLoading && setRunOpen(false)}>
+          <div className="modal-box slide-up" style={{ maxWidth: 680 }}>
             <div className="modal-header">
               <span className="modal-title">Run — {applicationName}</span>
-              <button className="modal-close" onClick={() => setRunOpen(false)}>✕</button>
+              <button className="modal-close" onClick={() => { if (!runLoading) { cancelStream(); setRunOpen(false); } }}>✕</button>
             </div>
             <div className="modal-body">
               <div style={{ fontSize: 12, color: "#525252", background: "#f4f4f4", padding: "10px 12px", marginBottom: 16, lineHeight: 1.6 }}>
-                Sends <span className="inline-code">POST</span> to the online service with query <span className="inline-code">applicationName</span> and optional <span className="inline-code">confirmationNumber</span>.
+                Sends <span className="inline-code">POST</span> to the online service with <span className="inline-code">applicationName</span> and optional <span className="inline-code">confirmationNumber</span>.
               </div>
               <div className="form-group">
                 <label className="cds-label">Confirmation Number</label>
-                <input className="cds-input" value={confirmationNumber} onChange={(e) => setConfirmationNumber(e.target.value)} />
+                <input className="cds-input" value={confirmationNumber} onChange={(e) => setConfirmationNumber(e.target.value)} disabled={runLoading} />
               </div>
               <div className="form-group">
                 <label className="cds-label">Request Body (JSON or XML)</label>
                 <textarea
                   className="cds-input"
-                  rows={8}
+                  rows={6}
                   value={runBody}
                   onChange={(e) => setRunBody(e.target.value)}
                   style={{ fontFamily: '"IBM Plex Mono",monospace', fontSize: 12, resize: "vertical" }}
+                  disabled={runLoading}
                 />
               </div>
-              {runResult && (
+              {/* Stream toggle */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <input
+                  type="checkbox"
+                  id="stream-toggle"
+                  checked={streamEnabled}
+                  onChange={(e) => { setStreamEnabled(e.target.checked); setStreamEvents([]); setStreamDone(false); setRunResult(null); }}
+                  disabled={runLoading}
+                  style={{ cursor: "pointer" }}
+                />
+                <label htmlFor="stream-toggle" style={{ fontSize: 13, color: "#161616", cursor: "pointer" }}>
+                  Stream per-step responses (SSE)
+                </label>
+              </div>
+
+              {/* Normal (non-stream) result */}
+              {!streamEnabled && runResult && (
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.32px", color: "#24a148", marginBottom: 6 }}>✓ Response</div>
                   <pre style={{ background: "#f4f4f4", padding: 12, fontSize: 12, fontFamily: '"IBM Plex Mono",monospace', overflow: "auto", maxHeight: 160, border: "1px solid #e0e0e0" }}>{runResult}</pre>
                 </div>
               )}
+
+              {/* SSE stream results */}
+              {streamEnabled && (streamEvents.length > 0 || runLoading) && (
+                <div style={{ marginTop: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.32px", color: "#161616", marginBottom: 8 }}>
+                    Steps {streamDone ? `— ${streamEvents.length} complete` : runLoading ? "— streaming…" : ""}
+                  </div>
+                  <div style={{ maxHeight: 320, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                    {streamEvents.map((evt, i) => (
+                      <div key={i} style={{ border: "1px solid #e0e0e0", background: "#fafafa" }}>
+                        <button
+                          onClick={() => toggleStepExpanded(i)}
+                          style={{
+                            width: "100%", padding: "8px 12px", background: "none", border: "none",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            cursor: "pointer", fontFamily: "inherit", fontSize: 12,
+                          }}
+                        >
+                          <span style={{ color: "#0f62fe", fontWeight: 600 }}>Step {i + 1}</span>
+                          <span style={{ color: "#525252", fontSize: 11 }}>
+                            {new Date(evt.timestamp).toLocaleTimeString()} {evt.expanded ? "▲" : "▼"}
+                          </span>
+                        </button>
+                        {evt.expanded && (
+                          <pre style={{
+                            margin: 0, padding: "8px 12px 12px",
+                            fontSize: 11, fontFamily: '"IBM Plex Mono",monospace',
+                            background: "#f4f4f4", overflowX: "auto", maxHeight: 200,
+                            borderTop: "1px solid #e0e0e0", whiteSpace: "pre-wrap", wordBreak: "break-all",
+                          }}>
+                            {formatJson(evt.data)}
+                          </pre>
+                        )}
+                      </div>
+                    ))}
+                    {runLoading && (
+                      <div style={{ padding: "10px 12px", fontSize: 12, color: "#525252", background: "#f4f4f4", border: "1px solid #e0e0e0" }}>
+                        Waiting for next step…
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setRunOpen(false)}>Close</button>
+              {runLoading && streamEnabled
+                ? <button className="btn btn-ghost" onClick={cancelStream}>Cancel Stream</button>
+                : <button className="btn btn-ghost" onClick={() => { cancelStream(); setRunOpen(false); }}>Close</button>
+              }
               <button className="btn btn-primary" onClick={executeRun} disabled={runLoading}>
-                {runLoading ? "Sending…" : "Send POST /api/workflow"}
+                {runLoading ? (streamEnabled ? "Streaming…" : "Sending…") : "Send POST /api/workflow"}
               </button>
             </div>
           </div>
