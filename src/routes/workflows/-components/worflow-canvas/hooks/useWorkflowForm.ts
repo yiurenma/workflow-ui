@@ -78,7 +78,7 @@ export const useWorkflowForm = ({ setNodes }: UseWorkflowFormProps): UseWorkflow
                         const prevPlugin = node.data?.backendPlugin as BackendPlugin | undefined;
                         const updatedPlugin = formDataToBackendPlugin(prevPlugin, formData);
                         const d = formData as Record<string, unknown>;
-                        return {
+                        const updatedNode = {
                             ...node,
                             data: {
                                 ...node.data,
@@ -88,6 +88,8 @@ export const useWorkflowForm = ({ setNodes }: UseWorkflowFormProps): UseWorkflow
                                 backendPlugin: updatedPlugin,
                             },
                         };
+                        setSelectedNode(updatedNode);
+                        return updatedNode;
                     }
                     return node;
                 })
